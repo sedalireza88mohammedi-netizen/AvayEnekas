@@ -1,0 +1,150 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.menu-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+/* دکمه اصلی */
+.catagory {
+    display: flex;
+    align-items: center;
+    background-color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* باکس اصلی مگا منو */
+.mega-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 850px;
+    background-color: white;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+    border-top: 2px solid #ef4056;
+    display: flex;
+    min-height: 400px;
+    z-index: 50;
+}
+
+/* --- استایل‌های ستون سمت راست (Sidebar) --- */
+.sidebar {
+    width: 25%;
+    background-color: #f9fafb;
+    padding-top: 8px;
+    border-left: 1px solid #f3f4f6;
+}
+
+.category-item {
+    padding: 16px 20px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    color: #4b5563;
+    transition: all 0.2s;
+}
+
+.category-item.active {
+    color: #ef4056;
+    background-color: white;
+    border-right: 4px solid #ef4056;
+}
+
+.category-item:hover:not(.active) {
+    background-color: #e5e7eb;
+}
+
+.mySwiper {
+    direction: rtl;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.catagorySwipeTitle {
+    direction: rtl;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.content-area {
+    width: 75%;
+    padding: 32px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+    align-content: start;
+}
+
+.column-title {
+    font-weight: bold;
+    color: #374151;
+    font-size: 15px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 8px;
+}
+
+.column-title:hover {
+    color: #ef4056;
+    cursor: pointer;
+}
+
+.item-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.item-link {
+    font-size: 13px;
+    color: #6b7280;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.item-link:hover {
+    color: #ef4056;
+}
+
+.FirstFullBanner {
+    width: 95%;
+    height: 260px;
+    background-color: #676F71;
+    margin: 50px auto;
+    border-radius: 16px;
+}
+.BannerContainer{
+    width: 95%;
+    height: 350px;
+    display: flex;
+    justify-content: space-between;
+    margin: 50px auto;
+    
+}
+.LeftBannerTwin{
+    width: 49%;
+    height: inherit;
+    background-color: #676F71;
+    border-radius: 16px;
+}
+.RightBannerTwin{
+     width: 49%;
+     height: inherit;
+      background-color: #676F71;
+       border-radius: 16px;
+}

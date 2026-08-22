@@ -1,0 +1,297 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.footer {
+  direction: rtl;
+  width: 100%;
+  background-color: #F0F1F1;
+  color: #292C2D;
+  padding: 40px 100px 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 40px;
+}
+
+.RightSide {
+  flex: 1 1 400px;
+  display: flex;
+  flex-direction: column;
+}
+
+.FooterLogo {
+  font-weight: bold;
+  font-size: 35px;
+  color: #6d6c6c;
+  padding-bottom: 10px;
+}
+
+.FooterLogo2 {
+  color: #000;
+}
+
+.AboutUsTitle {
+  margin-top: 20px;
+  font-size: 20px;
+}
+
+.DeatelseAboutUs {
+  max-width: 500px;
+  margin-top: 20px;
+  text-align: justify;
+  line-height: 1.6;
+  font-size: 16px;
+}
+
+.ourNumber {
+  margin-top: 30px;
+}
+
+.WithUs {
+  margin-top: 10px;
+}
+
+.iconContainerFooter {
+  display: flex;
+  align-items: center;
+  direction: ltr;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.iconContainerFooter a {
+  text-decoration: none;
+  cursor: pointer;
+  font-size: 32px;
+  color: #292C2D;
+}
+
+.iconContainerFooter a:hover {
+  color: #000;
+}
+
+.iconContainerFooter img {
+  width: 36px;
+  height: 36px;
+  border-radius: 60px;
+  display: block;
+}
+
+.LeftSide {
+  flex: 1 1 500px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px;
+}
+
+.PoruductListFooter,
+.EasyToch {
+  display: flex;
+  min-width: 140px;
+}
+
+.footerList {
+  width: 100%;
+}
+
+.footer h2 {
+  margin-bottom: 5px;
+}
+
+.footer li {
+  padding-top: 10px;
+  list-style-type: none;
+}
+
+.footer a {
+  color: #6d6c6c;
+  text-decoration: none;
+}
+
+.footer li a:hover {
+  color: #292C2D;
+}
+
+.footer-map {
+  flex: 1 1 240px;
+  display: flex;
+  max-width: 320px;
+  height: 180px;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.map-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.3s ease;
+}
+
+.footer-map:hover .map-image {
+  transform: scale(1.05);
+}
+
+.borderFooter {
+  width: 100%;
+  height: 1px;
+  background-color: #888888;
+  margin: 30px 0 10px;
+}
+
+.trustContainer {
+  direction: rtl;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  width: 95%;
+  background-color: #FFFFFF;
+  margin: 20px auto;
+  border-radius: 10px;
+  padding: 25px 20px;
+  gap: 100px;
+}
+
+.trustItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.trustIcon {
+  display: inline-flex;
+  color: #6d6c6c;
+  font-size: 36px;
+  line-height: 1;
+}
+
+.trustText {
+  display: flex;
+  flex-direction: column;
+  text-align: right;
+}
+
+.trustTitle {
+  font-size: 20px;
+  font-weight: bold;
+  color: #292C2D;
+}
+
+.trustSubtitle {
+  margin-top: 4px;
+  font-size: 17px;
+  color: #9a9a9a;
+}
+
+
+
+.TrustDigitalContaner {
+  margin: 20px auto;
+width: 96%;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.TrustDigital {
+  width: 100px;
+  height: 100px;
+  background-color: #FFFFFF;
+  border-radius: 10px;
+}
+
+.footerBar {
+  width: 100%;
+  background-color: #292C2D;
+  color: #F9F7F7;
+  text-align: center;
+  padding: 15px 0;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+@media (max-width: 1024px) {
+  .footer {
+    padding: 30px 50px 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .footer {
+    padding: 30px 25px 20px;
+    text-align: center;
+    justify-content: center;
+  }
+
+  .RightSide {
+    align-items: center;
+  }
+
+  .DeatelseAboutUs {
+    text-align: justify;
+  }
+
+  .LeftSide {
+    justify-content: center;
+  }
+
+  .footer-map {
+    flex-basis: 100%;
+    max-width: 100%;
+  }
+
+  .trustIcon {
+    font-size: 24px;
+  }
+
+  .trustTitle {
+    font-size: 14px;
+  }
+
+  .trustSubtitle {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+ .trustDivider{
+  display: none;
+ }
+  .footer {
+    padding: 20px 15px;
+  }
+
+  .FooterLogo {
+    font-size: 28px;
+  }
+
+  .trustContainer {
+   justify-content: space-evenly;
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .trustDivider {
+    display: none;
+  }
+
+  .TrustDigitalContaner {
+    flex-wrap: wrap;
+  }
+
+  .TrustDigital {
+    width: 80px;
+    height: 80px;
+  }
+
+  .footerBar {
+   margin-bottom: 45px;
+    font-size: 16px;
+    padding: 10px 0;
+  }
+}

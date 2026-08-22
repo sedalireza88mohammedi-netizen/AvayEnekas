@@ -1,0 +1,91 @@
+.slider-main-container {
+  width: 100%;
+  margin: 50px auto;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.slider-wrapper {
+  position: relative;
+  width: 100%;
+  height: 460px;
+  overflow: hidden;
+  background-color: #1a1a1a;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+}
+
+.slider-wrapper:active {
+  cursor: grabbing;
+}
+
+/* موقعیت (transform) و انیمیشن هر اسلاید به‌صورت inline توسط جاوااسکریپت
+   کنترل می‌شه (تابع getSlideStyle در HeroSlider.jsx) تا از پرش اسلاید
+   سوم جلوگیری بشه. اینجا فقط استایل پایه رو تعریف می‌کنیم. */
+.slide-item {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  user-select: none;
+}
+
+.slide-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  user-select: none;
+}
+
+.slide-content {
+  position: absolute;
+  top: 15%;
+  left: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  color: #ffffff;
+  z-index: 20;
+  user-select: none;
+}
+
+.slider-pagination {
+  position: absolute;
+  bottom: 20px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  z-index: 30;
+}
+
+.pagination-dot {
+  height: 8px;
+  width: 8px;
+  border-radius: 20px;
+  background-color: #1a1a1a;
+  opacity: 0.5;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.3s ease;
+}
+
+.pagination-dot:hover {
+  opacity: 0.8;
+}
+
+.pagination-dot.active {
+  width: 24px;
+  opacity: 1;
+}
+
+@media (max-width: 768px) {
+  .slider-wrapper {
+    height: 300px;
+  }
+}
