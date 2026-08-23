@@ -151,13 +151,14 @@
 }
 @media (max-width: 768px) {
     .LeftBannerTwin ,.RightBannerTwin{
-        width: 95%;
-        height: 270px;
-         margin: 10px;
+        width: 47%;
+        height: 210px;
+         margin: 5px;
+         
     }
     .BannerContainer{
        
         justify-content: center;
-        height: 600px;
+        height: 300px;
     }
 }

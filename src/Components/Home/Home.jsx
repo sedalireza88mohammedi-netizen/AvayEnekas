@@ -10,6 +10,7 @@ import { Link } from 'react-router-dom';
 
 import "swiper/css";
 import CatagorySwiper from "../CatagorySwiper/CatagorySwiper";
+import PopularSlider from "../PopulerSwiper/PopulerSwiper";
 
 
 function Home() {
@@ -33,7 +34,7 @@ function Home() {
     <div className="LeftBannerTwin"></div>
     <div className="RightBannerTwin"></div>
 </div>
-
+<PopularSlider />
 
            
 

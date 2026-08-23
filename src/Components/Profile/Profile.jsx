@@ -35,6 +35,19 @@ function Profile() {
     const [messages, setMessages] = useState([])
     const [addresses, setAddresses] = useState([])
 
+    // استیت‌های مقادیر فرم پروفایل
+    const [formData, setFormData] = useState({
+        NameAndFamily: "",
+        BirthDate: "",
+        IdCard: "",
+        Email: "",
+        Number: ""
+    });
+
+    // استیت خطاها و پیام موفقیت
+    const [errorMessage, setErrorMessage] = useState("");
+    const [successMessage, setSuccessMessage] = useState("");
+
     // استیت‌های مربوط به منوی سفارشی جنسیت
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [selectedGender, setSelectedGender] = useState({ label: "لطفاً انتخاب کنید", value: "" });
@@ -57,27 +70,63 @@ function Profile() {
     const handleSelectOption = (label, value) => {
         setSelectedGender({ label, value });
         setIsDropdownOpen(false);
+        setErrorMessage(""); // با انتخاب جنسیت، خطای احتمالی پاک شود
     };
 
-    // تابع ثبت فرم برای ارسال به بک‌اند
+    // بروزرسانی مقادیر فرم به محض تایپ
+    const handleChange = (e) => {
+        setFormData({
+            ...formData,
+            [e.target.name]: e.target.value
+        });
+        setErrorMessage(""); // با هر بار تایپ، خطای قبلی پاک می‌شود
+    };
+
+    // تابع اعتبارسنجی و ثبت نهایی
     const handleSubmitProfile = (e) => {
         e.preventDefault();
-        // اینجا می‌توانید اطلاعات فرم را جمع‌آوری کرده و به بک‌اند بفرستید
-        const formData = {
-            nameAndFamily: e.target.NameAndFamily.value,
-            birthDate: e.target.BirthDate.value,
-            gender: e.target.Gender.value,
-            idCard: e.target.IdCard.value,
-            email: e.target.Email.value,
-            number: e.target.Number.value,
+
+        // شرط‌های بررسی صحت فیلدها
+        if (!formData.NameAndFamily.trim()) {
+            setErrorMessage("لطفاً نام و نام خانوادگی را وارد کنید.");
+            return;
+        }
+        if (!formData.BirthDate.trim()) {
+            setErrorMessage("لطفاً تاریخ تولد را وارد کنید.");
+            return;
+        }
+        if (!selectedGender.value) {
+            setErrorMessage("لطفاً جنسیت خود را انتخاب کنید.");
+            return;
+        }
+        if (!formData.IdCard.trim() || formData.IdCard.length < 8) {
+            setErrorMessage("لطفاً کد ملی معتبر وارد کنید.");
+
+return;
+        }
+        if (!formData.Email.trim() || !formData.Email.includes("@")) {
+            setErrorMessage("لطفاً یک ایمیل معتبر وارد کنید.");
+            return;
+        }
+        if (!formData.Number.trim() || formData.Number.length < 10) {
+            setErrorMessage("لطفاً شماره تلفن معتبر وارد کنید.");
+            return;
+        }
+
+        // اگر تمام شرط‌ها درست بود:
+        setErrorMessage("");
+        const finalData = {
+            ...formData,
+            gender: selectedGender.value
         };
-        console.log("Form Data Submitted:", formData);
-        
+
+        console.log("اطلاعات معتبر و آماده ارسال به بک‌اند:", finalData);
+        setSuccessMessage("اطلاعات پروفایل با موفقیت ثبت شد!");
+
+        // پاک کردن پیام موفقیت پس از ۴ ثانیه
+        setTimeout(() => setSuccessMessage(""), 4000);
     };
- const [isErrorOpen, setIsErrorOpen] = useState(false);
-    const [errorMessage, setErrorMessage] = useState("");
-    const [MaineMessage, setMaineMessage] = useState("");
-    const [iconMessage, setIconMessage] = useState("");
+
     return (
         <div className="ContaimerAllPro">
             <div className="SideBar">
@@ -97,7 +146,6 @@ function Profile() {
                         <FontAwesomeIcon icon={faHeart} /> علاقه‌مندی‌ها
                     </button>
                     <h6 className="LinePro"></h6>
-
 
                     <button onClick={() => setPage("Messages")} className={page === "Messages" ? "sideBar-active" : "OptionBtn"}>
                         <FontAwesomeIcon icon={faBell} /> پیام‌ها
@@ -144,7 +192,8 @@ function Profile() {
                     </>
                 )}
 
-                {page === "Interested" && (
+
+{page === "Interested" && (
                     <>
                         <h2 className="TitleOptions"><FontAwesomeIcon icon={faHeart} /> لیست علاقه‌مندی‌ها</h2>
                         <h6 className="LineOrder"></h6>
@@ -201,18 +250,33 @@ function Profile() {
                     <form onSubmit={handleSubmitProfile} className="ProfileContainer">
                         <div className="FildContainer">
                             <label htmlFor="NameAndFamily">نام و نام خانوادگی</label>
-                            <input type="text" name="NameAndFamily" id="NameAndFamily" placeholder="سید محمد محمدی" />
+                            <input 
+                                type="text" 
+                                name="NameAndFamily" 
+                                id="NameAndFamily" 
+                                placeholder="سید محمد محمدی" 
+                                value={formData.NameAndFamily}
+                                onChange={handleChange}
+                            />
                         </div>
                         <div className="FildContainer">
                             <label htmlFor="BirthDate">تاریخ تولد</label>
-                            <input type="text" name="BirthDate" id="BirthDate" placeholder="1377/1/6" />
+                            <input 
+                                type="text" 
+                                name="BirthDate" 
+                                id="BirthDate" 
+                                placeholder="1377/1/6" 
+                                value={formData.BirthDate}
+                                onChange={handleChange}
+                            />
                         </div>
-
+                        
                         {/* منوی سفارشی جنسیت */}
-                        <div className="FildContainer" ref={dropdownRef}>
+
+<div className="FildContainer" ref={dropdownRef}>
                             <label>جنسیت</label>
                             <div className="custom-select-wrapper">
-                                <div
+                                <div 
                                     className={`custom-select-trigger ${isDropdownOpen ? 'open' : ''}`}
                                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                                 >
@@ -233,24 +297,47 @@ function Profile() {
                                     </div>
                                 )}
                             </div>
-                            {/* اینپوت مخفی برای ارسال جنسیت به بک‌اند */}
-                            <input type="hidden" name="Gender" value={selectedGender.value} />
                         </div>
 
                         <div className="FildContainer">
                             <label htmlFor="IdCard">کد ملی</label>
-                            <input type="number" name="IdCard" id="IdCard" placeholder="037350854" />
+                            <input 
+                                type="number" 
+                                name="IdCard" 
+                                id="IdCard" 
+                                placeholder="037350854" 
+                                value={formData.IdCard}
+                                onChange={handleChange}
+                            />
                         </div>
                         <div className="FildContainer">
                             <label htmlFor="Email">ایمیل</label>
-                            <input type="email" name="Email" id="Email" placeholder="SedMad@gmail.com" />
+                            <input 
+                                type="email" 
+                                name="Email" 
+                                id="Email" 
+                                placeholder="SedMad@gmail.com" 
+                                value={formData.Email}
+                                onChange={handleChange}
+                            />
                         </div>
                         <div className="FildContainer">
                             <label htmlFor="Number">شماره تلفن</label>
-                            <input maxLength={11} type="number" name="Number" id="Number" placeholder="09027741653" />
+                            <input 
+                                type="number" 
+                                name="Number" 
+                                id="Number" 
+                                placeholder="09027741653" 
+                                value={formData.Number}
+                                onChange={handleChange}
+                            />
                         </div>
 
-                        {/* دکمه ثبت تغییرات (تمام عرض در پایین فرم) */}
+                        {/* نمایش پیام خطا یا موفقیت */}
+                        {errorMessage && <div className="form-error-msg">{errorMessage}</div>}
+                        {successMessage && <div className="form-success-msg">{successMessage}</div>}
+
+                        {/* دکمه ثبت تغییرات */}
                         <div className="SubmitBtnContainer">
                             <button type="submit" className="SubmitProfileBtn">ثبت تغییرات</button>
                         </div>
