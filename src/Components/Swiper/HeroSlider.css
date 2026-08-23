@@ -19,9 +19,7 @@
   cursor: grabbing;
 }
 
-/* موقعیت (transform) و انیمیشن هر اسلاید به‌صورت inline توسط جاوااسکریپت
-   کنترل می‌شه (تابع getSlideStyle در HeroSlider.jsx) تا از پرش اسلاید
-   سوم جلوگیری بشه. اینجا فقط استایل پایه رو تعریف می‌کنیم. */
+
 .slide-item {
   position: absolute;
   top: 0;

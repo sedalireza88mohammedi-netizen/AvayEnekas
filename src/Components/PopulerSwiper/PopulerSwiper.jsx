@@ -73,7 +73,7 @@ export default function PopularSlider() {
     };
 
     return (<>
-   
+    <div className='PopulerTitleContainer'><h2>محبوب ترین ها</h2></div>
         <div className="BtnNextContainer">
             <button className="nav-btnprevPopuler" onClick={() => scrollByAmount(-300)} aria-label="اسلاید قبلی">
                 <ChevronLeft size={20} />
@@ -82,7 +82,7 @@ export default function PopularSlider() {
                 <ChevronLeft size={20} style={{ transform: 'rotate(180deg)' }} />
             </button>
         </div>
-        <div className='PopulerTitleContainer'><h2>محبوب ترین ها</h2></div>
+       
  
         <section className="swiper-container" aria-label="پیشنهادهای شگفت‌انگیز">
             <div className="swiper-wrapper-box">

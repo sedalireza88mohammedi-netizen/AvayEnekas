@@ -367,6 +367,7 @@
     color: var(--text-dark);
 
 }
+
 .BtnNextContainer {
     display: flex;
     direction: ltr;
@@ -375,7 +376,7 @@
 
 .nav-btnprevPopuler,
 .nav-btnnextprevPopuler {
-   margin-left: 20px;
+    margin-left: 20px;
     position: relative;
     top: 50%;
     transition: all 0.3s ease;
@@ -391,7 +392,7 @@
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     z-index: 20;
     color: var(--text-dark);
-margin-bottom: -45px;
+    margin-bottom: -45px;
 
 }
 
@@ -402,15 +403,16 @@ margin-bottom: -45px;
     box-shadow: 0 2px 5px #c9c9c9;
 }
 
-.PopulerTitleContainer{
+.PopulerTitleContainer {
     color: #3f3f46;
     margin-top: 50px;
     text-align: center;
-       margin: -4px;
+   margin-bottom: -5px;
 }
+
 @media (max-width: 768px) {
     .swiper-wrapper-box {
-        width: 90%;
+        width: 100%;
         border-radius: 0;
         padding: 5px 0;
     }
@@ -424,13 +426,17 @@ margin-bottom: -45px;
         gap: 6px;
     }
 
- .nav-btnprevPopuler,
-.nav-btnnextprevPopuler{
-    margin: 0;
-}
-.BtnNextContainer{
-    margin: 0 ;
-}
+    .nav-btnprevPopuler,
+    .nav-btnnextprevPopuler {
+        margin: 0;
+        margin-bottom: -20px;
+        margin-left: 10px;
+    }
+
+    .BtnNextContainer {
+        margin: 0;
+    }
+
     .product-card {
         min-width: 170px;
         width: 170px;

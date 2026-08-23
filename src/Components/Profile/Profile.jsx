@@ -3,9 +3,11 @@ import { useState, useEffect, useRef } from "react"
 import "./profile.css"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faBell, faExclamation, faHeart, faLocationDot, faPlus, faShoppingCart, faUser, faChevronDown } from '@fortawesome/free-solid-svg-icons';
+import { faBell, faExclamation, faHeart, faLocationDot, faPlus, faShoppingCart, faUser, faChevronDown, faArrowRightFromBracket, faUserTie } from '@fortawesome/free-solid-svg-icons';
+import { Link } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
-library.add(faShoppingCart, faHeart, faBell, faLocationDot, faUser, faExclamation, faChevronDown);
+library.add(faShoppingCart, faHeart, faBell, faLocationDot, faUser, faExclamation, faChevronDown, faArrowRightFromBracket);
 
 // کامپوننت مشترک برای نمایش پیام خالی بودن یک بخش
 function EmptyState({ message }) {
@@ -102,7 +104,7 @@ function Profile() {
         if (!formData.IdCard.trim() || formData.IdCard.length < 8) {
             setErrorMessage("لطفاً کد ملی معتبر وارد کنید.");
 
-return;
+            return;
         }
         if (!formData.Email.trim() || !formData.Email.includes("@")) {
             setErrorMessage("لطفاً یک ایمیل معتبر وارد کنید.");
@@ -126,7 +128,7 @@ return;
         // پاک کردن پیام موفقیت پس از ۴ ثانیه
         setTimeout(() => setSuccessMessage(""), 4000);
     };
-
+const navigate = useNavigate();
     return (
         <div className="ContaimerAllPro">
             <div className="SideBar">
@@ -160,10 +162,22 @@ return;
                     <button onClick={() => setPage("Profile")} className={page === "Profile" ? "sideBar-active" : "OptionBtn"}>
                         <FontAwesomeIcon icon={faUser} /> پروفایل
                     </button>
+                    <button onClick={() => setPage("OutUser")} className={page === "OutUser" ? "sideBar-active" : "OptionBtn"}>
+                        <FontAwesomeIcon icon={faArrowRightFromBracket} /> خروج از حساب کاربری
+                    </button>
                 </div>
             </div>
 
             <div id="ProContainer" className="ProContainer">
+                {
+                    page === "OutUser" && (<>
+                        <h2 className="OutUserTitle">از حساب کاربری خارج میشوید؟</h2>
+                        <h3 className="OutUseDeatelse">با خروج از حساب کاربری، به سبد خرید فعلی‌تان دسترسی نخواهید داشت. هروقت بخواهید می‌توانید مجددا وارد شوید و خریدتان را ادامه دهید.</h3>
+                        <h6 className="LineOrder"></h6>
+                        <button className="OutUserBtn">خروج از حساب کاربری</button>
+                    </>
+                    )
+                }
                 {page === "Orders" && (
                     <>
                         <h2 className="TitleOptions"><FontAwesomeIcon icon={faShoppingCart} /> تاریخچه سفارشات</h2>
@@ -193,7 +207,7 @@ return;
                 )}
 
 
-{page === "Interested" && (
+                {page === "Interested" && (
                     <>
                         <h2 className="TitleOptions"><FontAwesomeIcon icon={faHeart} /> لیست علاقه‌مندی‌ها</h2>
                         <h6 className="LineOrder"></h6>
@@ -247,101 +261,103 @@ return;
                 )}
 
                 {page === "Profile" && (
-                    <form onSubmit={handleSubmitProfile} className="ProfileContainer">
-                        <div className="FildContainer">
-                            <label htmlFor="NameAndFamily">نام و نام خانوادگی</label>
-                            <input 
-                                type="text" 
-                                name="NameAndFamily" 
-                                id="NameAndFamily" 
-                                placeholder="سید محمد محمدی" 
-                                value={formData.NameAndFamily}
-                                onChange={handleChange}
-                            />
-                        </div>
-                        <div className="FildContainer">
-                            <label htmlFor="BirthDate">تاریخ تولد</label>
-                            <input 
-                                type="text" 
-                                name="BirthDate" 
-                                id="BirthDate" 
-                                placeholder="1377/1/6" 
-                                value={formData.BirthDate}
-                                onChange={handleChange}
-                            />
-                        </div>
-                        
-                        {/* منوی سفارشی جنسیت */}
+                    <>
 
-<div className="FildContainer" ref={dropdownRef}>
-                            <label>جنسیت</label>
-                            <div className="custom-select-wrapper">
-                                <div 
-                                    className={`custom-select-trigger ${isDropdownOpen ? 'open' : ''}`}
-                                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                                >
-                                    <span style={{ color: selectedGender.value === "" ? "#888" : "#212121" }}>
-                                        {selectedGender.label}
-                                    </span>
-                                    <FontAwesomeIcon icon={faChevronDown} className={`custom-arrow ${isDropdownOpen ? 'rotate' : ''}`} />
-                                </div>
-
-                                {isDropdownOpen && (
-                                    <div className="custom-options">
-                                        <div className="custom-option" onClick={() => handleSelectOption("مرد", "Male")}>
-                                            مرد
-                                        </div>
-                                        <div className="custom-option" onClick={() => handleSelectOption("زن", "Female")}>
-                                            زن
-                                        </div>
-                                    </div>
-                                )}
+                        <form onSubmit={handleSubmitProfile} className="ProfileContainer">
+                            <div className="FildContainer">
+                                <label htmlFor="NameAndFamily">نام و نام خانوادگی</label>
+                                <input
+                                    type="text"
+                                    name="NameAndFamily"
+                                    id="NameAndFamily"
+                                    placeholder="سید محمد محمدی"
+                                    value={formData.NameAndFamily}
+                                    onChange={handleChange}
+                                />
                             </div>
-                        </div>
+                            <div className="FildContainer">
+                                <label htmlFor="BirthDate">تاریخ تولد</label>
+                                <input
+                                    type="text"
+                                    name="BirthDate"
+                                    id="BirthDate"
+                                    placeholder="1377/1/6"
+                                    value={formData.BirthDate}
+                                    onChange={handleChange}
+                                />
+                            </div>
 
-                        <div className="FildContainer">
-                            <label htmlFor="IdCard">کد ملی</label>
-                            <input 
-                                type="number" 
-                                name="IdCard" 
-                                id="IdCard" 
-                                placeholder="037350854" 
-                                value={formData.IdCard}
-                                onChange={handleChange}
-                            />
-                        </div>
-                        <div className="FildContainer">
-                            <label htmlFor="Email">ایمیل</label>
-                            <input 
-                                type="email" 
-                                name="Email" 
-                                id="Email" 
-                                placeholder="SedMad@gmail.com" 
-                                value={formData.Email}
-                                onChange={handleChange}
-                            />
-                        </div>
-                        <div className="FildContainer">
-                            <label htmlFor="Number">شماره تلفن</label>
-                            <input 
-                                type="number" 
-                                name="Number" 
-                                id="Number" 
-                                placeholder="09027741653" 
-                                value={formData.Number}
-                                onChange={handleChange}
-                            />
-                        </div>
+                            <div className="FildContainer" ref={dropdownRef}>
+                                <label>جنسیت</label>
+                                <div className="custom-select-wrapper">
+                                    <div
+                                        className={`custom-select-trigger ${isDropdownOpen ? 'open' : ''}`}
+                                        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                                    >
+                                        <span style={{ color: selectedGender.value === "" ? "#888" : "#212121" }}>
+                                            {selectedGender.label}
+                                        </span>
+                                        <FontAwesomeIcon icon={faChevronDown} className={`custom-arrow ${isDropdownOpen ? 'rotate' : ''}`} />
+                                    </div>
 
-                        {/* نمایش پیام خطا یا موفقیت */}
-                        {errorMessage && <div className="form-error-msg">{errorMessage}</div>}
-                        {successMessage && <div className="form-success-msg">{successMessage}</div>}
+                                    {isDropdownOpen && (
+                                        <div className="custom-options">
+                                            <div className="custom-option" onClick={() => handleSelectOption("مرد", "Male")}>
+                                                مرد
+                                            </div>
+                                            <div className="custom-option" onClick={() => handleSelectOption("زن", "Female")}>
+                                                زن
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
 
-                        {/* دکمه ثبت تغییرات */}
-                        <div className="SubmitBtnContainer">
-                            <button type="submit" className="SubmitProfileBtn">ثبت تغییرات</button>
-                        </div>
-                    </form>
+                            <div className="FildContainer">
+                                <label htmlFor="IdCard">کد ملی</label>
+                                <input
+                                    type="number"
+                                    name="IdCard"
+                                    id="IdCard"
+                                    placeholder="037350854"
+                                    value={formData.IdCard}
+                                    onChange={handleChange}
+                                />
+                            </div>
+                            <div className="FildContainer">
+                                <label htmlFor="Email">ایمیل</label>
+                                <input
+                                    type="email"
+                                    name="Email"
+                                    id="Email"
+                                    placeholder="SedMad@gmail.com"
+                                    value={formData.Email}
+                                    onChange={handleChange}
+                                />
+                            </div>
+                            <div className="FildContainer">
+                                <label htmlFor="Number">شماره تلفن</label>
+                                <input
+                                    type="number"
+                                    name="Number"
+                                    id="Number"
+                                    placeholder="09027741653"
+                                    value={formData.Number}
+                                    onChange={handleChange}
+                                />
+                            </div>
+
+                            {/* نمایش پیام خطا یا موفقیت */}
+                            {errorMessage && <div className="form-error-msg">{errorMessage}</div>}
+                            {successMessage && <div className="form-success-msg">{successMessage}</div>}
+
+                            {/* دکمه ثبت تغییرات */}
+                            <div className="SubmitBtnContainer">
+                                <button type="submit" className="SubmitProfileBtn">ثبت تغییرات</button>
+                            </div>
+                        </form>
+                        <button onClick={() => navigate("/AdminPannel")} className="AdmiPannelPro">  <FontAwesomeIcon icon={faUserTie} />پنل ادمین </button>
+                    </>
                 )}
             </div>
         </div>
