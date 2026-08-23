@@ -41,7 +41,7 @@ function LogIn() {
             setMaineMessage("!خوش آمدید ")
             setErrorMessage(<h3 style={{ color: "green" }} >.ورود شما موفقیت‌آمیز بود</h3>);
             setIsErrorOpen(true);
-
+            localStorage.setItem("isLoggedin", "true")
             setTimeout(() => {
                 navigate("/")
             }, 2000)

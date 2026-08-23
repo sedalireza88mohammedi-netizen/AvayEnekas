@@ -250,11 +250,11 @@ width: 96%;
   }
 
   .trustTitle {
-    font-size: 14px;
+    font-size: 16px;
   }
 
   .trustSubtitle {
-    font-size: 12px;
+    font-size: 14px;
   }
 }
 
@@ -290,7 +290,7 @@ width: 96%;
   }
 
   .footerBar {
-   margin-bottom: 45px;
+   margin-bottom: 60px;
     font-size: 16px;
     padding: 10px 0;
   }

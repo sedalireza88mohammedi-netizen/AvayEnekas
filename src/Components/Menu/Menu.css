@@ -31,7 +31,9 @@ a {
 .HeaderWrapper.scrolled {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
-
+.AvayHeader{
+    color:#F5F5F5 ;
+}
 .Header>p {
     position: fixed;
     top: 0;
@@ -39,10 +41,10 @@ a {
     width: 100%;
     background-color: #292C2D;
     height: 50px;
-    color: #F9F7F7;
+    color: #F5F5F5;
     text-align: center;
     line-height: 50px;
-    font-size: 16px;
+    font-size: 20px;
     font-weight: bold;
     margin: 0;
 }
@@ -83,7 +85,7 @@ a {
     background-color: #f0f0f1;
     border-radius: 8px;
     padding: 0 45px 0 15px;
-    font-size: 14px;
+    font-size: 16px;
     border: none;
     outline: none;
     color: #62666d;
@@ -283,17 +285,21 @@ a {
     border-right: 3px solid #000;
     padding-right: 8px;
     cursor: pointer;
-    border-bottom:0.5px solid #ececec ;
+    border-bottom: 0.5px solid #ececec;
 }
-.title-text :hover{
+
+.title-text :hover {
     color: #000 !important;
 }
-.column-title-MegaMenu :hover{
+
+.column-title-MegaMenu :hover {
     color: #000 !important;
 }
-.column-title-MegaMenu .chevron :hover{
-        color: #000 !important;
+
+.column-title-MegaMenu .chevron :hover {
+    color: #000 !important;
 }
+
 .column-title-MegaMenu .chevron {
     margin-right: 5px;
     font-size: 18px;
@@ -322,15 +328,17 @@ a {
 
 .MobileMenu {
     display: none;
-  
+
 }
-.AdminPannel{
-  padding: 5px 15px;
+
+.AdminPannel {
+    padding: 5px 15px;
     display: flex;
-  
+
 }
-.AdminPannel h6{
-  align-items: center;
+
+.AdminPannel h6 {
+    align-items: center;
     justify-content: center;
     height: 40px;
     border: 1px solid #e5e7eb;
@@ -345,45 +353,52 @@ a {
     display: flex;
 }
 
-.AdminPannel :hover{
-     color: #000000 ;
-    border-color: #000000 ;
+.AdminPannel :hover {
+    color: #000000;
+    border-color: #000000;
 }
+
 @media (max-width: 768px) {
 
- 
+
     .HeaderWrapper {
         top: 0;
-   
+
+    }
+
+    .Header {
+        margin-bottom: 10px;
     }
 
     .Header>p {
-        display: none;
-        
+        font-size: 14px;
+
     }
 
     .Menu {
         display: none !important;
-      
+
     }
 
     .MenuTop {
         padding: 10px 15px;
         flex-direction: column;
-       
+
         gap: 15px;
     }
 
     .LeftHed {
         display: none;
-     
+
     }
 
     .logo {
-        margin: 0;
-        font-size: 24px;
+    
+       margin: 40px;
+       margin-bottom: 0;
+        font-size: 22px;
         align-self: center;
-       
+
     }
 
     .search-container {
@@ -396,7 +411,7 @@ a {
         height: 40px;
     }
 
- 
+
     .MobileMenu {
         display: block;
         position: fixed;

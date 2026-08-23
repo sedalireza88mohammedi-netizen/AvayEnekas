@@ -13,15 +13,15 @@ export default function HeroSlider() {
   const slidesData = [
     {
       id: 1,
-      image: 'src/assets/Images/MainSwiper Images/Swiper1.jpg',
+      image: 'Images/MainSwiper Images/Swiper1.jpg',
     },
     {
       id: 2,
-      image: 'src/assets/Images/MainSwiper Images/Swiper2.jpg',
+      image: 'Images/MainSwiper Images/Swiper2.jpg',
     },
     {
       id: 3,
-      image: 'src/assets/Images/MainSwiper Images/Swiper3.jpg',
+      image: 'Images/MainSwiper Images/Swiper3.jpg',
     },
   ];
 

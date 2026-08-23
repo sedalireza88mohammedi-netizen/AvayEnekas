@@ -68,7 +68,7 @@ function Menu({ isCart }) {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-
+    const isLoggedin = localStorage.getItem("isLoggedin");
     const CategoryDataMenu = {
         Band: {
             title: "باند",
@@ -132,7 +132,7 @@ function Menu({ isCart }) {
     return (
         <>
             <header className="Header">
-                <p>خرید بیش از 1 میلیون تومان ارسال رایگان | خدمات رایگان</p>
+                <p>فروشگاه صوتی تصویری <span className="AvayHeader">آوای</span> انعکاس</p>
             </header>
 
             <div className={`HeaderWrapper ${isScrolledDown ? 'scrolled' : ''} ${isCart ? "cart-page-margin" : ""}`}>
@@ -142,18 +142,29 @@ function Menu({ isCart }) {
 
                     <form className="search-container" onSubmit={(e) => e.preventDefault()}>
                         <FontAwesomeIcon icon={faSearch} className="searchIcon" />
-                        <input className="search" type="text" placeholder="جستجو" aria-label="جستجو در سایت" />
+                        <input className="search" type="text" placeholder='  جستجو در آوای انعکاس' aria-label="جستجو در سایت" />
                     </form>
 
                     <div className="LeftHed">
-                        <Link to="/AdminPannel"className="AdminPannel">  <h6 className="AdminPannel">
+                        <Link to="/AdminPannel" className="AdminPannel">  <h6 className="AdminPannel">
                             <FontAwesomeIcon icon={faUserTie} />پنل ادمین   </h6>
                         </Link>
+                        {
+                            isLoggedin ? (
+                                <Link to="/Profile" className="UserContainer">
+                                    <FontAwesomeIcon icon={faUser} />
+                                    <span>حساب کاربری</span>
+                                </Link>
+                            )
+                                :
+                                (
+                                    <Link to="/LogIn/SinUp" className="UserContainer">
+                                        <FontAwesomeIcon icon={faUser} />
+                                        <span>ثبت نام | ورود</span>
+                                    </Link>
+                                )
+                        }
 
-                        <Link to="/LogIn/SinUp" className="UserContainer">
-                            <FontAwesomeIcon icon={faUser} />
-                            <span>ثبت نام | ورود</span>
-                        </Link>
                         <div className="BorderLine"></div>
                         <button className="cart-btn" onClick={() => navigate("/Cart")} aria-label="سبد خرید">
                             <FontAwesomeIcon icon={faCartShopping} />
@@ -235,10 +246,20 @@ function Menu({ isCart }) {
                         <FontAwesomeIcon icon={faCartShopping} />
                         <span>سبد خرید</span>
                     </NavLink>
-                    <NavLink className={({ isActive }) => (isActive ? "active-link" : "mobUser")} to="/Profile">
-                        <FontAwesomeIcon icon={faUser} />
-                        <span>آوای من</span>
-                    </NavLink>
+                    {
+                        isLoggedin ? (
+                            <NavLink className={({ isActive }) => (isActive ? "active-link" : "mobUser")} to="/Profile">
+                                <FontAwesomeIcon icon={faUser} />
+                                <span>آوای من</span>
+                            </NavLink>
+                        ) : (
+                            <NavLink className={({ isActive }) => (isActive ? "active-link" : "mobUser")} to="/LogIn/SinUp">
+                                <FontAwesomeIcon icon={faUser} />
+                                <span>آوای من</span>
+                            </NavLink>
+                        )
+                    }
+
                 </div>
             </div >
         </>

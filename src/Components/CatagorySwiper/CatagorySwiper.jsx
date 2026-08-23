@@ -6,17 +6,17 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 export default function CatagorySwiper(){
     
         const CATEGORIES_DATA = [
-            { image: 'src/assets/Products_Images/باند RCF 715/1.webp', link: '/category/digital' },
-            { image: 'src/assets/Products_Images/باند RCF 715/1.webp', link: '/category/fashion' },
-            { image: 'src/assets/Products_Images/باند RCF 715/1.webp', link: '/category/home' },
-            { image: 'src/assets/Products_Images/باند RCF 715/1.webp', link: '/category/beauty' },
-            { image: 'src/assets/Products_Images/باند RCF 715/1.webp', link: '/category/supermarket' },
-            { image: 'src/assets/Products_Images/باند RCF 715/1.webp', link: '/category/sports' },
-            { image: 'src/assets/Products_Images/باند RCF 715/1.webp', link: '/category/toys' },
-            { image: 'src/assets/Images/ProductImages/randomMixer1.jpg', link: '/category/tools' },
-            { image: 'src/assets/Images/ProductImages/randomMixer1.jpg', link: '/category/books' },
-            { image: 'src/assets/Images/ProductImages/randomMixer1.jpg', link: '/category/auto' },
-            { image: 'src/assets/Images/ProductImages/randomMixer1.jpg', link: '/category/jewelry' },
+            { image: 'Products_Images/باند RCF 715/1.webp', link: '/category/digital' },
+            { image: 'Products_Images/باند RCF 715/1.webp', link: '/category/fashion' },
+            { image: 'Products_Images/باند RCF 715/1.webp', link: '/category/home' },
+            { image: 'Products_Images/باند RCF 715/1.webp', link: '/category/beauty' },
+            { image: 'Products_Images/باند RCF 715/1.webp', link: '/category/supermarket' },
+            { image: 'Products_Images/باند RCF 715/1.webp', link: '/category/sports' },
+            { image: 'Products_Images/باند RCF 715/1.webp', link: '/category/toys' },
+            { image: 'Images/ProductImages/randomMixer1.jpg', link: '/category/tools' },
+            { image: 'Images/ProductImages/randomMixer1.jpg', link: '/category/books' },
+            { image: 'Images/ProductImages/randomMixer1.jpg', link: '/category/auto' },
+            { image: 'Images/ProductImages/randomMixer1.jpg', link: '/category/jewelry' },
             { image: 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=150&q=80', link: '/category/gifts' },
             { image: 'https://images.unsplash.com/photo-1601597111158-2fceff292cdc?w=150&q=80', link: '/category/local' },
             { image: 'https://images.unsplash.com/photo-1606722590583-6951b5ea92ad?w=150&q=80', link: '/category/art' }

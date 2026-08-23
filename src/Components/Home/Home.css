@@ -132,6 +132,7 @@
     width: 95%;
     height: 350px;
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     margin: 50px auto;
     
@@ -147,4 +148,16 @@
      height: inherit;
       background-color: #676F71;
        border-radius: 16px;
+}
+@media (max-width: 768px) {
+    .LeftBannerTwin ,.RightBannerTwin{
+        width: 95%;
+        height: 270px;
+         margin: 10px;
+    }
+    .BannerContainer{
+       
+        justify-content: center;
+        height: 600px;
+    }
 }

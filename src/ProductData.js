@@ -7,7 +7,7 @@ const productsData = [
         discount: 30,
         rating: 4.3,
         Empressive:true,
-        image: 'src/assets/Products_Images/ابر داخل میکروفن/ab00fa2dfb2b3569c4f229585fbba403c5f66b4b_1689416513.jpg'
+        image: 'Products_Images/ابر داخل میکروفن/ab00fa2dfb2b3569c4f229585fbba403c5f66b4b_1689416513.jpg'
         
     },
     {
@@ -18,7 +18,7 @@ const productsData = [
         discount: 15,
         rating: 4.1,
          Empressive:true,
-        image: 'src/assets/Products_Images/آمپلی فایر 6460/1.webp'
+        image: 'Products_Images/آمپلی فایر 6460/1.webp'
     },
     {
         id: 3,
@@ -29,7 +29,7 @@ const productsData = [
         discount: 19,
         rating: 4.5,
          Empressive:true,
-        image: 'src/assets/Products_Images/باند RCF 715/1.webp'
+        image: 'Products_Images/باند RCF 715/1.webp'
     },
     {
         id: 4,
@@ -40,7 +40,7 @@ const productsData = [
         discount: 12,
         rating: 4.7,
          Empressive:true,
-        image: 'src/assets/Products_Images/باند جاسکو 1000/0e7fef1d7b36da03cb05c02609b2810db71ee819_1760365242.webp'
+        image: 'Products_Images/باند جاسکو 1000/0e7fef1d7b36da03cb05c02609b2810db71ee819_1760365242.webp'
     },
     {
         id: 5,
@@ -51,7 +51,7 @@ const productsData = [
         discount: 11,
         rating: 4.9,
          Empressive:true,
-        image: 'src/assets/Products_Images/پارتی باکس 122 bt/1.webp'
+        image: 'Products_Images/پارتی باکس 122 bt/1.webp'
     },
     {
         id: 6,
@@ -62,7 +62,7 @@ const productsData = [
         discount: 10,
         rating: 4.4,
          Empressive:true,
-        image: 'src/assets/Products_Images/پاور میکسر دایناکورد 1000/1.jpg'
+        image: 'Products_Images/پاور میکسر دایناکورد 1000/1.jpg'
     },
     {
         id: 7,
@@ -73,7 +73,7 @@ const productsData = [
         discount: 13,
         rating: 4.6,
          Empressive:false,
-        image: 'src/assets/Products_Images/میکروفن بیسیم جاسکو 4004/جاسکو-4004-وب-پی.webp'
+        image: 'Products_Images/میکروفن بیسیم جاسکو 4004/جاسکو-4004-وب-پی.webp'
     },
 
 

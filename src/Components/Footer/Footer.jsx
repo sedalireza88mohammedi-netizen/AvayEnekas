@@ -29,7 +29,7 @@ function Footer() {
 
                     <div className="iconContainerFooter">
                         <a title='پیج اینستگرام ما' href="https://www.instagram.com/enekas_ava?igsh=MWVob2ppamdlcWtqMg==" target='_blank'><FontAwesomeIcon icon={faInstagram} /></a>
-                        <a title='نشانی ایتا ما' href="https://eitaa.com/enekas_ava" target='_blank'><img src="src/assets/Images/Itta-Icon.jpg" alt="ایتای ما" /></a>
+                        <a title='نشانی ایتا ما' href="https://eitaa.com/enekas_ava" target='_blank'><img src="Images/Itta-Icon.jpg" alt="ایتای ما" /></a>
                         <a href="#" target='_blank'><FontAwesomeIcon icon={faTelegram} /></a>
                     </div>
 
@@ -82,8 +82,8 @@ function Footer() {
                         </ul>
                     </div>
 
-<div className="footer-map" onClick={() => window.open(neshanUrl, "_blank")}>
-                        <img title="موقعیت مکانی فروشگاه آوای" src="src/assets/Images/Map-Image.jpg" alt="لوکیشن فروشگاه آوای انعکاس" className="map-image" />
+                    <div className="footer-map" onClick={() => window.open(neshanUrl, "_blank")}>
+                        <img title="موقعیت مکانی فروشگاه آوای" src="Images/Map-Image.jpg" alt="لوکیشن فروشگاه آوای انعکاس" className="map-image" />
                     </div>
 
                 </div>
