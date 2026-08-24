@@ -11,12 +11,13 @@ import { Link } from 'react-router-dom';
 import "swiper/css";
 import CatagorySwiper from "../CatagorySwiper/CatagorySwiper";
 import PopularSlider from "../PopulerSwiper/PopulerSwiper";
+import Articelse from "../Articles/Articels";
 
 
 function Home() {
 
 
-   
+
     return (
         <>
 
@@ -24,21 +25,22 @@ function Home() {
 
             <HeroSlider />
             <EmperiseveSwiper />
- <div className="FirstFullBanner"></div>
+            <div className="FirstFullBanner"></div>
 
 
 
             <br />
-<CatagorySwiper />
-<div className="BannerContainer">
-    <div className="LeftBannerTwin"></div>
-    <div className="RightBannerTwin"></div>
-</div>
-<PopularSlider />
+            <CatagorySwiper />
+            <div className="BannerContainer">
+                <div className="LeftBannerTwin"></div>
+                <div className="RightBannerTwin"></div>
+            </div>
+            <PopularSlider />
+            <div className="FirstFullBanner"></div>
 
-           
+            <Articelse />
 
-           
+
         </>
     )
 }
