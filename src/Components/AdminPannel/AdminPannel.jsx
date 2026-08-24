@@ -19,7 +19,7 @@ import {
   fetchOrders, updateOrderStatus,
   fetchCustomers,
   fetchArticles, createArticle, updateArticle, deleteArticle,
-} from "./api";
+} from "../AdminPannel/Api";
 
 /**
  * @param {...(string|false|null|undefined)} classes
