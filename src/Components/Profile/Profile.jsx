@@ -9,7 +9,6 @@ import { useNavigate } from "react-router-dom";
 
 library.add(faShoppingCart, faHeart, faBell, faLocationDot, faUser, faExclamation, faChevronDown, faArrowRightFromBracket);
 
-// کامپوننت مشترک برای نمایش پیام خالی بودن یک بخش
 function EmptyState({ message }) {
     return (
         <h2 className="Nothing">
@@ -29,7 +28,7 @@ function Profile() {
     const [page, setPage] = useState("Profile")
     const [activeOrderOption, setActiveOrderOption] = useState("InProgress")
 
-    // وضعیت‌های داده‌ها
+   
     const [orders, setOrders] = useState({
         InProgress: [], Delivered: [], Returned: [], Canceled: [],
     })
@@ -46,11 +45,10 @@ function Profile() {
         Number: ""
     });
 
-    // استیت خطاها و پیام موفقیت
     const [errorMessage, setErrorMessage] = useState("");
     const [successMessage, setSuccessMessage] = useState("");
 
-    // استیت‌های مربوط به منوی سفارشی جنسیت
+   
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [selectedGender, setSelectedGender] = useState({ label: "لطفاً انتخاب کنید", value: "" });
     const dropdownRef = useRef(null);
@@ -58,7 +56,7 @@ function Profile() {
     const currentOrders = orders[activeOrderOption] || []
     const currentOrderConfig = ORDER_STATUS_LIST.find(o => o.key === activeOrderOption)
 
-    // بستن منو با کلیک بیرون از آن
+  
     useEffect(() => {
         function handleClickOutside(event) {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -72,23 +70,23 @@ function Profile() {
     const handleSelectOption = (label, value) => {
         setSelectedGender({ label, value });
         setIsDropdownOpen(false);
-        setErrorMessage(""); // با انتخاب جنسیت، خطای احتمالی پاک شود
+        setErrorMessage(""); 
     };
 
-    // بروزرسانی مقادیر فرم به محض تایپ
+  
     const handleChange = (e) => {
         setFormData({
             ...formData,
             [e.target.name]: e.target.value
         });
-        setErrorMessage(""); // با هر بار تایپ، خطای قبلی پاک می‌شود
+        setErrorMessage(""); 
     };
 
-    // تابع اعتبارسنجی و ثبت نهایی
+  
     const handleSubmitProfile = (e) => {
         e.preventDefault();
 
-        // شرط‌های بررسی صحت فیلدها
+    
         if (!formData.NameAndFamily.trim()) {
             setErrorMessage("لطفاً نام و نام خانوادگی را وارد کنید.");
             return;
@@ -115,7 +113,6 @@ function Profile() {
             return;
         }
 
-        // اگر تمام شرط‌ها درست بود:
         setErrorMessage("");
         const finalData = {
             ...formData,
@@ -125,7 +122,7 @@ function Profile() {
         console.log("اطلاعات معتبر و آماده ارسال به بک‌اند:", finalData);
         setSuccessMessage("اطلاعات پروفایل با موفقیت ثبت شد!");
 
-        // پاک کردن پیام موفقیت پس از ۴ ثانیه
+     
         setTimeout(() => setSuccessMessage(""), 4000);
     };
 const navigate = useNavigate();
@@ -347,11 +344,10 @@ const navigate = useNavigate();
                                 />
                             </div>
 
-                            {/* نمایش پیام خطا یا موفقیت */}
+                          
                             {errorMessage && <div className="form-error-msg">{errorMessage}</div>}
                             {successMessage && <div className="form-success-msg">{successMessage}</div>}
 
-                            {/* دکمه ثبت تغییرات */}
                             <div className="SubmitBtnContainer">
                                 <button type="submit" className="SubmitProfileBtn">ثبت تغییرات</button>
                             </div>
