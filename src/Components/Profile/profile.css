@@ -415,7 +415,8 @@ body {
     }
 
     .AccountImage {
-        height: 120px;
+        margin: 0 auto;
+        height: 180px;
     }
 
     .optionsOrders {

@@ -2,7 +2,8 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Clock, Sparkles, ChevronLeft, ArrowLeft } from 'lucide-react';
 import "./SwiperEmperisive.css";
-import productsData from '../ProductData';
+import fallbackProducts from '../ProductData';
+import { fetchProducts } from '../api';
 
 const toPersianDigits = (num) => {
   const farsiDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
@@ -114,14 +115,25 @@ export default function EmperiseveSwiper() {
     if (swiperRef.current) swiperRef.current.scrollBy({ left: amount, behavior: 'smooth' });
   };
 
+  const [products, setProducts] = useState(null);
+
+  useEffect(() => {
+    let mounted = true;
+    fetchProducts()
+      .then((data) => { if (mounted) setProducts(data); })
+      .catch(() => { if (mounted) setProducts([]); });
+    return () => { mounted = false; };
+  }, []);
+
   return (
     <section className="swiper-container" aria-label="پیشنهادهای شگفت‌انگیز">
       <div className="swiper-wrapper-box">
-        <button className="nav-btn prev" onClick={() => scrollByAmount(-300)} aria-label="اسلاید قبلی">
-          <ChevronLeft size={20} />
-        </button>
-        <button className="nav-btn next" onClick={() => scrollByAmount(300)} aria-label="اسلاید بعدی">
+        <button className="nav-btn prev" onClick={() => scrollByAmount(300)} aria-label="اسلاید قبلی">
+        
           <ChevronLeft size={20} style={{ transform: 'rotate(180deg)' }} />
+        </button>
+        <button className="nav-btn next" onClick={() => scrollByAmount(-300)} aria-label="اسلاید بعدی">
+            <ChevronLeft size={20} />
         </button>
 
         <div
@@ -133,7 +145,7 @@ export default function EmperiseveSwiper() {
           onPointerMove={handlePointerMove}
         >
           <AmazingOfferCard />
-          {productsData.filter((product) => product.Empressive).map((product) => (
+          {(products || fallbackProducts).filter((product) => product.Empressive).map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
           <a href="#" className="end-card" aria-label="مشاهده همه محصولات">

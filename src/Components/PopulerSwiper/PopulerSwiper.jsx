@@ -2,7 +2,8 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Clock, Sparkles, ChevronLeft, ArrowLeft } from 'lucide-react';
 import "./PopulerSwiper.css";
-import productsData from '../../ProductData';
+import fallbackProducts from '../../ProductData';
+import { fetchProducts } from '../../api';
 
 const toPersianDigits = (num) => {
     const farsiDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
@@ -72,6 +73,16 @@ export default function PopularSlider() {
         if (swiperRef.current) swiperRef.current.scrollBy({ left: amount, behavior: 'smooth' });
     };
 
+    const [products, setProducts] = useState(null);
+
+    useEffect(() => {
+        let mounted = true;
+        fetchProducts()
+            .then((data) => { if (mounted) setProducts(data); })
+            .catch(() => { if (mounted) setProducts([]); });
+        return () => { mounted = false; };
+    }, []);
+
     return (<>
     <div className='PopulerTitleContainer'><h2>محبوب ترین ها</h2></div>
         <div className="BtnNextContainer">
@@ -97,7 +108,7 @@ export default function PopularSlider() {
                     onPointerMove={handlePointerMove}
                 >
 
-                    {productsData.filter((product) => product.Empressive).map((product) => (
+                    {(products || fallbackProducts).filter((product) => product.Empressive).map((product) => (
                         <ProductCard key={product.id} product={product} />
                     ))}
                     <a href="#" className="end-card" aria-label="مشاهده همه محصولات">

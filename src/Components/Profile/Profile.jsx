@@ -28,7 +28,7 @@ function Profile() {
     const [page, setPage] = useState("Profile")
     const [activeOrderOption, setActiveOrderOption] = useState("InProgress")
 
-   
+
     const [orders, setOrders] = useState({
         InProgress: [], Delivered: [], Returned: [], Canceled: [],
     })
@@ -48,7 +48,7 @@ function Profile() {
     const [errorMessage, setErrorMessage] = useState("");
     const [successMessage, setSuccessMessage] = useState("");
 
-   
+
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [selectedGender, setSelectedGender] = useState({ label: "لطفاً انتخاب کنید", value: "" });
     const dropdownRef = useRef(null);
@@ -56,7 +56,7 @@ function Profile() {
     const currentOrders = orders[activeOrderOption] || []
     const currentOrderConfig = ORDER_STATUS_LIST.find(o => o.key === activeOrderOption)
 
-  
+
     useEffect(() => {
         function handleClickOutside(event) {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -70,23 +70,23 @@ function Profile() {
     const handleSelectOption = (label, value) => {
         setSelectedGender({ label, value });
         setIsDropdownOpen(false);
-        setErrorMessage(""); 
+        setErrorMessage("");
     };
 
-  
+
     const handleChange = (e) => {
         setFormData({
             ...formData,
             [e.target.name]: e.target.value
         });
-        setErrorMessage(""); 
+        setErrorMessage("");
     };
 
-  
+
     const handleSubmitProfile = (e) => {
         e.preventDefault();
 
-    
+
         if (!formData.NameAndFamily.trim()) {
             setErrorMessage("لطفاً نام و نام خانوادگی را وارد کنید.");
             return;
@@ -122,10 +122,10 @@ function Profile() {
         console.log("اطلاعات معتبر و آماده ارسال به بک‌اند:", finalData);
         setSuccessMessage("اطلاعات پروفایل با موفقیت ثبت شد!");
 
-     
+
         setTimeout(() => setSuccessMessage(""), 4000);
     };
-const navigate = useNavigate();
+    const navigate = useNavigate();
     return (
         <div className="ContaimerAllPro">
             <div className="SideBar">
@@ -344,7 +344,7 @@ const navigate = useNavigate();
                                 />
                             </div>
 
-                          
+
                             {errorMessage && <div className="form-error-msg">{errorMessage}</div>}
                             {successMessage && <div className="form-success-msg">{successMessage}</div>}
 
