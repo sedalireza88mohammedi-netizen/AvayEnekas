@@ -1,16 +1,10 @@
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { library } from '@fortawesome/fontawesome-svg-core';
-import { } from '@fortawesome/free-solid-svg-icons';
 import { faInstagram, faTelegram } from '@fortawesome/free-brands-svg-icons';
-library.add(faInstagram);
-import { Link, useNavigate } from "react-router-dom"
-import { useState } from "react";
+import { Link } from "react-router-dom"
 import "./Footer.css"
 import { faCircleCheck, faThumbsUp, faTruck } from '@fortawesome/free-regular-svg-icons';
-import { faCube } from '@fortawesome/free-solid-svg-icons/faCube';
 function Footer() {
-    const navigate = useNavigate()
     const neshanUrl = "https://neshan.org/maps/search/آوای انعکاس، قم";
 
 
@@ -40,22 +34,22 @@ function Footer() {
                         <ul className="footerList">
                             <h2>محصولات</h2>
                             <li>
-                                <Link>باند</Link>
+                                <Link to="/Catagoryes?search=باند">باند</Link>
                             </li>
                             <li>
-                                <Link>آمپلی فایر</Link>
+                                <Link to="/Catagoryes?search=آمپلی فایر">آمپلی فایر</Link>
                             </li>
                             <li>
-                                <Link>باند پسیو</Link>
+                                <Link to="/Catagoryes?search=باند پسیو">باند پسیو</Link>
                             </li>
                             <li>
-                                <Link>میکسر دیجیتال</Link>
+                                <Link to="/Catagoryes?search=میکسر">میکسر دیجیتال</Link>
                             </li>
                             <li>
-                                <Link>پاور میکسر</Link>
+                                <Link to="/Catagoryes?search=پاور میکسر">پاور میکسر</Link>
                             </li>
                             <li>
-                                <Link>میکرفون</Link>
+                                <Link to="/Catagoryes?search=میکروفون">میکرفون</Link>
                             </li>
                         </ul>
                     </div>
@@ -64,20 +58,16 @@ function Footer() {
                         <ul className="footerList">
                             <h2>دسترسی آسان</h2>
                             <li>
-                                <Link onClick={() => { navigate("/") }}>صفحه اصلی</Link>
+                                <Link to="/">صفحه اصلی</Link>
                             </li>
                             <li>
-                                <Link>درباره ما </Link>
+                                <Link to="/Catagoryes"> دسته بندی ها</Link>
                             </li>
                             <li>
-                                <Link> ارتباط با ما</Link>
+                                <Link to="/Cart">سبد خرید</Link>
                             </li>
                             <li>
-                                <Link> دسته بندی ها</Link>
-                            </li>
-
-                            <li>
-                                <Link>مشاوره رایگان</Link>
+                                <a href="tel:09027741653">مشاوره رایگان</a>
                             </li>
                         </ul>
                     </div>

@@ -2,7 +2,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Clock, Sparkles, ChevronLeft, ArrowLeft } from 'lucide-react';
 import "./SwiperEmperisive.css";
-import fallbackProducts from '../ProductData';
 import { fetchProducts } from '../api';
 
 const toPersianDigits = (num) => {
@@ -145,7 +144,7 @@ export default function EmperiseveSwiper() {
           onPointerMove={handlePointerMove}
         >
           <AmazingOfferCard />
-          {(products || fallbackProducts).filter((product) => product.Empressive).map((product) => (
+          {(products || []).filter((product) => product.Empressive).map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
           <a href="#" className="end-card" aria-label="مشاهده همه محصولات">

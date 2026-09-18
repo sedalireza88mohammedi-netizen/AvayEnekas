@@ -1,8 +1,7 @@
 
 import React, { useRef, useState, useEffect } from 'react';
-import { Clock, Sparkles, ChevronLeft, ArrowLeft } from 'lucide-react';
+import { ChevronLeft, ArrowLeft } from 'lucide-react';
 import "./PopulerSwiper.css";
-import fallbackProducts from '../../ProductData';
 import { fetchProducts } from '../../api';
 
 const toPersianDigits = (num) => {
@@ -108,7 +107,7 @@ export default function PopularSlider() {
                     onPointerMove={handlePointerMove}
                 >
 
-                    {(products || fallbackProducts).filter((product) => product.Empressive).map((product) => (
+                    {(products || []).filter((product) => product.Empressive).map((product) => (
                         <ProductCard key={product.id} product={product} />
                     ))}
                     <a href="#" className="end-card" aria-label="مشاهده همه محصولات">

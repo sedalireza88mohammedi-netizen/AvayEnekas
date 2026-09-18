@@ -240,3 +240,138 @@ button {
     font-weight: 500;
     text-align: center;
 }
+
+/* جستجو */
+.cat-search-box {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 0.6rem 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.cat-search-icon {
+    color: #6b7280;
+    flex-shrink: 0;
+}
+
+.cat-search-box input {
+    border: none;
+    outline: none;
+    background: transparent;
+    flex: 1;
+    font-family: inherit;
+    font-size: 0.9rem;
+}
+
+/* گرید محصولات */
+.cat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1rem;
+}
+
+.cat-product-card {
+    display: flex;
+    flex-direction: column;
+    background: #ffffff;
+    border: 1px solid #eef0f3;
+    border-radius: 12px;
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.cat-product-card:hover {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+}
+
+.cat-product-image-wrapper {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    background: #f3f4f6;
+}
+
+.cat-product-image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.cat-product-discount {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: #ef4444;
+    color: #fff;
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 6px;
+    z-index: 1;
+}
+
+.cat-product-info {
+    padding: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    flex: 1;
+}
+
+.cat-product-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #1f2937;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.cat-product-subtitle {
+    font-size: 0.75rem;
+    color: #6b7280;
+}
+
+.cat-product-price-row {
+    margin-top: auto;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.cat-product-price {
+    color: #ef4444;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.cat-product-price small {
+    font-size: 0.65rem;
+    color: #6b7280;
+    font-weight: normal;
+}
+
+.cat-product-oldprice {
+    text-decoration: line-through;
+    color: #9ca3af;
+    font-size: 0.7rem;
+}
+
+.cat-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    color: #9ca3af;
+    padding: 3rem 0;
+}

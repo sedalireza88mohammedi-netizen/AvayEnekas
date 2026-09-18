@@ -19,11 +19,6 @@
     --border-color: #e4e4e7;
 }
 
-@font-face {
-    font-family: YekanBold;
-    src: url(../../../public/Fonts/BYekan+\ Bold.ttf);
-}
-
 * {
     box-sizing: border-box;
     font-family: YekanBold;

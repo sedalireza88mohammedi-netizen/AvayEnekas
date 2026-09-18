@@ -1,168 +1,154 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { library } from '@fortawesome/fontawesome-svg-core';
-import { faArrowRight, faArrowLeft, } from '@fortawesome/free-solid-svg-icons';
-import React, { useState } from 'react';
-import {
-    Smartphone, Laptop, MonitorSmartphone, Armchair, Coffee, Sparkles, Shirt, Gem, Car,
-    ChevronLeft, ChevronDown, ChevronUp, LayoutGrid
+import { faArrowRight, faSearch } from '@fortawesome/free-solid-svg-icons';
+import { useState, useEffect } from 'react';
+import { LayoutGrid, PackageX } from 'lucide-react';
+import "./Catagoryes.css";
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { fetchProducts, fetchCategories } from '../../api';
+import { usePageMeta } from '../../useSeo';
+
+const toPersianDigits = (num) =>
+  num.toString().replace(/\d/g, (x) => '۰۱۲۳۴۵۶۷۸۹'[x]);
+
+const formatPrice = (price) => price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+function ProductCard({ product }) {
+  return (
+    <Link to={`/Product/${product.id}`} className="cat-product-card">
+      <div className="cat-product-image-wrapper">
+        {product.discount > 0 && (
+          <span className="cat-product-discount">{toPersianDigits(product.discount)}٪</span>
+        )}
+        <img
+          src={product.image}
+          alt={product.title}
+          loading="lazy"
+          decoding="async"
+          width={200}
+          height={200}
+        />
+      </div>
+      <div className="cat-product-info">
+        <h3 className="cat-product-title">{product.title}</h3>
+        {product.subtitle && <span className="cat-product-subtitle">{product.subtitle}</span>}
+        <div className="cat-product-price-row">
+          <span className="cat-product-price">{toPersianDigits(formatPrice(product.price))} <small>تومان</small></span>
+          {product.oldPrice > product.price && (
+            <span className="cat-product-oldprice">{toPersianDigits(formatPrice(product.oldPrice))}</span>
+          )}
+        </div>
+      </div>
+    </Link>
+  );
 }
-    from 'lucide-react';
-import "./Catagoryes.css"
-import { useNavigate } from 'react-router-dom';
 
-
-library.add(faArrowRight, faArrowLeft,);
-// ==========================================
-// ۲. داده‌های نمونه (Mock Data)
-// ==========================================
-const CATEGORIES = [
-    { id: 'mobile', title: 'موبایل', icon: Smartphone },
-    { id: 'laptop', title: 'لپ تاپ', icon: Laptop },
-    { id: 'digital', title: 'کالای دیجیتال', icon: MonitorSmartphone },
-    { id: 'home', title: 'خانه و آشپزخانه', icon: Armchair },
-    { id: 'appliances', title: 'لوازم خانگی برقی', icon: Coffee },
-    { id: 'beauty', title: 'آرایشی بهداشتی', icon: Sparkles },
-    { id: 'fashion', title: 'مد و پوشاک', icon: Shirt },
-    { id: 'jewelry', title: 'طلا و نقره', icon: Gem },
-    { id: 'car', title: 'خودرو و موتورسیکلت', icon: Car },
-];
-
-const SUB_CATEGORIES_DATA = {
-    mobile: {
-        headerLink: 'همه محصولات موبایل',
-        mainTitle: 'انتخاب موبایل',
-        sections: [
-            {
-                id: 'apple',
-                title: 'گوشی های اپل',
-                defaultOpen: true,
-                items: [
-                    { id: 'all', title: 'همه کالاها', isIcon: true, icon: LayoutGrid },
-                    { id: 'ip17', title: 'آیفون ۱۷', image: 'https://placehold.co/150x150/e8e8e8/333?text=iPhone+17' },
-                    { id: 'ip16', title: 'آیفون ۱۶', image: 'https://placehold.co/150x150/e8e8e8/333?text=iPhone+16' }
-                ]
-            },
-            { id: 'brands', title: 'برندهای مختلف گوشی موبایل', items: [] },
-            { id: 'top-brands', title: 'برندهای برتر', items: [] },
-            { id: 'price', title: 'گوشی براساس قیمت', items: [] },
-            { id: 'performance', title: 'گوشی براساس عملکرد', items: [] },
-        ]
-    }
-};
-
-// ==========================================
-// ۳. کامپوننت‌های مستقل React
-// ==========================================
-
-const ProductCircle = ({ item }) => {
-    return (
-        <div className="product-item">
-            <div className="product-circle">
-                {item.isIcon ? (
-                    <item.icon size={32} className="product-icon" />
-                ) : (
-                    <img src={item.image} alt={item.title} />
-                )}
-            </div>
-            <span className="product-title">{item.title}</span>
-        </div>
-    );
-};
-
-const Accordion = ({ section }) => {
-    const [isOpen, setIsOpen] = useState(section.defaultOpen || false);
-
-    return (
-        <div className="accordion">
-            <button className="accordion-btn" onClick={() => setIsOpen(!isOpen)}>
-                <span>{section.title}</span>
-                {isOpen ? (
-                    <ChevronUp size={20} className="accordion-icon" />
-                ) : (
-                    <ChevronDown size={20} className="accordion-icon" />
-                )}
-            </button>
-
-            {isOpen && section.items && section.items.length > 0 && (
-                <div className="accordion-content no-scrollbar">
-                    {section.items.map(item => (
-                        <ProductCircle key={item.id} item={item} />
-                    ))}
-                </div>
-            )}
-        </div>
-    );
-};
-
-const MainContent = ({ categoryId }) => {
-    const data = SUB_CATEGORIES_DATA[categoryId];
-
-    if (!data) {
-        return (
-            <div className="main-content" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9ca3af' }}>
-                محتوایی برای این دسته‌بندی یافت نشد.
-            </div>
-        );
-    }
-
-    return (
-        <div className="main-content no-scrollbar">
-            <div className="header-link">
-                <ChevronLeft size={20} />
-                <span>{data.headerLink}</span>
-            </div>
-
-            <h2 className="main-title">{data.mainTitle}</h2>
-
-            <div>
-                {data.sections.map(section => (
-                    <Accordion key={section.id} section={section} />
-                ))}
-            </div>
-        </div>
-    );
-};
-
-
-const Sidebar = ({ activeId, onSelect }) => {
-    return (
-        <div className="sidebar no-scrollbar">
-            {CATEGORIES.map(category => {
-                const isActive = activeId === category.id;
-                const Icon = category.icon;
-
-                return (
-                    <button
-                        key={category.id}
-                        onClick={() => onSelect(category.id)}
-                        className={`sidebar-btn ${isActive ? 'active' : ''}`}
-                    >
-                        <Icon size={24} className="sidebar-btn-icon" strokeWidth={isActive ? 2 : 1.5} />
-                        <span>{category.title}</span>
-                    </button>
-                );
-            })}
-        </div>
-    );
-};
 export default function Catagoryes() {
-    const [activeCategory, setActiveCategory] = useState('mobile');
-    const navigate = useNavigate()
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const search = searchParams.get('search') || '';
+  const category = searchParams.get('category') || '';
 
-    return (
-        <>
-           
-            <div className="app-wrapper">
-                 <h1 title='بازگشت به خانه' className='BackFromCatagory' onClick={() => { navigate("/") }}><FontAwesomeIcon icon={faArrowRight} /></h1>
-                {/* در پروژه شخصی خودتان نیازی به این تگ style نیست. 
-        فقط کافیست کدهای متغیر styles بالا را در فایل App.css قرار دهید. 
-      */}
+  const [categories, setCategories] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [localSearch, setLocalSearch] = useState(search);
 
+  usePageMeta({
+    title: category
+      ? `دسته‌بندی ${category} | آوای انعکاس`
+      : 'دسته‌بندی محصولات صوتی و تصویری | آوای انعکاس',
+    description: 'خرید تجهیزات صوتی و تصویری: باند، میکروفون، میکسر، آمپلی فایر و کابل از فروشگاه آوای انعکاس.',
+  });
 
-                <Sidebar activeId={activeCategory} onSelect={setActiveCategory} />
-                <MainContent categoryId={activeCategory} />
+  useEffect(() => {
+    setLocalSearch(search);
+  }, [search]);
 
+  useEffect(() => {
+    let active = true;
+    fetchCategories()
+      .then((cats) => active && setCategories(cats))
+      .catch(() => active && setCategories([]));
+    return () => { active = false; };
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    fetchProducts({ category: category || undefined, search: search || undefined })
+      .then((data) => { if (active) setProducts(data); })
+      .catch(() => active && setProducts([]))
+      .finally(() => active && setLoading(false));
+    return () => { active = false; };
+  }, [category, search]);
+
+  const selectCategory = (name) => {
+    navigate(name ? `/Catagoryes?category=${encodeURIComponent(name)}` : '/Catagoryes');
+  };
+
+  const submitSearch = (e) => {
+    e.preventDefault();
+    navigate(`/Catagoryes?search=${encodeURIComponent(localSearch.trim())}`);
+  };
+
+  const title = category || search || 'همه محصولات';
+
+  return (
+    <>
+      <div className="app-wrapper">
+        <h1 title="بازگشت به خانه" className="BackFromCatagory" onClick={() => navigate("/")}>
+          <FontAwesomeIcon icon={faArrowRight} />
+        </h1>
+
+        <div className="sidebar">
+          <button
+            className={`sidebar-btn ${!category ? 'active' : ''}`}
+            onClick={() => selectCategory('')}
+          >
+            <LayoutGrid size={22} />
+            <span>همه</span>
+          </button>
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => selectCategory(cat)}
+              className={`sidebar-btn ${category === cat ? 'active' : ''}`}
+            >
+              <span>{cat}</span>
+            </button>
+          ))}
+        </div>
+
+        <div className="main-content no-scrollbar">
+          <form className="cat-search-box" onSubmit={submitSearch} role="search">
+            <FontAwesomeIcon icon={faSearch} className="cat-search-icon" />
+            <input
+              type="search"
+              value={localSearch}
+              onChange={(e) => setLocalSearch(e.target.value)}
+              placeholder="جستجو در محصولات..."
+              aria-label="جستجو در محصولات"
+            />
+          </form>
+
+          <h2 className="main-title">{title}</h2>
+
+          {loading ? (
+            <div className="page-loader" />
+          ) : products.length === 0 ? (
+            <div className="cat-empty">
+              <PackageX size={48} />
+              <p>محصولی یافت نشد.</p>
             </div>
-        </>
-    );
+          ) : (
+            <div className="cat-grid">
+              {products.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </>
+  );
 }

@@ -13,29 +13,33 @@ export default function HeroSlider() {
   const slidesData = [
     {
       id: 1,
+      title: 'فروشگاه تخصصی صوتی تصویری آوای انعکاس',
       image: 'Images/MainSwiper Images/Swiper1.jpg',
     },
     {
       id: 2,
+      title: 'تجهیزات حرفه‌ای استودیو از آوای انعکاس',
       image: 'Images/MainSwiper Images/Swiper2.jpg',
     },
     {
       id: 3,
+      title: 'مشاوره و نصب تخصصی تجهیزات صوت و تصویر',
       image: 'Images/MainSwiper Images/Swiper3.jpg',
     },
   ];
 
-  const nextSlide = () => {
-    prevSlideRef.current = currentSlide;
-    setDirection('next');
-    setCurrentSlide((prev) => (prev === slidesData.length - 1 ? 0 : prev + 1));
+  const changeSlide = (steps) => {
+    setCurrentSlide((prev) => {
+      const next = (prev + steps + slidesData.length) % slidesData.length;
+      prevSlideRef.current = prev;
+      return next;
+    });
+    setDirection(steps > 0 ? 'next' : 'prev');
   };
 
-  const prevSlide = () => {
-    prevSlideRef.current = currentSlide;
-    setDirection('prev');
-    setCurrentSlide((prev) => (prev === 0 ? slidesData.length - 1 : prev - 1));
-  };
+  const nextSlide = () => changeSlide(1);
+
+  const prevSlide = () => changeSlide(-1);
 
 
   const goToSlide = (index) => {
@@ -43,18 +47,13 @@ export default function HeroSlider() {
     const len = slidesData.length;
     const forwardDist = (index - currentSlide + len) % len;
     const backwardDist = (currentSlide - index + len) % len;
-    prevSlideRef.current = currentSlide;
-    setDirection(forwardDist <= backwardDist ? 'next' : 'prev');
-    setCurrentSlide(index);
+    changeSlide(forwardDist <= backwardDist ? forwardDist : -backwardDist);
   };
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      nextSlide();
-    }, 4000); 
-
+    const timer = setInterval(() => changeSlide(1), 4000);
     return () => clearInterval(timer);
-  }, [slidesData.length, currentSlide]);
+  }, []);
 
   const handleTouchStart = (e) => {
     setTouchStart(e.targetTouches[0].clientX);
@@ -149,6 +148,9 @@ onTouchEnd={handleDragEnd}
               alt={slide.title}
               className="slide-image"
               draggable="false"
+              loading={index === 0 ? 'eager' : 'lazy'}
+              fetchPriority={index === 0 ? 'high' : 'auto'}
+              decoding="async"
             />
           </div>
         ))}
