@@ -141,7 +141,7 @@
 
 .nav-btn:focus-visible,
 .dot:focus-visible {
-    outline: 2px solid #ef4056;
+    outline: 2px solid var(--brand);
     outline-offset: 2px;
 }
 
@@ -246,3 +246,15 @@
 }
 
 /* EndCatagorySwiper */
+.category-image-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 20px;
+    color: #475569;
+    font-size: 0.95rem;
+    font-weight: 700;
+    background: linear-gradient(160deg, #f1f5f9 0%, #e2e8f0 60%, #cbd5e1 100%);
+    border: 1px solid #e2e8f0;
+}

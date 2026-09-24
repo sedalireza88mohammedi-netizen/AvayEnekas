@@ -26,12 +26,12 @@
 .errorIcon {
     margin-top: 20px;
     font-size: 60px;
-    color: #d51f37;
+    color: var(--brand-dark);
 }
 
 .problem {
     margin-top: 20px;
-    color: #d51f37
+    color: var(--brand-dark)
 }
 
 .GotIt {

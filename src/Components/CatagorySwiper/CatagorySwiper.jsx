@@ -1,111 +1,123 @@
 import React, { useRef, useState, useEffect } from "react";
-import { Swiper, SwiperSlide } from "swiper/react";
 import { Link } from 'react-router-dom';
 import "./CatagorySwiper.css"
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-export default function CatagorySwiper(){
-    
-        const CATEGORIES_DATA = [
-            { image: 'Products_Images/باند RCF 715/1.webp', link: '/category/digital' },
-            { image: 'Products_Images/باند RCF 715/1.webp', link: '/category/fashion' },
-            { image: 'Products_Images/باند RCF 715/1.webp', link: '/category/home' },
-            { image: 'Products_Images/باند RCF 715/1.webp', link: '/category/beauty' },
-            { image: 'Products_Images/باند RCF 715/1.webp', link: '/category/supermarket' },
-            { image: 'Products_Images/باند RCF 715/1.webp', link: '/category/sports' },
-            { image: 'Products_Images/باند RCF 715/1.webp', link: '/category/toys' },
-            { image: 'Images/ProductImages/randomMixer1.jpg', link: '/category/tools' },
-            { image: 'Images/ProductImages/randomMixer1.jpg', link: '/category/books' },
-            { image: 'Images/ProductImages/randomMixer1.jpg', link: '/category/auto' },
-            { image: 'Images/ProductImages/randomMixer1.jpg', link: '/category/jewelry' },
-            { image: 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=150&q=80', link: '/category/gifts' },
-            { image: 'https://images.unsplash.com/photo-1601597111158-2fceff292cdc?w=150&q=80', link: '/category/local' },
-            { image: 'https://images.unsplash.com/photo-1606722590583-6951b5ea92ad?w=150&q=80', link: '/category/art' }
-        ];
-    
-    
-    
-        const [columnsPerView, setColumnsPerView] = useState(4);
-        const [currentIndex, setCurrentIndex] = useState(0);
-        const [touchStart, setTouchStart] = useState(0);
-        const [touchEnd, setTouchEnd] = useState(0);
-    
-        const containerRef = useRef(null);
-    
-        // دسته‌بندی آیتم‌ها به صورت جفت‌های ۲ ردیفه
-        const columns = [];
-        for (let i = 0; i < CATEGORIES_DATA.length; i += 1) {
-            columns.push(CATEGORIES_DATA.slice(i, i + 1));
+import { fetchCategories, fetchProducts } from '../../api';
+import SafeImg from '../../SafeImg';
+
+export default function CatagorySwiper() {
+    const [categories, setCategories] = useState([]);
+
+    useEffect(() => {
+        let mounted = true;
+
+        fetchCategories()
+            .then(async (cats) => {
+                const tiles = await Promise.all(
+                    (cats || []).map(async (name) => {
+                        let image = '';
+                        try {
+                            const list = await fetchProducts({ category: name, featured: true, limit: 1 });
+                            if (list && list[0] && list[0].image) image = list[0].image;
+                        } catch { /* بدون تصویر */ }
+                        return { name, image, link: `/Catagoryes?category=${encodeURIComponent(name)}` };
+                    })
+                );
+                if (mounted) setCategories(tiles);
+            })
+            .catch(() => { if (mounted) setCategories([]); });
+
+        return () => { mounted = false; };
+    }, []);
+
+    const CATEGORIES_DATA = categories.length > 0
+        ? categories
+        : [{
+            name: 'دسته‌بندی محصولات',
+            image: '',
+            link: '/Catagoryes',
+        }];
+
+    const [columnsPerView, setColumnsPerView] = useState(4);
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [touchStart, setTouchStart] = useState(0);
+    const [touchEnd, setTouchEnd] = useState(0);
+
+    const containerRef = useRef(null);
+
+    // دسته‌بندی آیتم‌ها به صورت جفت‌های ۲ ردیفه
+    const columns = [];
+    for (let i = 0; i < CATEGORIES_DATA.length; i += 1) {
+        columns.push(CATEGORIES_DATA.slice(i, i + 1));
+    }
+
+    // محاسبه هوشمند تعداد ستون‌ها بر اساس عرض صفحه (Responsive recalculation)
+    useEffect(() => {
+        const handleResize = () => {
+            const width = window.innerWidth;
+            if (width >= 1024) {
+                setColumnsPerView(4);
+            } else if (width >= 640) {
+                setColumnsPerView(3);
+            } else {
+                setColumnsPerView(2);
+            }
+        };
+
+        handleResize(); // مقداردهی اولیه
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    const maxIndex = Math.max(0, columns.length - columnsPerView);
+
+    const handlePrev = () => {
+        setCurrentIndex((prev) => Math.max(0, prev - 1));
+    };
+
+    const handleNext = () => {
+        setCurrentIndex((prev) => Math.min(maxIndex, prev + 1));
+    };
+
+    // هندل کردن رویدادهای لمسی در موبایل (Touch Swipe Events)
+    const handleTouchStart = (e) => {
+        setTouchStart(e.targetTouches[0].clientX);
+    };
+
+    const handleTouchMove = (e) => {
+        setTouchEnd(e.targetTouches[0].clientX);
+    };
+
+    const handleTouchEnd = () => {
+        if (!touchStart || !touchEnd) return;
+        const distance = touchStart - touchEnd;
+        const isLeftSwipe = distance > 40;
+        const isRightSwipe = distance < -40;
+
+        // در ساختار راست‌چین (RTL):
+        // کشیدن با دست به سمت راست (isRightSwipe): اسلایدها به راست می‌روند و آیتم‌های بعدی نمایش داده می‌شوند.
+        if (isRightSwipe && currentIndex < maxIndex) {
+            handleNext();
         }
-    
-    
-        // محاسبه هوشمند تعداد ستون‌ها بر اساس عرض صفحه (Responsive recalculation)
-        useEffect(() => {
-            const handleResize = () => {
-                const width = window.innerWidth;
-                if (width >= 1024) {
-                    setColumnsPerView(4);
-                } else if (width >= 640) {
-                    setColumnsPerView(3);
-                } else {
-                    setColumnsPerView(2);
-                }
-            };
-    
-            handleResize(); // مقداردهی اولیه
-            window.addEventListener('resize', handleResize);
-            return () => window.removeEventListener('resize', handleResize);
-        }, []);
-    
-        const maxIndex = Math.max(0, columns.length - columnsPerView);
-    
-        const handlePrev = () => {
-            setCurrentIndex((prev) => Math.max(0, prev - 1));
-        };
-    
-        const handleNext = () => {
-            setCurrentIndex((prev) => Math.min(maxIndex, prev + 1));
-        };
-    
-        // هندل کردن رویدادهای لمسی در موبایل (Touch Swipe Events)
-        const handleTouchStart = (e) => {
-            setTouchStart(e.targetTouches[0].clientX);
-        };
-    
-        const handleTouchMove = (e) => {
-            setTouchEnd(e.targetTouches[0].clientX);
-        };
-    
-        const handleTouchEnd = () => {
-            if (!touchStart || !touchEnd) return;
-            const distance = touchStart - touchEnd;
-            const isLeftSwipe = distance > 40;
-            const isRightSwipe = distance < -40;
-    
-            // در ساختار راست‌چین (RTL): 
-            // کشیدن با دست به سمت راست (isRightSwipe): اسلایدها به راست می‌روند و آیتم‌های بعدی نمایش داده می‌شوند.
-            if (isRightSwipe && currentIndex < maxIndex) {
-                handleNext();
-            }
-            // کشیدن با دست به سمت چپ (isLeftSwipe): اسلایدها به چپ می‌روند و آیتم‌های قبلی نمایش داده می‌شوند.
-            if (isLeftSwipe && currentIndex > 0) {
-                handlePrev();
-            }
-    
-            setTouchStart(0);
-            setTouchEnd(0);
-        };
-    
-        // کنترل با کلیدهای آرومپ کیبورد (Keyboard Navigation)
-        const handleKeyDown = (e) => {
-            if (e.key === 'ArrowLeft') {
-                handleNext();
-            } else if (e.key === 'ArrowRight') {
-                handlePrev();
-            }
-        };
-    
+        // کشیدن با دست به سمت چپ (isLeftSwipe): اسلایدها به چپ می‌روند و آیتم‌های قبلی نمایش داده می‌شوند.
+        if (isLeftSwipe && currentIndex > 0) {
+            handlePrev();
+        }
+
+        setTouchStart(0);
+        setTouchEnd(0);
+    };
+
+    // کنترل با کلیدهای آرومپ کیبورد (Keyboard Navigation)
+    const handleKeyDown = (e) => {
+        if (e.key === 'ArrowLeft') {
+            handleNext();
+        } else if (e.key === 'ArrowRight') {
+            handlePrev();
+        }
+    };
+
     return(
-        
         <>
          {/* StartCatagorySwiper */}
             {/* بخش اصلی اسلایدر با استانداردهای Accessibility و سئو */}
@@ -119,7 +131,7 @@ export default function CatagorySwiper(){
                 <header className="slider-header">
                     <div className="slider-title-group">
                         <h2 className="slider-title">دسته‌بندی محصولات</h2>
-                      
+
                     </div>
                 </header>
 
@@ -162,20 +174,20 @@ export default function CatagorySwiper(){
                         {columns.map((column, colIndex) => (
                             <div className="slider-column" key={`col-${colIndex}`}>
                                 {column.map((category) => (
-                                    <article  key={category.id}>
-
+                                    <article key={category.name || colIndex} className="category-card">
                                         <Link to={category.link}>
-
-
-
-
-                                            {/* عکس دسته‌بندی با لودینگ بهینه‌شده برای سئو */}
-                                            <img
-                                                src={category.image}
-                                                className="category-image"
-                                                loading="lazy"
-                                            />
-
+                                            {category.image ? (
+                                                <SafeImg
+                                                    src={category.image}
+                                                    className="category-image"
+                                                    loading="lazy"
+                                                />
+                                            ) : (
+                                                <div className="category-image category-image-fallback">{category.name}</div>
+                                            )}
+                                            <div className="category-info">
+                                                <span className="category-name">{category.name}</span>
+                                            </div>
                                         </Link>
                                     </article>
                                 ))}

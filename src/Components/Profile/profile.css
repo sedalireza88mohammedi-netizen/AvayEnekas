@@ -466,3 +466,65 @@ body {
         width: 100%;
     }
 }
+/* ???? ????? */
+.OrdersList { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
+.OrderCard {
+  display: flex; flex-direction: column; gap: 10px;
+  background: #fff; border: 1px solid #e5e7eb; border-radius: 12px;
+  padding: 14px 16px;
+}
+.OrderCardHead { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.OrderCardHead strong { color: #111827; font-size: 0.9rem; }
+.OrderCardDate { color: #9ca3af; font-size: 0.78rem; }
+.OrderCardRows { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; color: #4b5563; font-size: 0.85rem; }
+.OrderBadge {
+  background: #d1fae5; color: #047857; border-radius: 20px; padding: 3px 12px; font-size: 0.75rem; font-weight: 600;
+}
+.OrderBadgeBad { background: #fee2e2; color: var(--brand-dark); border-radius: 20px; padding: 3px 12px; font-size: 0.75rem; font-weight: 600; }
+.OrderCardPayment { color: #6b7280; font-size: 0.8rem; }
+
+/* ????????????? */
+.InterestedList { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
+.InterestedCard {
+  display: flex; align-items: center; gap: 14px;
+  background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px 14px;
+}
+.InterestedCardImg {
+  width: 80px; height: 80px; overflow: hidden; border-radius: 8px; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center; background: #fff;
+}
+.InterestedCardInfo { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.InterestedCardTitle { color: #111827; font-size: 0.88rem; text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 360px; }
+.InterestedCardTitle:hover { color: #0d9488; }
+.InterestedCardPrice { color: #0d9488; font-size: 0.85rem; font-weight: 600; }
+.InterestedCardRemove {
+  margin-inline-start: auto; background: none; border: none; cursor: pointer; color: var(--brand-dark); font-size: 1rem;
+}
+.InterestedCardRemove:hover { color: var(--brand-dark); }
+
+/* ??????? */
+.AddressList { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
+.AddressCard {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+  background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px 16px;
+}
+.AddressCardDefault { border-color: #0d9488; box-shadow: 0 0 0 1px #0d9488; }
+.AddressCardInfo { display: flex; flex-direction: column; gap: 6px; }
+.AddressCardInfo strong { color: #111827; font-size: 0.9rem; }
+.AddressCardInfo p { color: #4b5563; font-size: 0.85rem; margin: 0; }
+.AddressPostal { color: #9ca3af; font-size: 0.78rem; direction: ltr; }
+.AddressBadge { background: #ccfbf1; color: #0f766e; border-radius: 20px; padding: 2px 10px; font-size: 0.72rem; font-weight: 600; width: fit-content; }
+.AddressCardActions { display: flex; align-items: center; gap: 8px; }
+.AddressCardActions button {
+  font-family: inherit; font-size: 0.75rem; color: #0d9488; background: none;
+  border: 1px solid #99f6e4; border-radius: 7px; padding: 5px 12px; cursor: pointer;
+}
+.AddressCardDelete { color: var(--brand-dark) !important; border-color: #fca5a5 !important; }
+.AddressForm { display: flex; flex-direction: column; gap: 10px; background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; margin-top: 14px; }
+.AddressForm input {
+  font-family: inherit; font-size: 0.88rem; color: #111827;
+  border: 1px solid #d1d5db; border-radius: 8px; padding: 9px 12px; outline: none;
+}
+.AddressForm input:focus { border-color: #0d9488; }
+.AddressFormBtns { display: flex; align-items: center; gap: 10px; }
+.AddressFormBtns .OutUserBtn { padding: 8px 18px; }

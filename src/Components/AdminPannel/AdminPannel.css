@@ -1454,3 +1454,136 @@
 }
 
 /* ================= RESPONSIVE ================= */
+/* ============================== ????? ?? ??????? ============================== */
+
+.section-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 18px;
+    color: #16181b;
+}
+
+.section-head h2 {
+    margin: 0;
+    font-size: 16px;
+}
+
+.section-head > svg {
+    color: #6b7280;
+    margin-top: 2px;
+}
+
+.radio-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 12px;
+}
+
+.radio-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #24262a;
+    cursor: pointer;
+}
+
+.radio-label input {
+    accent-color: #16181b;
+}
+
+.phone-picker-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.btn-ghost {
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    color: #24262a;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-ghost:hover {
+    background: #e5e7eb;
+}
+
+.btn-ghost:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.customers-chip-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+    max-height: 240px;
+    overflow: auto;
+    padding: 4px;
+}
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid #d1d5db;
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.chip:hover {
+    border-color: #9ca3af;
+}
+
+.chip.is-selected {
+    background: #16181b;
+    border-color: #16181b;
+    color: #fff;
+}
+
+.chip input {
+    accent-color: #ef4056;
+}
+
+.chip-name {
+    font-weight: 600;
+}
+
+.chip-phone {
+    opacity: 0.8;
+    direction: ltr;
+}
+
+.form-success {
+    color: #15803d;
+    background: #ecfdf5;
+    border: 1px solid #bbf7d0;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 13px;
+    margin-bottom: 12px;
+}
+
+.form-error {
+    color: #b91c1c;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 13px;
+    margin-bottom: 12px;
+}

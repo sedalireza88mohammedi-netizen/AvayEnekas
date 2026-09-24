@@ -1,7 +1,6 @@
 import "./ErrorEmpty.css";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faHouse, faArrowRight, faCircleExclamation } from '@fortawesome/free-solid-svg-icons';
+import { faCircleExclamation } from '@fortawesome/free-solid-svg-icons';
 import { useEffect } from "react";
 
 library.add(faCircleExclamation);

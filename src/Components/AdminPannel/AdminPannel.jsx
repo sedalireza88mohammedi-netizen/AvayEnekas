@@ -6,7 +6,7 @@ import {
   DollarSign, ShoppingBag, AlertTriangle, Radio, Volume2,
   ArrowUpRight, ArrowDownRight, Phone, Mail, Calendar, Package2,
   CheckCircle2, Clock, XCircle, Truck, Menu, Bell, ImagePlus, Video,
-  RefreshCw, FileText,
+  RefreshCw, FileText, MessageSquareText, Send,
 } from "lucide-react";
 import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -19,6 +19,7 @@ import {
   fetchOrders, updateOrderStatus,
   fetchCustomers,
   fetchArticles, createArticle, updateArticle, deleteArticle,
+  fetchAdminMessages, sendAdminMessage,
 } from "../AdminPannel/Api.jsx";
 
 /**
@@ -71,6 +72,7 @@ const NAV = [
   { key: "products", label: "محصولات", icon: Package },
   { key: "orders", label: "سفارش‌ها", icon: ShoppingCart },
   { key: "customers", label: "مشتریان", icon: Users },
+  { key: "messages", label: "پیامک", icon: MessageSquareText },
   { key: "articles", label: "مقالات", icon: FileText },
   { key: "reports", label: "گزارش فروش", icon: BarChart3 },
   { key: "settings", label: "تنظیمات", icon: Settings },
@@ -1023,6 +1025,186 @@ function SettingsView() {
   );
 }
 
+/* ============================== MESSAGES (پیامک به مشتریان) ============================== */
+
+function MessagesSection({ messages, customers, onSend }) {
+  const [text, setText] = useState("");
+  const [targetMode, setTargetMode] = useState("all");
+  const [selectedPhones, setSelectedPhones] = useState(new Set());
+  const [manualPhone, setManualPhone] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [feedback, setFeedback] = useState("");
+  const [feedbackErr, setFeedbackErr] = useState("");
+
+  const togglePhone = (phone) => {
+    setSelectedPhones((prev) => {
+      const s = new Set(prev);
+      if (s.has(phone)) s.delete(phone);
+      else s.add(phone);
+      return s;
+    });
+  };
+
+  const addManualPhone = () => {
+    const p = manualPhone.trim();
+    if (!p) return;
+    setSelectedPhones((prev) => new Set(prev).add(p));
+    setManualPhone("");
+  };
+
+  const handleSend = async () => {
+    setFeedback("");
+    setFeedbackErr("");
+    if (!text.trim()) {
+      setFeedbackErr("متن پیام را وارد کنید");
+      return;
+    }
+    let phones = [];
+    if (targetMode === "all") phones = [];
+    else if (selectedPhones.size === 0) {
+      setFeedbackErr("حداقل یک مشتری (گیرنده) را انتخاب کنید");
+      return;
+    } else {
+      phones = Array.from(selectedPhones);
+    }
+    setSubmitting(true);
+    try {
+      const res = await onSend({ text: text.trim(), target: targetMode, phones });
+      setFeedback("پیام برای " + num(res.phones || res.created || phones.length) + " نفر ارسال شد ✓");
+      setText("");
+      setSelectedPhones(new Set());
+    } catch (err) {
+      setFeedbackErr(err.message || "ارسال ناموفق بود");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="stack">
+      <div className="card">
+        <div className="section-head">
+          <MessageSquareText size={18} />
+          <div>
+            <h2>ارسال پیامک به مشتریان</h2>
+            <p className="muted small">پیام شما در بخش «پیام‌های من» برای مشتری نمایش داده می‌شود و بالای آیکن زنگش نشانگر قرمز می‌آید.</p>
+          </div>
+        </div>
+
+        <Field label="متن پیام">
+          <textarea
+            rows={4}
+            value={text}
+            maxLength={1000}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="متن پیامک را بنویسید..."
+          />
+          <p className="muted small" style={{ textAlign: "left", marginTop: 4 }}>{num(text.length)} / ۱٬۰۰۰</p>
+        </Field>
+
+        <Field label="گیرنده‌ها">
+          <div className="radio-row">
+            <label className="radio-label">
+              <input type="radio" checked={targetMode === "all"} onChange={() => setTargetMode("all")} />
+              همه مشتریان
+            </label>
+            <label className="radio-label">
+              <input type="radio" checked={targetMode === "customers"} onChange={() => setTargetMode("customers")} />
+              انتخاب مشتری
+            </label>
+          </div>
+
+          {targetMode === "customers" && (
+            <>
+              <div className="phone-picker-row">
+                <input
+                  className="mono"
+                  value={manualPhone}
+                  onChange={(e) => setManualPhone(e.target.value)}
+                  placeholder="شماره جدید (مثال: 0912XXXXXXX)"
+                  style={{ flex: 1 }}
+                />
+                <button type="button" className="btn btn-ghost" onClick={addManualPhone} disabled={!manualPhone.trim()}>
+                  <Plus size={16} /> افزودن
+                </button>
+              </div>
+
+              <div className="customers-chip-list">
+                {customers.map((c) => (
+                  <label key={c.id} className={`chip ${selectedPhones.has(c.phone) ? "is-selected" : ""}`}>
+                    <input
+                      type="checkbox"
+                      checked={selectedPhones.has(c.phone)}
+                      onChange={() => togglePhone(c.phone)}
+                    />
+                    <span className="chip-name">{c.name}</span>
+                    <span className="chip-phone mono">{c.phone}</span>
+                  </label>
+                ))}
+                {customers.length === 0 && <p className="muted small">مشتری ثبت‌شده‌ای وجود ندارد.</p>}
+              </div>
+              <p className="muted small">انتخاب‌شده: {num(selectedPhones.size)} نفر</p>
+            </>
+          )}
+        </Field>
+
+        {feedback && <p className="form-success">{feedback}</p>}
+        {feedbackErr && <p className="form-error">{feedbackErr}</p>}
+
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={handleSend}
+          disabled={submitting || !text.trim()}
+        >
+          <Send size={16} />
+          {submitting ? "در حال ارسال..." : "ارسال پیامک"}
+        </button>
+      </div>
+
+      <div className="card">
+        <div className="section-head">
+          <Bell size={18} />
+          <h2>تاریخچه پیام‌های ارسالی</h2>
+        </div>
+        <div className="table-wrap">
+          <table className="table">
+            <thead>
+              <tr>
+                <th>گیرنده</th>
+                <th>متن پیام</th>
+                <th>وضعیت</th>
+              </tr>
+            </thead>
+            <tbody>
+              {messages.length === 0 ? (
+                <tr>
+                  <td colSpan={3} className="empty-row">هنوز پیامی ارسال نشده است</td>
+                </tr>
+              ) : (
+                messages.map((m) => (
+                  <tr key={m.id}>
+                    <td>
+                      <span className="bold small">{m.customer || "—"}</span>
+                      <span className="mono muted small" dir="ltr"> ({m.phone})</span>
+                    </td>
+                    <td className="small">{m.text}</td>
+                    <td>
+                      {m.is_read
+                        ? <Badge status="پرداخت شده" />
+                        : <Badge status="در انتظار پردازش" />}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ============================== MOCK CHART DATA (dashboard/reports only) ============================== */
 
 const salesByMonth = [
@@ -1048,6 +1230,7 @@ export default function AdminPanel() {
   const [orders, setOrders] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [articles, setArticles] = useState([]);
+  const [messages, setMessages] = useState([]);
   const [ordersFilterSeed, setOrdersFilterSeed] = useState("همه");
 
   const [loading, setLoading] = useState(true);
@@ -1057,13 +1240,14 @@ export default function AdminPanel() {
     setLoading(true);
     setLoadError("");
     try {
-      const [productsData, ordersData, customersData, articlesData] = await Promise.all([
-        fetchProducts(), fetchOrders(), fetchCustomers(), fetchArticles(),
+      const [productsData, ordersData, customersData, articlesData, messagesData] = await Promise.all([
+        fetchProducts(), fetchOrders(), fetchCustomers(), fetchArticles(), fetchAdminMessages(),
       ]);
       setProducts(productsData);
       setOrders(ordersData);
       setCustomers(customersData);
       setArticles(articlesData);
+      setMessages(messagesData || []);
     } catch (err) {
       setLoadError(err.message || "اتصال به سرور برقرار نشد");
     } finally {
@@ -1117,6 +1301,13 @@ export default function AdminPanel() {
 const handleDeleteArticle = async (id) => {
     await deleteArticle(id);
     setArticles((prev) => prev.filter((a) => a.id !== id));
+  };
+
+  const handleSendMessage = async (payload) => {
+    const res = await sendAdminMessage(payload);
+    const list = await fetchAdminMessages();
+    setMessages(list || []);
+    return res;
   };
 
   if (loading) {
@@ -1243,6 +1434,13 @@ const handleDeleteArticle = async (id) => {
               />
             )}
             {activeTab === "customers" && <Customers customers={customers} />}
+            {activeTab === "messages" && (
+              <MessagesSection
+                messages={messages}
+                customers={customers}
+                onSend={handleSendMessage}
+              />
+            )}
             {activeTab === "articles" && (
               <Articles
                 articles={articles}

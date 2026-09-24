@@ -115,6 +115,12 @@ export async function fetchProducts(params = {}) {
   const query = new URLSearchParams();
   if (params.category) query.set("category", params.category);
   if (params.search) query.set("search", params.search);
+  if (params.featured) query.set("featured", "true");
+  if (params.brand) query.set("brand", params.brand);
+  if (params.minPrice != null && params.minPrice !== "") query.set("min_price", String(params.minPrice));
+  if (params.maxPrice != null && params.maxPrice !== "") query.set("max_price", String(params.maxPrice));
+  if (params.sort) query.set("sort", params.sort);
+  if (params.limit) query.set("limit", String(params.limit));
   const qs = query.toString();
   const data = await request("/products" + (qs ? "?" + qs : ""));
   return Array.isArray(data) ? data.map(mapProduct) : [];
@@ -128,6 +134,17 @@ export async function fetchProduct(id) {
 export async function fetchCategories() {
   const data = await request("/categories");
   return Array.isArray(data) ? data : [];
+}
+
+/* ------------------------------ reviews ------------------------------ */
+
+export async function fetchProductReviews(productId) {
+  const data = await request("/products/" + productId + "/reviews");
+  return data || { count: 0, results: [] };
+}
+
+export async function addProductReview(productId, payload) {
+  return request("/products/" + productId + "/reviews", { method: "POST", body: payload });
 }
 
 /* ------------------------------ articles ------------------------------ */
@@ -150,6 +167,11 @@ function mapArticle(a) {
 export async function fetchArticles() {
   const data = await request("/articles");
   return Array.isArray(data) ? data.map(mapArticle) : [];
+}
+
+export async function fetchArticle(id) {
+  const data = await request("/articles/" + id);
+  return data ? mapArticle(data) : null;
 }
 
 /* ------------------------------ auth (OTP + JWT) ------------------------------ */
@@ -286,6 +308,20 @@ export async function removeCartItem(productId) {
 
 export async function checkoutCart(payload) {
   return request("/cart/checkout", { method: "POST", guest: true, body: payload });
+}
+
+/* ------------------------------ messages (پیامک از ادمین) ------------------------------ */
+
+export async function getMyMessages() {
+  const phone = getPhone();
+  return request("/messages" + (phone ? `?phone=${encodeURIComponent(phone)}` : ""), {
+    auth: true,
+    guest: true,
+  });
+}
+
+export async function markMessageRead(id) {
+  return request("/messages/" + id + "/read", { method: "PATCH", auth: true, guest: true, body: { read: true } });
 }
 
 /* ------------------------------ local cart fallback ------------------------------ */

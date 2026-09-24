@@ -1,8 +1,11 @@
-
 import React, { useRef, useState, useEffect } from 'react';
 import { Clock, Sparkles, ChevronLeft, ArrowLeft } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import "./SwiperEmperisive.css";
 import { fetchProducts } from '../api';
+import RatingStars from '../RatingStars';
+import SafeImg from '../SafeImg';
+import { FavButton, AddToCartBtn } from '../ProductActions';
 
 const toPersianDigits = (num) => {
   const farsiDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
@@ -13,33 +16,50 @@ const formatPrice = (price) => {
   return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 };
 
-const ProductCard = ({ product }) => (
-  <article className="product-card">
-    <div className="product-image-wrapper">
-      <img
-        src={product.image}
-        alt={product.title}
-        draggable="false"
-        loading="lazy"
-        width="200"
-        height="200"
-      />
-    </div>
-    <div className="product-info-top">
-      <h3 className="product-title" title={product.title}>{product.title}</h3>
-      <span className="product-subtitle" title={product.subtitle}>{product.subtitle}</span>
-    </div>
-    <div className="product-price-section">
-      <div className="price-details">
-        <span className="old-price">{toPersianDigits(formatPrice(product.oldPrice))}</span>
-        <div className="new-price">
-          <span>{toPersianDigits(formatPrice(product.price))}</span>
-          <span className="currency">تومان</span>
-        </div>
+const ProductCard = ({ product, onDrag }) => (
+  <div className="product-card-shell">
+    <Link
+      to={`/Product/${product.id}`}
+      className="product-card"
+      draggable="false"
+      onClickCapture={(e) => {
+        if (onDrag && onDrag()) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      }}
+    >
+      <div className="product-image-wrapper">
+        <SafeImg
+          src={product.image}
+          alt={product.title}
+          draggable="false"
+          loading="lazy"
+          width="200"
+          height="200"
+        />
       </div>
-      <div className="discount-badge">{toPersianDigits(product.discount)}٪</div>
-    </div>
-  </article>
+      <div className="product-info-top">
+        <h3 className="product-title" title={product.title}>{product.title}</h3>
+        <span className="product-subtitle" title={product.subtitle}>{product.subtitle}</span>
+      </div>
+      <div className="product-rating-row">
+        <RatingStars rating={product.rating} size={13} />
+      </div>
+      <div className="product-price-section">
+        <div className="price-details">
+          <span className="old-price">{toPersianDigits(formatPrice(product.oldPrice))}</span>
+          <div className="new-price">
+            <span>{toPersianDigits(formatPrice(product.price))}</span>
+            <span className="currency">تومان</span>
+          </div>
+        </div>
+        <div className="discount-badge">{toPersianDigits(product.discount)}٪</div>
+      </div>
+    </Link>
+    <FavButton id={product.id} />
+    <AddToCartBtn product={product} />
+  </div>
 );
 
 const AmazingOfferCard = () => {
@@ -84,28 +104,39 @@ const AmazingOfferCard = () => {
           </div>
         </div>
       </div>
-      <a href="#" className="view-all-link">مشاهده همه <ChevronLeft size={16} /></a>
+      <Link to="/Catagoryes" className="view-all-link">مشاهده همه <ChevronLeft size={16} /></Link>
     </div>
   );
 };
 
 export default function EmperiseveSwiper() {
   const swiperRef = useRef(null);
+  const dragMoved = useRef(false);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
 
   const handlePointerDown = (e) => {
+    if (e.button !== 0 && e.pointerType === 'mouse') return;
+    dragMoved.current = false;
     setIsDragging(true);
     setStartX(e.pageX - swiperRef.current.offsetLeft);
     setScrollLeft(swiperRef.current.scrollLeft);
   };
-  const handlePointerLeave = () => setIsDragging(false);
-  const handlePointerUp = () => setIsDragging(false);
+  const handlePointerLeave = () => {
+    setIsDragging(false);
+    dragMoved.current = false;
+  };
+  const handlePointerUp = () => {
+    setIsDragging(false);
+  };
   const handlePointerMove = (e) => {
     if (!isDragging) return;
-    e.preventDefault();
     const x = e.pageX - swiperRef.current.offsetLeft;
+    // حرکت‌های خیلی کوچک (کلیک معمولی) درگ محسوب نمی‌شوند
+    if (Math.abs(x - startX) < 10) return;
+    dragMoved.current = true;
+    e.preventDefault();
     const walk = (x - startX) * 1.5;
     if (swiperRef.current) swiperRef.current.scrollLeft = scrollLeft - walk;
   };
@@ -118,7 +149,7 @@ export default function EmperiseveSwiper() {
 
   useEffect(() => {
     let mounted = true;
-    fetchProducts()
+    fetchProducts({ featured: true, limit: 12 })
       .then((data) => { if (mounted) setProducts(data); })
       .catch(() => { if (mounted) setProducts([]); });
     return () => { mounted = false; };
@@ -128,11 +159,10 @@ export default function EmperiseveSwiper() {
     <section className="swiper-container" aria-label="پیشنهادهای شگفت‌انگیز">
       <div className="swiper-wrapper-box">
         <button className="nav-btn prev" onClick={() => scrollByAmount(300)} aria-label="اسلاید قبلی">
-        
           <ChevronLeft size={20} style={{ transform: 'rotate(180deg)' }} />
         </button>
         <button className="nav-btn next" onClick={() => scrollByAmount(-300)} aria-label="اسلاید بعدی">
-            <ChevronLeft size={20} />
+          <ChevronLeft size={20} />
         </button>
 
         <div
@@ -145,12 +175,12 @@ export default function EmperiseveSwiper() {
         >
           <AmazingOfferCard />
           {(products || []).filter((product) => product.Empressive).map((product) => (
-            <ProductCard key={product.id} product={product} />
+            <ProductCard key={product.id} product={product} onDrag={() => dragMoved.current} />
           ))}
-          <a href="#" className="end-card" aria-label="مشاهده همه محصولات">
+          <Link to="/Catagoryes" className="end-card" aria-label="مشاهده همه محصولات">
             <div className="end-card-icon-wrapper"><ArrowLeft size={24} /></div>
             <span className="end-card-text">مشاهده همه</span>
-          </a>
+          </Link>
         </div>
       </div>
     </section>

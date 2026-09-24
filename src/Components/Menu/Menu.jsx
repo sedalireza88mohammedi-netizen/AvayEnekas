@@ -1,10 +1,13 @@
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
 import "./Menu.css";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBars, faBurst, faCartShopping, faFire, faHeart, faHome, faSearch, faSun, faUser, faUserTie } from '@fortawesome/free-solid-svg-icons';
+import { faBars, faBell, faBurst, faCartShopping, faFire, faHeart, faHome, faSearch, faSun, faUser, faUserTie } from '@fortawesome/free-solid-svg-icons';
 import { isLoggedIn as checkLogin } from '../../auth';
 import { useAuthSync } from '../../useSeo';
+import { fetchProducts } from '../../api';
+import { useCartStore } from '../../cartStore';
+import SafeImg from '../../SafeImg';
 
 const CATEGORY_DATA = {
   Band: {
@@ -53,34 +56,170 @@ const CATEGORY_DATA = {
   },
 };
 
+const HOT_KEYWORDS = ["باند", "میکروفون", "هدفون", "آمپلی فایر", "میکسر", "کابل XLR"];
+
+const toPersianDigits = (num) =>
+  num.toString().replace(/\d/g, (x) => '۰۱۲۳۴۵۶۷۸۹'[x]);
+
+const formatPrice = (price) =>
+  toPersianDigits(price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','));
+
 function Menu({ isCart }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState("Band");
-  const [isScrolledDown, setIsScrolledDown] = useState(false);
+  const [isScrolledDown, setIsScrolledDown] = useState(false); // برای سایه‌ی هدر
+  const [navHidden, setNavHidden] = useState(false); // برای باز/بسته شدن ردیف دسته‌بندی‌ها
   const [query, setQuery] = useState("");
   const [loggedIn, setLoggedIn] = useState(checkLogin());
+  const { cartCount, refreshCart, unreadCount, refreshMessages } = useCartStore();
+
+  // --- جستجوی زنده (سبک دیجی‌کالا) ---
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [results, setResults] = useState([]);
+  const [activeIndex, setActiveIndex] = useState(-1);
+  const searchWrapRef = useRef(null);
 
   useAuthSync(useCallback(() => setLoggedIn(checkLogin()), []));
 
-  const winScroll = useCallback(() => {
-    const top = window.pageYOffset || document.documentElement.scrollTop;
-    setIsScrolledDown(top > 80);
+  // ردیف دسته‌بندی‌ها موقع اسکرول به پایین بسته و موقع اسکرول به بالا باز می‌شود.
+  // با یک آستانه (buffer) کار می‌کند تا نوسانات ریز اسکرول (که باعث گیرکردن/پرش
+  // منو در بعضی اندازه‌های صفحه می‌شد) دیگر باعث تعویض مداوم کلاس نشوند.
+  const lastScrollY = useRef(0);
+  const ticking = useRef(false);
+  const SCROLL_BUFFER = 6;
+  const SHOW_ABOVE = 90; // زیر این مقدار همیشه باز است
+
+  useEffect(() => {
+    lastScrollY.current = window.pageYOffset || document.documentElement.scrollTop;
+
+    const handleScroll = () => {
+      if (ticking.current) return;
+      ticking.current = true;
+
+      requestAnimationFrame(() => {
+        const currentY = Math.max(0, window.pageYOffset || document.documentElement.scrollTop);
+        const delta = currentY - lastScrollY.current;
+
+        setIsScrolledDown(currentY > 10);
+
+        if (currentY <= SHOW_ABOVE) {
+          setNavHidden(false);
+        } else if (delta > SCROLL_BUFFER) {
+          setNavHidden(true);
+        } else if (delta < -SCROLL_BUFFER) {
+          setNavHidden(false);
+        }
+
+        lastScrollY.current = currentY;
+        ticking.current = false;
+      });
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
+    };
   }, []);
 
-  // اسکرول فقط در کامپوننت منو گوش داده می‌شود
+  // بستن دراپ‌داون با کلیک بیرون از باکس جستجو
   useEffect(() => {
-    window.addEventListener('scroll', winScroll, { passive: true });
-    return () => window.removeEventListener('scroll', winScroll);
-  }, [winScroll]);
+    const onDocClick = (e) => {
+      if (searchWrapRef.current && !searchWrapRef.current.contains(e.target)) {
+        setSearchOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', onDocClick);
+    return () => document.removeEventListener('mousedown', onDocClick);
+  }, []);
+
+  useEffect(() => {
+    setSearchOpen(false);
+    setActiveIndex(-1);
+  }, [location.pathname, location.search]);
+
+  useEffect(() => {
+    refreshCart();
+    refreshMessages();
+  }, [location.pathname, refreshCart, refreshMessages]);
+
+  // اگر ردیف دسته‌بندی‌ها موقع اسکرول بسته شد، مگامنوی باز را هم ببند
+  useEffect(() => {
+    if (navHidden) setIsOpen(false);
+  }, [navHidden]);
+
+  // جستجوی زنده با تاخیر (Debounce)
+  useEffect(() => {
+    const value = query.trim();
+    if (value.length < 2) {
+      setResults([]);
+      setActiveIndex(-1);
+      return;
+    }
+    const timer = setTimeout(() => {
+      fetchProducts({ search: value })
+        .then((data) => {
+          setResults((data || []).slice(0, 6));
+          setActiveIndex(-1);
+        })
+        .catch(() => setResults([]));
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [query]);
+
+  const closeSearch = () => {
+    setSearchOpen(false);
+    setActiveIndex(-1);
+  };
 
   const handleSearch = (e) => {
     e.preventDefault();
     const value = query.trim();
     navigate(value ? `/Catagoryes?search=${encodeURIComponent(value)}` : "/Catagoryes");
+    closeSearch();
+  };
+
+  const handleKeyDown = (e) => {
+    if (!searchOpen && (e.key === 'ArrowDown' || e.key === 'Enter')) {
+      if (query.trim().length >= 2) setSearchOpen(true);
+      return;
+    }
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setSearchOpen(true);
+      setActiveIndex((i) => Math.min(results.length - 1, i + 1));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setActiveIndex((i) => Math.max(-1, i - 1));
+    } else if (e.key === 'Enter') {
+      if (activeIndex >= 0 && results[activeIndex]) {
+        e.preventDefault();
+        navigate(`/Product/${results[activeIndex].id}`);
+        closeSearch();
+      } else {
+        handleSearch(e);
+      }
+    } else if (e.key === 'Escape') {
+      closeSearch();
+    }
+  };
+
+  const goToProduct = (id) => {
+    navigate(`/Product/${id}`);
+    closeSearch();
   };
 
   const linkQuery = (value) => `/Catagoryes?search=${encodeURIComponent(value)}`;
+
+  const openSelected = (value) => {
+    navigate(linkQuery(value));
+    closeSearch();
+  };
+
+  const hasQuery = query.trim().length >= 2;
 
   return (
     <>
@@ -88,20 +227,75 @@ function Menu({ isCart }) {
         <p>فروشگاه صوتی تصویری <span className="AvayHeader">آوای</span> انعکاس</p>
       </header>
 
-      <div className={`HeaderWrapper ${isScrolledDown ? 'scrolled' : ''} ${isCart ? "cart-page-margin" : ""}`}>
+      <div className={`HeaderWrapper ${isScrolledDown ? 'scrolled' : ''} ${navHidden ? 'nav-hidden' : ''} ${isCart ? "cart-page-margin" : ""}`}>
         <div className="MenuTop">
           <Link to="/" className="logo">آوای <span className="logo2">انعکاس</span></Link>
 
-          <form className="search-container" onSubmit={handleSearch} role="search">
+          <form className="search-container" onSubmit={handleSearch} role="search" ref={searchWrapRef}>
             <FontAwesomeIcon icon={faSearch} className="searchIcon" />
             <input
               className="search"
               type="search"
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => { setQuery(e.target.value); setSearchOpen(true); }}
+              onFocus={() => setSearchOpen(true)}
+              onKeyDown={handleKeyDown}
               placeholder='  جستجو در آوای انعکاس'
               aria-label="جستجو در سایت"
+              autoComplete="off"
             />
+
+            {searchOpen && (
+              <div className="search-pop">
+                {hasQuery ? (
+                  <>
+                    {results.length > 0 ? (
+                      <>
+                        <div className="search-pop-head">پیشنهادها</div>
+                        <ul className="search-pop-list">
+                          {results.map((p, i) => (
+                            <li key={p.id}>
+                              <div
+                                className={`search-pop-item ${i === activeIndex ? 'active' : ''}`}
+                                onClick={() => goToProduct(p.id)}
+                                onMouseEnter={() => setActiveIndex(i)}
+                                role="button"
+                                tabIndex={-1}
+                              >
+                                <SafeImg className="search-pop-thumb" src={p.image} alt={p.title} width="48" height="48" />
+                                <div className="search-pop-info">
+                                  <span className="search-pop-title">{p.title}</span>
+                                  <span className="search-pop-price">{formatPrice(p.price)} <span>تومان</span></span>
+                                </div>
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                        <div className="search-pop-footer">
+                          <button type="button" className="search-pop-viewall" onClick={handleSearch}>
+                            <span>مشاهده همه نتایج</span>
+                            <span className="search-pop-chevron">‹</span>
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="search-pop-empty">محصولی با این عبارت پیدا نشد</div>
+                    )}
+                  </>
+                ) : (
+                  <div className="search-pop-hot">
+                    <div className="search-pop-head">پرطرفدارترین‌ها</div>
+                    <div className="search-pop-chips">
+                      {HOT_KEYWORDS.map((k) => (
+                        <span key={k} className="search-pop-chip" onClick={() => openSelected(k)} role="button" tabIndex={-1}>
+                          {k}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </form>
 
           <div className="LeftHed">
@@ -121,9 +315,18 @@ function Menu({ isCart }) {
             )}
 
             <div className="BorderLine"></div>
+
+             <button className="massege-btn" onClick={() => navigate("/Messages")} aria-label=" پیام ها">
+              <FontAwesomeIcon icon={faBell} />
+              {unreadCount > 0 && <span className="bell-unread-badge">{toPersianDigits(unreadCount)}</span>}
+            </button>
+
             <button className="cart-btn" onClick={() => navigate("/Cart")} aria-label="سبد خرید">
               <FontAwesomeIcon icon={faCartShopping} />
+              {cartCount > 0 && <span className="cart-count-badge">{toPersianDigits(cartCount)}</span>}
             </button>
+
+            
           </div>
         </div>
 

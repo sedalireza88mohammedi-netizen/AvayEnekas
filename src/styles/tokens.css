@@ -1,0 +1,48 @@
+/*
+  توکن‌های طراحی سایت آوای انعکاس
+  منبع رنگ‌ها: صفحه اصلی (Home.css) و منوی اصلی (Menu.css)
+  هدف: یکی‌سازی رنگ‌بندی کل سایت به جای رنگ‌های پراکنده در هر کامپوننت.
+  در فایل‌های CSS دیگر، به‌جای هگزهای ثابت از این متغیرها استفاده کنید.
+*/
+
+:root {
+  /* رنگ اصلی برند (برگرفته از صفحه اصلی) */
+  --brand: #ef4056;
+  --brand-dark: #d51f37;
+  --brand-light: #fdeef0;
+
+  /* متن‌ها */
+  --text-strong: #222831;   /* عنوان‌های اصلی */
+  --text-body: #3f4064;     /* متن معمولی تیره */
+  --text-muted: #62666d;    /* متن کم‌رنگ‌تر */
+  --text-faint: #81858b;    /* متن خیلی کم‌رنگ / لینک فرعی */
+
+  /* پس‌زمینه و سطوح */
+  --surface: #ffffff;
+  --surface-soft: #f9fafb;
+  --surface-header: #171818;
+
+  /* خطوط و جداکننده‌ها */
+  --border: #e5e7eb;
+  --border-soft: #f0f0f1;
+  --border-faint: #f3f4f6;
+
+  /* وضعیت‌ها */
+  --success: #22c55e;
+  --danger: var(--brand);
+
+  /* شعاع و سایه مشترک */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.14);
+
+  /* فونت */
+  --font-regular: 'Yekan', 'Vazirmatn', system-ui, -apple-system, sans-serif;
+  --font-bold: 'YekanBold', 'Vazirmatn', system-ui, -apple-system, sans-serif;
+
+  /* ریسپانسیو: نقطه‌شکست مشترک برای موبایل/تبلت */
+  --bp-mobile: 768px;
+}
