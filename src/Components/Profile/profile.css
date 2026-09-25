@@ -1,4 +1,3 @@
-
 * {
     box-sizing: border-box;
 }
@@ -175,7 +174,7 @@ body {
     border-radius: 10px;
 }
 
-.AddAddresContaner{
+.AddAddresContaner {
     width: 250px;
     height: 60px;
     background-color: #efefef;
@@ -190,18 +189,18 @@ body {
     transition: 0.3s ease;
 }
 
-.AddAddresContaner:hover{
-     background-color: #e4e4e4;
-     color: #212121;
-     transform: translateY(-8px);
+.AddAddresContaner:hover {
+    background-color: #e4e4e4;
+    color: #212121;
+    transform: translateY(-8px);
 }
 
-.AddAddresContaner h3{
+.AddAddresContaner h3 {
     text-align: center;
 }
 
 
-.ProfileContainer{
+.ProfileContainer {
     width: 98%;
     min-height: 500px;
     display: flex;
@@ -216,7 +215,7 @@ body {
     border-radius: 8px;
 }
 
-.FildContainer{
+.FildContainer {
     display: flex;
     flex-direction: column;
     width: 48%;
@@ -230,7 +229,7 @@ body {
 }
 
 
-.ProfileContainer input { 
+.ProfileContainer input {
     border: 1px solid #ddd;
     height: 48px;
     padding: 0 15px;
@@ -310,17 +309,21 @@ body {
     background-color: #212121;
     color: #ffffff;
 }
+
 .SubmitBtnContainer {
     width: 100%;
     display: flex;
-    justify-content: flex-end; /* دکمه در سمت چپ قرار گیرد یا حذف کنید تا سمت راست باشد */
+    justify-content: flex-end;
+    /* دکمه در سمت چپ قرار گیرد یا حذف کنید تا سمت راست باشد */
     margin-top: 15px;
 }
 
 .SubmitProfileBtn {
-    width: 100%; /* اگر می‌خواهید دکمه تمام‌عرض باشد */
+    width: 100%;
+    /* اگر می‌خواهید دکمه تمام‌عرض باشد */
     height: 48px;
-    background-color: #212121; /* رنگ هماهنگ با تم سایت */
+    background-color: #212121;
+    /* رنگ هماهنگ با تم سایت */
     color: #ffffff;
     border: none;
     border-radius: 8px;
@@ -332,21 +335,24 @@ body {
 }
 
 .SubmitProfileBtn:hover {
-    background-color: #000000; /* رنگ کمی تیره‌تر هنگام هاور */
+    background-color: #000000;
+    /* رنگ کمی تیره‌تر هنگام هاور */
     transform: translateY(-2px);
 }
 
 
-.OutUserTitle{
-  padding: 30px;
-  color: #212121;
+.OutUserTitle {
+    padding: 30px;
+    color: #212121;
 }
-.OutUseDeatelse{
-  padding-bottom: 20px;
-  padding-right: 30px;
-  color: #3e3e3e;
+
+.OutUseDeatelse {
+    padding-bottom: 20px;
+    padding-right: 30px;
+    color: #3e3e3e;
 }
-.OutUserBtn{
+
+.OutUserBtn {
     display: block;
     width: 80%;
     height: 50px;
@@ -359,11 +365,13 @@ body {
     cursor: pointer;
     transition: 0.3s all ease;
 }
-.OutUserBtn:hover{
-     background-color: #000000;
-     transform: translateY(-3px);
+
+.OutUserBtn:hover {
+    background-color: #000000;
+    transform: translateY(-3px);
 }
-.AdmiPannelPro{
+
+.AdmiPannelPro {
     display: block;
     width: 40%;
     height: 50px;
@@ -373,10 +381,12 @@ body {
     font-size: 20px;
     color: #3b3b3b;
 }
-.AdmiPannelPro:hover{
+
+.AdmiPannelPro:hover {
     color: #000000;
-     border: 1px solid #000000;
+    border: 1px solid #000000;
 }
+
 @media (max-width: 992px) {
     .ContaimerAllPro {
         gap: 20px;
@@ -466,65 +476,543 @@ body {
         width: 100%;
     }
 }
+
 /* ???? ????? */
-.OrdersList { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
+.OrdersList {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 12px;
+}
+
 .OrderCard {
-  display: flex; flex-direction: column; gap: 10px;
-  background: #fff; border: 1px solid #e5e7eb; border-radius: 12px;
-  padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 14px 16px;
 }
-.OrderCardHead { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
-.OrderCardHead strong { color: #111827; font-size: 0.9rem; }
-.OrderCardDate { color: #9ca3af; font-size: 0.78rem; }
-.OrderCardRows { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; color: #4b5563; font-size: 0.85rem; }
+
+.OrderCardHead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.OrderCardHead strong {
+    color: #111827;
+    font-size: 0.9rem;
+}
+
+.OrderCardDate {
+    color: #9ca3af;
+    font-size: 0.78rem;
+}
+
+.OrderCardRows {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    color: #4b5563;
+    font-size: 0.85rem;
+}
+
 .OrderBadge {
-  background: #d1fae5; color: #047857; border-radius: 20px; padding: 3px 12px; font-size: 0.75rem; font-weight: 600;
+    background: #d1fae5;
+    color: #047857;
+    border-radius: 20px;
+    padding: 3px 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
 }
-.OrderBadgeBad { background: #fee2e2; color: var(--brand-dark); border-radius: 20px; padding: 3px 12px; font-size: 0.75rem; font-weight: 600; }
-.OrderCardPayment { color: #6b7280; font-size: 0.8rem; }
+
+.OrderBadgeBad {
+    background: #fee2e2;
+    color: var(--brand-dark);
+    border-radius: 20px;
+    padding: 3px 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.OrderCardPayment {
+    color: #6b7280;
+    font-size: 0.8rem;
+}
+
+.OrderCardDetails {
+    align-self: flex-start;
+    margin-top: 2px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #0f172a;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 7px 14px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.OrderCardDetails:hover {
+    background: var(--brand);
+}
+
+/* فاکتور سفارش */
+.InvoiceView {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.InvoiceTop {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.InvoiceBack {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    color: #6b7280;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 7px 14px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.InvoiceBack:hover {
+    border-color: var(--brand);
+    color: var(--brand);
+}
+
+.InvoiceBlock {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.InvoiceBlockTitle {
+    margin: 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 0.85rem;
+    color: var(--brand);
+    font-weight: 700;
+}
+
+.InvoiceRow {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.InvoiceRow span {
+    color: #9ca3af;
+    font-size: 0.8rem;
+}
+
+.InvoiceRow strong {
+    color: #111827;
+    font-size: 0.82rem;
+    text-align: left;
+}
+
+.InvoiceStatus {
+    color: #047857 !important;
+}
+
+.InvoiceItems {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.InvoiceItem {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.InvoiceItemImg {
+    width: 52px;
+    height: 52px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 1px solid #f1f5f9;
+    flex-shrink: 0;
+    background: #fff;
+}
+
+.InvoiceItemImgEmpty {
+    background: #f8fafc;
+}
+
+.InvoiceItemInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+    min-width: 0;
+}
+
+.InvoiceItemName {
+    font-size: 0.82rem;
+    color: #111827;
+    text-decoration: none;
+    font-weight: 600;
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.InvoiceItemName:hover {
+    color: var(--brand);
+}
+
+.InvoiceItemMeta {
+    color: #9ca3af;
+    font-size: 0.75rem;
+}
+
+.InvoiceItemTotal {
+    font-size: 0.8rem;
+    color: #111827;
+    white-space: nowrap;
+}
+
+.InvoiceTotalRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px dashed #e5e7eb;
+    padding-top: 12px;
+    margin-top: 4px;
+}
+
+.InvoiceTotalRow span {
+    color: #4b5563;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.InvoiceTotalRow strong {
+    color: var(--brand);
+    font-size: 1rem;
+}
 
 /* ????????????? */
-.InterestedList { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
+.InterestedList {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 12px;
+}
+
 .InterestedCard {
-  display: flex; align-items: center; gap: 14px;
-  background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 12px 14px;
 }
+
 .InterestedCardImg {
-  width: 80px; height: 80px; overflow: hidden; border-radius: 8px; flex-shrink: 0;
-  display: inline-flex; align-items: center; justify-content: center; background: #fff;
+    width: 80px;
+    height: 80px;
+    overflow: hidden;
+    border-radius: 8px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
 }
-.InterestedCardInfo { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
-.InterestedCardTitle { color: #111827; font-size: 0.88rem; text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 360px; }
-.InterestedCardTitle:hover { color: #0d9488; }
-.InterestedCardPrice { color: #0d9488; font-size: 0.85rem; font-weight: 600; }
+
+.InterestedCardInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.InterestedCardTitle {
+    color: #111827;
+    font-size: 0.88rem;
+    text-decoration: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 360px;
+}
+
+.InterestedCardTitle:hover {
+    color: #0d9488;
+}
+
+.InterestedCardPrice {
+    color: #0d9488;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
 .InterestedCardRemove {
-  margin-inline-start: auto; background: none; border: none; cursor: pointer; color: var(--brand-dark); font-size: 1rem;
+    margin-inline-start: auto;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--brand-dark);
+    font-size: 1rem;
 }
-.InterestedCardRemove:hover { color: var(--brand-dark); }
+
+.InterestedCardRemove:hover {
+    color: var(--brand-dark);
+}
 
 /* ??????? */
-.AddressList { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
+.AddressList {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 12px;
+}
+
 .AddressCard {
-  display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
-  background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px 16px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 14px 16px;
 }
-.AddressCardDefault { border-color: #0d9488; box-shadow: 0 0 0 1px #0d9488; }
-.AddressCardInfo { display: flex; flex-direction: column; gap: 6px; }
-.AddressCardInfo strong { color: #111827; font-size: 0.9rem; }
-.AddressCardInfo p { color: #4b5563; font-size: 0.85rem; margin: 0; }
-.AddressPostal { color: #9ca3af; font-size: 0.78rem; direction: ltr; }
-.AddressBadge { background: #ccfbf1; color: #0f766e; border-radius: 20px; padding: 2px 10px; font-size: 0.72rem; font-weight: 600; width: fit-content; }
-.AddressCardActions { display: flex; align-items: center; gap: 8px; }
+
+.AddressCardDefault {
+    border-color: #0d9488;
+    box-shadow: 0 0 0 1px #0d9488;
+}
+
+.AddressCardInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.AddressCardInfo strong {
+    color: #111827;
+    font-size: 0.9rem;
+}
+
+.AddressCardInfo p {
+    color: #4b5563;
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+.AddressPostal {
+    color: #9ca3af;
+    font-size: 0.78rem;
+    direction: ltr;
+}
+
+.AddressBadge {
+    background: #ccfbf1;
+    color: #0f766e;
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    width: fit-content;
+}
+
+.AddressCardActions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
 .AddressCardActions button {
-  font-family: inherit; font-size: 0.75rem; color: #0d9488; background: none;
-  border: 1px solid #99f6e4; border-radius: 7px; padding: 5px 12px; cursor: pointer;
+    font-family: inherit;
+    font-size: 0.75rem;
+    color: #0d9488;
+    background: none;
+    border: 1px solid #99f6e4;
+    border-radius: 7px;
+    padding: 5px 12px;
+    cursor: pointer;
 }
-.AddressCardDelete { color: var(--brand-dark) !important; border-color: #fca5a5 !important; }
-.AddressForm { display: flex; flex-direction: column; gap: 10px; background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; margin-top: 14px; }
+
+.AddressCardDelete {
+    color: var(--brand-dark) !important;
+    border-color: #fca5a5 !important;
+}
+
+.AddressForm {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 16px;
+    margin-top: 14px;
+}
+
 .AddressForm input {
-  font-family: inherit; font-size: 0.88rem; color: #111827;
-  border: 1px solid #d1d5db; border-radius: 8px; padding: 9px 12px; outline: none;
+    font-family: inherit;
+    font-size: 0.88rem;
+    color: #111827;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    padding: 9px 12px;
+    outline: none;
 }
-.AddressForm input:focus { border-color: #0d9488; }
-.AddressFormBtns { display: flex; align-items: center; gap: 10px; }
-.AddressFormBtns .OutUserBtn { padding: 8px 18px; }
+
+.AddressForm input:focus {
+    border-color: #0d9488;
+}
+
+.AddressFormBtns {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.AddressFormBtns .OutUserBtn {
+    padding: 8px 18px;
+}
+
+/* ???? */
+.ProfileMsgHead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.ProfileMsgHead .TitleOptions {
+    padding: 20px 20px 20px 0;
+    flex: 1;
+}
+
+.ProfileMsgMarkAll {
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    color: #000000;
+    background: #fff;
+    border: 1px solid #000000;
+    border-radius: 10px;
+    padding: 7px 14px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-inline-end: 20px;
+    margin-top: 10px;
+    white-space: nowrap;
+}
+
+.ProfileMsgMarkAll:hover {
+    background: #fdecee;
+}
+
+.MessagesList {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.MessageCard {
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    text-align: right;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 14px 16px;
+    cursor: pointer;
+    font-family: inherit;
+    color: inherit;
+    transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.MessageCard:hover {
+    border-color: #c7c9ce;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+}
+
+.MessageCardDot {
+    width: 10px;
+    height: 10px;
+    min-width: 10px;
+    border-radius: 50%;
+    background: #000000;
+    margin-top: 7px;
+}
+
+.MessageCard.is-read .MessageCardDot {
+    background: #c3c6cc;
+}
+
+.MessageCardContent {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.MessageCardText {
+    font-size: 14px;
+    line-height: 1.9;
+    color: #232933;
+    white-space: pre-line;
+}
+
+.MessageCard.is-read .MessageCardText {
+    color: #62666d;
+}
+
+.MessageCardDate {
+    font-size: 12px;
+    color: #9a9fa8;
+}
+
+@media (max-width: 768px) {
+    .ProfileMsgHead {
+        align-items: flex-start;
+    }
+
+    .ProfileMsgMarkAll {
+        margin-inline-end: 0;
+    }
+}

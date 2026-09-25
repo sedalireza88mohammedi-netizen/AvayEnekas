@@ -11,7 +11,7 @@ const Profile = lazy(() => import('./Components/Profile/Profile'));
 const AdminPanel = lazy(() => import('./Components/AdminPannel/AdminPannel'));
 const ProductDeatelse = lazy(() => import('./Components/ProductDeatelse/ProductDeatelse'));
 const ArticleDeatelse = lazy(() => import('./Components/Articles/ArticleDeatelse'));
-const MessagesPage = lazy(() => import('./Components/Messages/Messages'));
+
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -98,14 +98,6 @@ function App() {
           element={
             <Suspense fallback={<div className="page-loader" />}>
               <ArticleDeatelse />
-            </Suspense>
-          }
-        />
-        <Route
-          path="/Messages"
-          element={
-            <Suspense fallback={<div className="page-loader" />}>
-              <MessagesPage />
             </Suspense>
           }
         />

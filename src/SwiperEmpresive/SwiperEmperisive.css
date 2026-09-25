@@ -53,23 +53,13 @@
     width: 100%;
     scroll-behavior: smooth;
     cursor: grab;
+    touch-action: pan-y;
 }
 
 .custom-swiper::-webkit-scrollbar {
     display: none;
 }
 
-.custom-swiper.dragging {
-    scroll-snap-type: none;
-    scroll-behavior: auto;
-    cursor: grabbing;
-}
-
-.custom-swiper.dragging .product-card,
-.custom-swiper.dragging .amazing-card,
-.custom-swiper.dragging .end-card {
-    pointer-events: none;
-}
 
 .amazing-card {
     background-color: #171717;

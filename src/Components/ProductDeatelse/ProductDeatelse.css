@@ -51,6 +51,8 @@
 }
 
 .pd-main-image {
+  width: 85%;
+  height: 600px;
   position: relative;
   border: 1px solid #eef0f3;
   border-radius: 12px;
@@ -60,6 +62,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+ 
 }
 
 .pd-main-image img {
@@ -72,10 +75,10 @@
   position: absolute;
   top: 12px;
   right: 12px;
-  background: var(--brand);
+  background: #2b2b2b;
   color: #fff;
   font-size: 0.8rem;
-  padding: 4px 10px;
+  padding: 8px 10px;
   border-radius: 8px;
   z-index: 1;
 }
@@ -99,7 +102,7 @@
 }
 
 .pd-thumb.active {
-  border-color: var(--brand);
+  border-color: #000;
 }
 
 .pd-thumb img {
@@ -154,7 +157,7 @@
 }
 
 .pd-price {
-  color: var(--brand);
+  color: #000000;
   font-size: 1.5rem;
   font-weight: bold;
 }
@@ -208,7 +211,7 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: var(--brand);
+  background: #2b2b2b;
   color: #fff;
   border: none;
   border-radius: 10px;
@@ -222,7 +225,7 @@
 }
 
 .pd-add-btn:hover:not(:disabled) {
-  background: var(--brand-dark);
+  background: #000000;
 }
 
 .pd-add-btn:disabled {
@@ -235,7 +238,9 @@
 }
 
 @keyframes pd-spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .pd-added {
@@ -297,16 +302,23 @@
 }
 
 .pd-related-grid {
-  display: grid;
+  width: 100% ;
+  height: 300px;
+  display: flex;
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   gap: 12px;
+
 }
 
 .pd-related-card {
+  
+  width: 100%;
+  height: 270px;
   background: #fff;
   border: 1px solid #eef0f3;
   border-radius: 12px;
   padding: 10px;
+
   text-decoration: none;
   color: inherit;
   display: flex;
@@ -340,7 +352,7 @@
 }
 
 .pd-related-price {
-  color: var(--brand);
+  color:#000;
   font-weight: bold;
   font-size: 0.8rem;
 }
@@ -408,6 +420,7 @@
   text-decoration: none;
   font-weight: 600;
 }
+
 /* ????? ??????? */
 .pd-reviews {
   margin-top: 32px;
@@ -550,7 +563,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: #0d9488;
+  background: #2b2b2b;
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -560,75 +573,79 @@
   cursor: pointer;
 }
 
+.pd-review-submit:hover {
+  background: #000;
+}
+
 .pd-review-submit:disabled {
   opacity: 0.6;
   cursor: default;
 }
 
 .pd-title-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    flex-wrap: wrap;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .pd-stock-chip {
-    background: #d1fae5;
-    color: #047857;
-    font-size: 0.75rem;
-    font-weight: 600;
-    padding: 4px 12px;
-    border-radius: 20px;
-    white-space: nowrap;
+  background: #d1fae5;
+  color: #047857;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 20px;
+  white-space: nowrap;
 }
 
 .pd-fav-row {
-    margin-top: 10px;
+  margin-top: 10px;
 }
 
 .pd-fav-row .fav-btn {
-    position: static;
-    width: 38px;
-    height: 38px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #fff;
-    border: 1px solid #e5e7eb;
+  position: static;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border: 1px solid #e5e7eb;
 }
 
 .pd-fav-row .fav-btn:hover {
-    transform: scale(1.06);
+  transform: scale(1.06);
 }
 
 .pd-video {
-    max-width: 1100px;
-    margin: 28px auto 0;
-    padding: 0 16px;
+  max-width: 1100px;
+  margin: 28px auto 0;
+  padding: 0 16px;
 }
 
 .pd-video-title {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: #1e293b;
-    margin-bottom: 14px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 14px;
 }
 
 .pd-video-frame {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 16 / 9;
-    background: #000;
-    border-radius: 14px;
-    overflow: hidden;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  border-radius: 14px;
+  overflow: hidden;
 }
 
 .pd-video-frame iframe,
 .pd-video-frame video {
-    width: 100%;
-    height: 100%;
-    border: none;
-    display: block;
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
 }

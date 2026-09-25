@@ -6,6 +6,7 @@ import "./Catagoryes.css";
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { fetchProducts, fetchCategories } from '../../api';
 import { usePageMeta } from '../../useSeo';
+import { saveSearch } from '../../searchHistory';
 import RatingStars from '../../RatingStars';
 import SafeImg from '../../SafeImg';
 import { FavButton, AddToCartBtn } from '../../ProductActions';
@@ -138,7 +139,9 @@ export default function Catagoryes() {
 
   const submitSearch = (e) => {
     e.preventDefault();
-    navigate(`/Catagoryes?search=${encodeURIComponent(localSearch.trim())}`);
+    const value = localSearch.trim();
+    if (value) saveSearch(value);
+    navigate(`/Catagoryes?search=${encodeURIComponent(value)}`);
   };
 
   const title = category || search || 'همه محصولات';

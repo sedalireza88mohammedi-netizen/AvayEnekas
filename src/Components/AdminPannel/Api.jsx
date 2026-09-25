@@ -34,7 +34,24 @@ export function uid() {
 }
 
 async function request(path, options = {}) {
-  const res = await fetch(API_BASE_URL + path, options);
+  const method = (options.method || "GET").toUpperCase();
+  let res;
+  const doFetchOnce = () => fetch(API_BASE_URL + path, options);
+  try {
+    res = await doFetchOnce();
+  } catch {
+    if (method === "GET" || method === "HEAD") {
+      // کانکشن keep-alive کهنه ممکن است بسته شود؛ یک بار با سوکت تازه دوباره تلاش می‌کنیم
+      await new Promise((r) => setTimeout(r, 400));
+      try {
+        res = await doFetchOnce();
+      } catch {
+        throw new Error("خطا در ارتباط با سرور؛ از روشن بودن بکاند مطمئن شوید");
+      }
+    } else {
+      throw new Error("خطا در ارتباط با سرور؛ از روشن بودن بکاند مطمئن شوید");
+    }
+  }
   if (!res.ok) {
     const message = await res.text().catch(() => "");
     throw new Error(message || ("خطا در ارتباط با سرور (کد " + res.status + ")"));

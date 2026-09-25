@@ -2,10 +2,11 @@ import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
 import "./Menu.css";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBars, faBell, faBurst, faCartShopping, faFire, faHeart, faHome, faSearch, faSun, faUser, faUserTie } from '@fortawesome/free-solid-svg-icons';
+import { faBars, faBell, faBurst, faCartShopping, faClockRotateLeft, faFire, faHeart, faHome, faSearch, faSun, faTrash, faUser, faUserTie } from '@fortawesome/free-solid-svg-icons';
 import { isLoggedIn as checkLogin } from '../../auth';
 import { useAuthSync } from '../../useSeo';
-import { fetchProducts } from '../../api';
+import { fetchProducts, fetchPopularSearches } from '../../api';
+import { getSearchHistory, saveSearch, clearSearchHistory } from '../../searchHistory';
 import { useCartStore } from '../../cartStore';
 import SafeImg from '../../SafeImg';
 
@@ -80,8 +81,22 @@ function Menu({ isCart }) {
   const [results, setResults] = useState([]);
   const [activeIndex, setActiveIndex] = useState(-1);
   const searchWrapRef = useRef(null);
+  const [popular, setPopular] = useState([]);
+  const [history, setHistory] = useState(getSearchHistory());
 
   useAuthSync(useCallback(() => setLoggedIn(checkLogin()), []));
+
+  // بارگذاری جستجوهای پرطرفدار از بک‌اند
+  useEffect(() => {
+    fetchPopularSearches(10)
+      .then((data) => {
+        const terms = (Array.isArray(data) ? data : [])
+          .map((d) => d.term)
+          .filter(Boolean);
+        if (terms.length) setPopular(terms);
+      })
+      .catch(() => {});
+  }, []);
 
   // ردیف دسته‌بندی‌ها موقع اسکرول به پایین بسته و موقع اسکرول به بالا باز می‌شود.
   // با یک آستانه (buffer) کار می‌کند تا نوسانات ریز اسکرول (که باعث گیرکردن/پرش
@@ -178,6 +193,7 @@ function Menu({ isCart }) {
   const handleSearch = (e) => {
     e.preventDefault();
     const value = query.trim();
+    if (value) setHistory(saveSearch(value));
     navigate(value ? `/Catagoryes?search=${encodeURIComponent(value)}` : "/Catagoryes");
     closeSearch();
   };
@@ -197,6 +213,7 @@ function Menu({ isCart }) {
     } else if (e.key === 'Enter') {
       if (activeIndex >= 0 && results[activeIndex]) {
         e.preventDefault();
+        setHistory(saveSearch(query.trim()));
         navigate(`/Product/${results[activeIndex].id}`);
         closeSearch();
       } else {
@@ -215,9 +232,12 @@ function Menu({ isCart }) {
   const linkQuery = (value) => `/Catagoryes?search=${encodeURIComponent(value)}`;
 
   const openSelected = (value) => {
+    setHistory(saveSearch(value));
     navigate(linkQuery(value));
     closeSearch();
   };
+
+  const clearHistory = () => setHistory(clearSearchHistory());
 
   const hasQuery = query.trim().length >= 2;
 
@@ -284,10 +304,27 @@ function Menu({ isCart }) {
                   </>
                 ) : (
                   <div className="search-pop-hot">
-                    <div className="search-pop-head">پرطرفدارترین‌ها</div>
+                    {history.length > 0 && (
+                      <>
+                        <div className="search-pop-head search-pop-head-row">
+                          <span><FontAwesomeIcon icon={faClockRotateLeft} className="search-pop-head-icon" /> تاریخچه جستجو</span>
+                          <button type="button" className="search-pop-clear" onClick={clearHistory} aria-label="پاک کردن تاریخچه">
+                            <FontAwesomeIcon icon={faTrash} /> پاک کردن
+                          </button>
+                        </div>
+                        <div className="search-pop-chips">
+                          {history.map((t) => (
+                            <span key={t} className="search-pop-chip" onClick={() => openSelected(t)} role="button" tabIndex={-1}>
+                              {t}
+                            </span>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                    <div className="search-pop-head"><span className="search-pop-head-fire">🔥</span> جستجوهای پرطرفدار</div>
                     <div className="search-pop-chips">
-                      {HOT_KEYWORDS.map((k) => (
-                        <span key={k} className="search-pop-chip" onClick={() => openSelected(k)} role="button" tabIndex={-1}>
+                      {(popular.length ? popular : HOT_KEYWORDS).map((k) => (
+                        <span key={k} className="search-pop-chip search-pop-chip-hot" onClick={() => openSelected(k)} role="button" tabIndex={-1}>
                           {k}
                         </span>
                       ))}
@@ -316,7 +353,7 @@ function Menu({ isCart }) {
 
             <div className="BorderLine"></div>
 
-             <button className="massege-btn" onClick={() => navigate("/Messages")} aria-label=" پیام ها">
+             <button className="massege-btn" onClick={() => navigate("/Profile?tab=messages")} aria-label=" پیام ها">
               <FontAwesomeIcon icon={faBell} />
               {unreadCount > 0 && <span className="bell-unread-badge">{toPersianDigits(unreadCount)}</span>}
             </button>
@@ -367,7 +404,7 @@ function Menu({ isCart }) {
                         <ul className="item-list">
                           {col.items.map((item, itemIndex) => (
                             <li key={itemIndex} className="item-link">
-                              <Link onClick={() => setIsOpen(false)} to={linkQuery(item)}>{item}</Link>
+                              <Link onClick={() => { setIsOpen(false); setHistory(saveSearch(item)); }} to={linkQuery(item)}>{item}</Link>
                             </li>
                           ))}
                         </ul>

@@ -12,7 +12,7 @@
     font-family: system-ui, -apple-system, sans-serif;
     direction: rtl;
     display: flex;
-   
+
     background-color: #f3f4f6;
     width: 100%;
     margin: 0 auto;
@@ -239,9 +239,9 @@
 /* گرید محصولات */
 .cat-grid {
     display: flex;
-   flex-wrap: wrap;
-   justify-content: space-evenly;
-    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    gap: 5px;
     padding: 20px;
     margin-top: 10px;
     background-color: #f9f9f9;
@@ -348,106 +348,107 @@
     color: #9ca3af;
     padding: 3rem 0;
 }
+
 /* ??????? */
 .cat-filters {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 18px;
-  padding: 12px;
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 18px;
+    padding: 12px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
 }
 
 .cat-filter {
-  font-family: inherit;
-  font-size: 0.83rem;
-  color: #1f2937;
-  background: #fff;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  padding: 7px 10px;
-  outline: none;
-  cursor: pointer;
+    font-family: inherit;
+    font-size: 0.83rem;
+    color: #1f2937;
+    background: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    padding: 7px 10px;
+    outline: none;
+    cursor: pointer;
 }
 
 .cat-filter:focus {
-  border-color: #0d9488;
+    border-color: #0d9488;
 }
 
 .cat-filter-price {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .cat-filter-price input {
-  font-family: inherit;
-  font-size: 0.83rem;
-  color: #1f2937;
-  width: 96px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  padding: 7px 10px;
-  outline: none;
+    font-family: inherit;
+    font-size: 0.83rem;
+    color: #1f2937;
+    width: 96px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    padding: 7px 10px;
+    outline: none;
 }
 
 .cat-filter-price input:focus {
-  border-color: #0d9488;
+    border-color: #0d9488;
 }
 
 .cat-filter-price span {
-  color: #9ca3af;
+    color: #9ca3af;
 }
 
 .cat-filter-reset {
-  font-family: inherit;
-  font-size: 0.8rem;
-  color: var(--brand-dark);
-  background: none;
-  border: 1px solid #fca5a5;
-  border-radius: 8px;
-  padding: 7px 14px;
-  cursor: pointer;
+    font-family: inherit;
+    font-size: 0.8rem;
+    color: var(--brand-dark);
+    background: none;
+    border: 1px solid #fca5a5;
+    border-radius: 8px;
+    padding: 7px 14px;
+    cursor: pointer;
 }
 
 .cat-filter-reset:hover {
-  background: #fef2f2;
+    background: #fef2f2;
 }
 
 .cat-filter-count {
-  margin-inline-start: auto;
-  font-size: 0.82rem;
-  color: #6b7280;
+    margin-inline-start: auto;
+    font-size: 0.82rem;
+    color: #6b7280;
 }
 
 /* --- ???????? ????? ?? ?????? ???? ???? --- */
 .cat-grid .product-card-shell {
     position: relative;
     margin: 0;
-   
+
 }
 
 .cat-grid .product-card {
-  background-color: white;
- 
-    width: 300px !important;
+    background-color: white;
+    width: 100% ;
     padding: 16px;
     display: flex;
     flex-direction: column;
     scroll-snap-align: start;
     flex-shrink: 0;
     border-radius: 10px;
-    margin: 10px;
     cursor: pointer;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
-.cat-grid .product-card:hover{
-      transform: translateY(-5px);
-    box-shadow: 0 5px 10px #cdcdcd ;
+
+.cat-grid .product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 10px #cdcdcd;
 }
+
 .cat-grid .product-image-wrapper {
     width: 100%;
     aspect-ratio: 1 / 1;
@@ -456,7 +457,6 @@
     justify-content: center;
     align-items: center;
     margin-bottom: 10px;
-    background: #f8fafc;
     border-radius: 8px;
     overflow: hidden;
 }
@@ -603,4 +603,3 @@
         height: 30px;
     }
 }
-

@@ -47,8 +47,8 @@ const num = (n) => n.toLocaleString("fa-IR");
 
 const statusClass = (status) => {
   switch (status) {
-    case "فعال": case "تحویل شده": case "پرداخت شده": case "منتشر شده": return "badge badge--success";
-    case "در حال ارسال": return "badge badge--warning";
+    case "فعال": case "تحویل شده": case "پرداخت شده": case "منتشر شده": case "خوانده شده": return "badge badge--success";
+    case "در حال ارسال": case "جدید": return "badge badge--warning";
     case "در انتظار پردازش": case "در انتظار": case "پیش‌نویس": return "badge badge--neutral";
     case "لغو شده": case "ناموجود": case "بازگشت وجه": return "badge badge--danger";
     default: return "badge badge--neutral";
@@ -1081,7 +1081,7 @@ function MessagesSection({ messages, customers, onSend }) {
   };
 
   return (
-    <div className="stack">
+    <div className="stack messages-section">
       <div className="card">
         <div className="section-head">
           <MessageSquareText size={18} />
@@ -1106,13 +1106,28 @@ function MessagesSection({ messages, customers, onSend }) {
           <div className="radio-row">
             <label className="radio-label">
               <input type="radio" checked={targetMode === "all"} onChange={() => setTargetMode("all")} />
-              همه مشتریان
+              همه مشتریان ({num(customers.length)} نفر)
             </label>
             <label className="radio-label">
               <input type="radio" checked={targetMode === "customers"} onChange={() => setTargetMode("customers")} />
               انتخاب مشتری
             </label>
           </div>
+
+          {targetMode === "all" && (
+            <>
+              <p className="muted small">این پیام برای <strong>{num(customers.length)} مشتری</strong> ارسال می‌شود:</p>
+              <div className="customers-chip-list is-preview">
+                {customers.map((c) => (
+                  <span key={c.id} className="chip">
+                    <span className="chip-name">{c.name || "کاربر"}</span>
+                    <span className="chip-phone mono">{c.phone}</span>
+                  </span>
+                ))}
+                {customers.length === 0 && <p className="muted small">مشتری ثبت‌شده‌ای وجود ندارد.</p>}
+              </div>
+            </>
+          )}
 
           {targetMode === "customers" && (
             <>
@@ -1137,13 +1152,16 @@ function MessagesSection({ messages, customers, onSend }) {
                       checked={selectedPhones.has(c.phone)}
                       onChange={() => togglePhone(c.phone)}
                     />
-                    <span className="chip-name">{c.name}</span>
+                    <span className="chip-name">{c.name || "کاربر"}</span>
                     <span className="chip-phone mono">{c.phone}</span>
                   </label>
                 ))}
                 {customers.length === 0 && <p className="muted small">مشتری ثبت‌شده‌ای وجود ندارد.</p>}
               </div>
-              <p className="muted small">انتخاب‌شده: {num(selectedPhones.size)} نفر</p>
+              <p className="muted small">
+                انتخاب‌شده: {num(selectedPhones.size)} نفر
+                {selectedPhones.size > 0 && " — " + Array.from(selectedPhones).join("، ")}
+              </p>
             </>
           )}
         </Field>
@@ -1167,8 +1185,8 @@ function MessagesSection({ messages, customers, onSend }) {
           <Bell size={18} />
           <h2>تاریخچه پیام‌های ارسالی</h2>
         </div>
-        <div className="table-wrap">
-          <table className="table">
+        <div className="table-scroll">
+          <table className="data-table">
             <thead>
               <tr>
                 <th>گیرنده</th>
@@ -1191,8 +1209,8 @@ function MessagesSection({ messages, customers, onSend }) {
                     <td className="small">{m.text}</td>
                     <td>
                       {m.is_read
-                        ? <Badge status="پرداخت شده" />
-                        : <Badge status="در انتظار پردازش" />}
+                        ? <Badge status="خوانده شده" />
+                        : <Badge status="جدید" />}
                     </td>
                   </tr>
                 ))

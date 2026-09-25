@@ -1524,6 +1524,7 @@
 
 .customers-chip-list {
     display: flex;
+    flex-direction: column;
     flex-wrap: wrap;
     gap: 8px;
     margin-bottom: 10px;
@@ -1533,16 +1534,23 @@
 }
 
 .chip {
-    display: inline-flex;
+    width: 50px;
+    height: 30px;
+    padding: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    text-align: center;
+    justify-content: center;
     align-items: center;
     gap: 6px;
     border: 1px solid #d1d5db;
     border-radius: 999px;
-    padding: 6px 12px;
+ 
     font-size: 12px;
     cursor: pointer;
     user-select: none;
     transition: background 0.15s, border-color 0.15s;
+   
 }
 
 .chip:hover {
@@ -1556,14 +1564,16 @@
 }
 
 .chip input {
-    accent-color: #ef4056;
+    accent-color: #000000;
 }
 
 .chip-name {
     font-weight: 600;
+    margin-right: 20px;
 }
 
 .chip-phone {
+    margin-right: 20px;
     opacity: 0.8;
     direction: ltr;
 }
@@ -1586,4 +1596,69 @@
     padding: 10px 12px;
     font-size: 13px;
     margin-bottom: 12px;
+}
+
+/* ================= MESSAGES (????? ?? ???????) ================= */
+
+.app .messages-section .chip {
+    background: #fff;
+    color: #24262a;
+}
+
+.app .messages-section .chip.is-selected {
+    background: #16181b;
+    color: #fff;
+}
+
+.app .messages-section .customers-chip-list.is-preview {
+    max-height: 220px;
+    background: #f8fafc;
+    border: 1px dashed #e2e8f0;
+    border-radius: 10px;
+    padding: 10px;
+}
+
+.app .messages-section .customers-chip-list.is-preview .chip {
+    cursor: default;
+    background: #f1f5f9;
+    border-color: #e2e8f0;
+    opacity: 0.9;
+}
+
+.app .messages-section .radio-label {
+    font-weight: 600;
+}
+
+.app .messages-section .data-table td:nth-child(1) {
+    white-space: nowrap;
+}
+
+.app .messages-section .data-table td:nth-child(2) {
+    max-width: 420px;
+    white-space: normal;
+    word-break: break-word;
+}
+
+@media (max-width: 640px) {
+    .app .messages-section .radio-row {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .app .messages-section .phone-picker-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .app .messages-section .phone-picker-row .btn {
+        justify-content: center;
+    }
+
+    .app .messages-section .customers-chip-list {
+        max-height: 180px;
+    }
+
+    .app .messages-section .data-table td:nth-child(2) {
+        max-width: 160px;
+    }
 }

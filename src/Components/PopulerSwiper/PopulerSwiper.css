@@ -54,6 +54,7 @@
     width: 100%;
     scroll-behavior: smooth;
     cursor: grab;
+    touch-action: pan-y;
 }
 
 .custom-swiper::-webkit-scrollbar {

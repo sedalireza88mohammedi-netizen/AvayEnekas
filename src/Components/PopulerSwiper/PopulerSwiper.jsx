@@ -1,11 +1,13 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { ChevronLeft, ArrowLeft } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import "./PopulerSwiper.css";
 import { fetchProducts } from '../../api';
 import RatingStars from '../../RatingStars';
 import SafeImg from '../../SafeImg';
 import { FavButton, AddToCartBtn } from '../../ProductActions';
+
+const DRAG_THRESHOLD = 20;
 
 const toPersianDigits = (num) => {
     const farsiDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
@@ -16,7 +18,9 @@ const formatPrice = (price) => {
     return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 };
 
-const ProductCard = ({ product, onDrag }) => (
+const ProductCard = ({ product, onDrag }) => {
+    const navigate = useNavigate();
+    return (
     <div className="product-card-shell">
         <Link
             to={`/Product/${product.id}`}
@@ -26,7 +30,10 @@ const ProductCard = ({ product, onDrag }) => (
                 if (onDrag && onDrag()) {
                     e.preventDefault();
                     e.stopPropagation();
+                    return;
                 }
+                e.preventDefault();
+                navigate(`/Product/${product.id}`);
             }}
         >
             <div className="product-image-wrapper">
@@ -57,10 +64,11 @@ const ProductCard = ({ product, onDrag }) => (
                 <div className="discount-badge">{toPersianDigits(product.discount)}٪</div>
             </div>
         </Link>
-        <FavButton id={product.id} />
-        <AddToCartBtn product={product} />
+   
+      
     </div>
-);
+    );
+};
 
 export default function PopularSlider() {
     const swiperRef = useRef(null);
@@ -80,12 +88,15 @@ const handlePointerDown = (e) => {
     setIsDragging(false);
     dragMoved.current = false;
   };
-  const handlePointerUp = () => setIsDragging(false);
+  const handlePointerUp = () => {
+    setIsDragging(false);
+    dragMoved.current = false;
+  };
   const handlePointerMove = (e) => {
     if (!isDragging) return;
     const x = e.pageX - swiperRef.current.offsetLeft;
     // حرکت‌های خیلی کوچک (کلیک معمولی) درگ محسوب نمی‌شوند
-    if (Math.abs(x - startX) < 10) return;
+    if (Math.abs(x - startX) < DRAG_THRESHOLD) return;
     dragMoved.current = true;
     e.preventDefault();
     const walk = (x - startX) * 1.5;
@@ -121,7 +132,7 @@ const handlePointerDown = (e) => {
         <section className="swiper-container" aria-label="محبوب‌ترین محصولات">
             <div className="swiper-wrapper-box">
                 <div
-                    className={`custom-swiper ${isDragging ? 'dragging' : ''}`}
+                    className={`custom-swiper `}
                     ref={swiperRef}
                     onPointerDown={handlePointerDown}
                     onPointerLeave={handlePointerLeave}

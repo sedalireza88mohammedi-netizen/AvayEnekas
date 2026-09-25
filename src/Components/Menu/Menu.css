@@ -1,5 +1,5 @@
 body {
-    font-family: YekanBold;
+    font-family: YekanBold !important;
     margin: 0;
     padding: 0;
 }
@@ -167,7 +167,7 @@ a {
 .search-pop-price {
     font-size: 13px;
     font-weight: bold;
-    color: var(--brand);
+    color: #000000;
 }
 
 .search-pop-price span {
@@ -208,6 +208,52 @@ a {
 /* چیپ‌های پرطرفدار */
 .search-pop-hot {
     padding-bottom: 10px;
+}
+
+.search-pop-head-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 4px;
+}
+
+.search-pop-head-icon {
+    margin-left: 4px;
+}
+
+.search-pop-head-fire {
+    font-size: 12px;
+    margin-left: 4px;
+}
+
+.search-pop-clear {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: none;
+    padding: 2px 8px;
+    font-family: inherit;
+    font-size: 11px;
+    color: #878c99;
+    cursor: pointer;
+    border-radius: 12px;
+    transition: background 0.15s, color 0.15s;
+}
+
+.search-pop-clear:hover {
+    background: #f0f0f1;
+    color: #e0245e;
+}
+
+.search-pop-chip-hot {
+    background: #fff3e0;
+    color: #c77700;
+}
+
+.search-pop-chip-hot:hover {
+    background: #ffe3b3;
+    color: #a05e00;
 }
 
 .search-pop-chips {
@@ -292,7 +338,7 @@ a {
     position: absolute;
     top: -6px;
     left: -10px;
-    background: var(--brand, #ef4056);
+    background: #000;
     color: #fff;
     font-size: 11px;
     font-weight: 700;
@@ -377,18 +423,22 @@ a {
 
 .category-trigger {
     font-size: 18px;
-    background-color: none;
+    background-color: none ;
     color: #222831;
     position: relative;
+    font-family: YekanBold !important;
 }
 
 .trigger-btn {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-weight: bold;
-    color: #3f4064;
+    font-weight: bolder;
+    color: #62666d;
     cursor: pointer;
+    background-color:#ffffff;
+    border: none;
+    font-size: 15px;
 }
 
 .trigger-btn:hover {
@@ -645,7 +695,7 @@ a {
     position: absolute;
     top: -6px;
     left: -10px;
-    background: var(--brand);
+    background: #000;
     color: #fff;
     font-size: 11px;
     font-weight: 700;

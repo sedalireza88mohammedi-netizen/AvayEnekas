@@ -50,7 +50,24 @@ async function request(path, options = {}) {
       signal,
     });
 
-  let res = await doFetch(retryable ? controller.signal : undefined);
+  let res;
+  const doFetchOnce = () => doFetch(retryable ? controller.signal : undefined);
+  try {
+    res = await doFetchOnce();
+  } catch (networkErr) {
+    if (networkErr && networkErr.name === "AbortError") throw networkErr;
+    if (method === "GET" || method === "HEAD") {
+      // کانکشن keep-alive کهنه ممکن است بسته شود؛ یک بار با سوکت تازه دوباره تلاش می‌کنیم
+      await new Promise((r) => setTimeout(r, 400));
+      try {
+        res = await doFetchOnce();
+      } catch {
+        throw new Error("خطا در ارتباط با سرور؛ از روشن بودن بکاند مطمئن شوید");
+      }
+    } else {
+      throw new Error("خطا در ارتباط با سرور؛ از روشن بودن بکاند مطمئن شوید");
+    }
+  }
 
   // در صورت منقضی شدن توکن، یک بار ریفرش و تلاش دوباره
   if (res.status === 401 && getRefreshToken() && !options._retried) {
@@ -134,6 +151,18 @@ export async function fetchProduct(id) {
 export async function fetchCategories() {
   const data = await request("/categories");
   return Array.isArray(data) ? data : [];
+}
+
+/* ------------------------------ search suggestions ------------------------------ */
+
+export async function fetchPopularSearches(limit = 10) {
+  const data = await request("/popular-searches?limit=" + limit);
+  return Array.isArray(data) ? data : [];
+}
+
+export async function recordSearch(term) {
+  if (!term) return null;
+  return request("/search/record", { method: "POST", body: { term } });
 }
 
 /* ------------------------------ reviews ------------------------------ */

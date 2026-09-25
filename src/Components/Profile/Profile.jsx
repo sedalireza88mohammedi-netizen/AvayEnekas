@@ -1,17 +1,18 @@
 import { useState, useEffect, useRef } from "react"
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import "./profile.css"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faBell, faExclamation, faHeart, faLocationDot, faPlus, faShoppingCart, faUser, faChevronDown, faArrowRightFromBracket, faTrash, faStar, faTrashCan, faUserTie } from '@fortawesome/free-solid-svg-icons';
+import { faBell, faExclamation, faHeart, faLocationDot, faPlus, faShoppingCart, faUser, faChevronDown, faArrowRightFromBracket, faTrash, faStar, faTrashCan, faUserTie, faCheckDouble, faReceipt } from '@fortawesome/free-solid-svg-icons';
 import { isLoggedIn, clearAuth, getPhone } from "../../auth";
 import {
   getProfile, updateProfile, getMyOrders, getFavorites, removeFavorite,
-  getAddresses, addAddress, setDefaultAddress, deleteAddress,
+  getAddresses, addAddress, setDefaultAddress, deleteAddress, getMyMessages,
 } from "../../api";
 import SafeImg from "../../SafeImg";
+import { useCartStore } from "../../cartStore";
 
-library.add(faShoppingCart, faHeart, faBell, faLocationDot, faUser, faExclamation, faChevronDown, faArrowRightFromBracket, faTrash, faStar, faTrashCan, faUserTie);
+library.add(faShoppingCart, faHeart, faBell, faLocationDot, faUser, faExclamation, faChevronDown, faArrowRightFromBracket, faTrash, faStar, faTrashCan, faUserTie, faCheckDouble, faReceipt);
 
 const toPersianDigits = (num) =>
   (num || 0).toString().replace(/\d/g, (x) => '۰۱۲۳۴۵۶۷۸۹'[x]);
@@ -19,11 +20,92 @@ const toPersianDigits = (num) =>
 const formatPrice = (price) =>
   (price || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
+function formatJalali(iso) {
+  if (!iso) return "";
+  try {
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return "";
+    return toPersianDigits(
+      d.toLocaleDateString('fa-IR', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+    );
+  } catch {
+    return "";
+  }
+}
+
 function EmptyState({ message }) {
   return (
     <h2 className="Nothing">
       <FontAwesomeIcon icon={faExclamation} /> {message}
     </h2>
+  )
+}
+
+function InvoiceView({ order, onBack }) {
+  const items = Array.isArray(order.line_items) ? order.line_items : []
+  return (
+    <div className="InvoiceView">
+      <div className="InvoiceTop">
+        <h3 className="TitleOptions"><FontAwesomeIcon icon={faReceipt} /> فاکتور سفارش {order.id}</h3>
+        <button type="button" className="InvoiceBack" onClick={onBack}>
+          بازگشت به سفارش‌ها
+        </button>
+      </div>
+      <h6 className="LineOrder"></h6>
+
+      <div className="InvoiceBlock">
+        <h4 className="InvoiceBlockTitle">خلاصه سفارش</h4>
+        <div className="InvoiceRow"><span>کد پیگیری</span><strong>{order.id}</strong></div>
+        <div className="InvoiceRow"><span>تاریخ ثبت</span><strong>{formatJalali(order.date)}</strong></div>
+        <div className="InvoiceRow"><span>وضعیت</span><strong className="InvoiceStatus">{order.status || "—"}</strong></div>
+        <div className="InvoiceRow"><span>نحوه پرداخت</span><strong>{order.payment || "—"}</strong></div>
+      </div>
+
+      <div className="InvoiceBlock">
+        <h4 className="InvoiceBlockTitle">اطلاعات گیرنده</h4>
+        {order.customer ? <div className="InvoiceRow"><span>نام و نام خانوادگی</span><strong>{order.customer}</strong></div> : null}
+        {order.phone ? <div className="InvoiceRow"><span>شماره تماس</span><strong dir="ltr">{order.phone}</strong></div> : null}
+        {order.email ? <div className="InvoiceRow"><span>ایمیل</span><strong dir="ltr">{order.email}</strong></div> : null}
+        {order.address ? <div className="InvoiceRow"><span>آدرس</span><strong>{order.address}</strong></div> : null}
+      </div>
+
+      {items.length > 0 ? (
+        <div className="InvoiceBlock">
+          <h4 className="InvoiceBlockTitle">اقلام سفارش ({toPersianDigits(items.length)} ردیف)</h4>
+          <div className="InvoiceItems">
+            {items.map((item, i) => (
+              <div className="InvoiceItem" key={i}>
+                {item.image ? (
+                  <img className="InvoiceItemImg" src={item.image} alt={item.name} />
+                ) : (
+                  <div className="InvoiceItemImg InvoiceItemImgEmpty"></div>
+                )}
+                <div className="InvoiceItemInfo">
+                  {item.product_id ? (
+                    <Link to={`/Product/${item.product_id}`} className="InvoiceItemName">{item.name}</Link>
+                  ) : (
+                    <span className="InvoiceItemName">{item.name}</span>
+                  )}
+                  <span className="InvoiceItemMeta">
+                    {toPersianDigits(item.quantity)} × {toPersianDigits(formatPrice(item.price))} تومان
+                  </span>
+                </div>
+                <strong className="InvoiceItemTotal">{toPersianDigits(formatPrice(item.subtotal))} تومان</strong>
+              </div>
+            ))}
+          </div>
+          <div className="InvoiceTotalRow">
+            <span>جمع کل سفارش</span>
+            <strong>{toPersianDigits(formatPrice(order.total || 0))} تومان</strong>
+          </div>
+        </div>
+      ) : (
+        <div className="InvoiceBlock">
+          <h4 className="InvoiceBlockTitle">اقلام سفارش</h4>
+          <p className="muted">هیچ ردیفی برای این سفارش ثبت نشده است ({toPersianDigits(order.items || 0)} قلم کالا).</p>
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -37,6 +119,7 @@ const ORDER_STATUS_LIST = [
 function Profile() {
   const [page, setPage] = useState("Profile")
   const [activeOrderOption, setActiveOrderOption] = useState("InProgress")
+  const [selectedOrder, setSelectedOrder] = useState(null)
 
   const [orders, setOrders] = useState({
     InProgress: [], Delivered: [], Returned: [], Canceled: [],
@@ -71,6 +154,28 @@ function Profile() {
   const currentOrderConfig = ORDER_STATUS_LIST.find(o => o.key === activeOrderOption)
 
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { markOneMessageRead } = useCartStore();
+
+  const allMessagesRead = messages.length > 0 && messages.every((m) => m.is_read);
+
+  const openMessage = (msg) => {
+    if (!msg.is_read) {
+      markOneMessageRead(msg.id);
+      setMessages((prev) => prev.map((m) => (m.id === msg.id ? { ...m, is_read: true } : m)));
+    }
+  };
+
+  const markAllMessages = () => {
+    messages.forEach((m) => {
+      if (!m.is_read) markOneMessageRead(m.id);
+    });
+    setMessages((prev) => prev.map((m) => ({ ...m, is_read: true })));
+  };
+
+  useEffect(() => {
+    if (searchParams.get("tab") === "messages") setPage("Messages");
+  }, [searchParams]);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -88,11 +193,12 @@ function Profile() {
 
     const load = async () => {
       try {
-        const [prof, ords, favs, addrs] = await Promise.all([
+        const [prof, ords, favs, addrs, msgs] = await Promise.all([
           getProfile().catch(() => ({})),
           getMyOrders().catch(() => ({ InProgress: [], Delivered: [], Returned: [], Canceled: [] })),
           getFavorites().catch(() => []),
           getAddresses().catch(() => []),
+          getMyMessages().catch(() => []),
         ]);
         if (!active) return;
         if (prof && prof.NameAndFamily) {
@@ -109,6 +215,7 @@ function Profile() {
         setOrders(ords || { InProgress: [], Delivered: [], Returned: [], Canceled: [] });
         setInterestedList(favs || []);
         setAddresses(addrs || []);
+        setMessages(msgs || []);
       } finally {
         if (active) setLoading(false);
       }
@@ -269,39 +376,48 @@ function Profile() {
         )}
         {page === "Orders" && (
           <>
-            <h2 className="TitleOptions"><FontAwesomeIcon icon={faShoppingCart} /> تاریخچه سفارشات</h2>
-            <div className="optionsOrders">
-              {ORDER_STATUS_LIST.map(status => (
-                <h3
-                  key={status.key}
-                  onClick={() => setActiveOrderOption(status.key)}
-                  className={activeOrderOption === status.key ? "Option-Active" : "statusOptionOrders"}
-                >
-                  {status.label}
-                </h3>
-              ))}
-            </div>
-            <h6 className="LineOrder"></h6>
-
-            {currentOrders.length > 0 ? (
-              <div className="OrdersList">
-                {currentOrders.map(order => (
-                  <div key={order.id} className="OrderCard">
-                    <div className="OrderCardHead">
-                      <strong>کد پیگیری: {order.id}</strong>
-                      <span className="OrderCardDate">{order.date || ""}</span>
-                    </div>
-                    <div className="OrderCardRows">
-                      <span>تعداد اقلام: {toPersianDigits(order.items || 0)}</span>
-                      <span>مبلغ: {toPersianDigits(formatPrice(order.total))} تومان</span>
-                      <span className={order.status === "لغو شده" ? "OrderBadgeBad" : "OrderBadge"}>{order.status}</span>
-                    </div>
-                    <span className="OrderCardPayment">پرداخت: {order.payment || "—"}</span>
-                  </div>
-                ))}
-              </div>
+            {selectedOrder ? (
+              <InvoiceView order={selectedOrder} onBack={() => setSelectedOrder(null)} />
             ) : (
-              <EmptyState message={currentOrderConfig?.emptyMessage} />
+              <>
+                <h2 className="TitleOptions"><FontAwesomeIcon icon={faShoppingCart} /> تاریخچه سفارشات</h2>
+                <div className="optionsOrders">
+                  {ORDER_STATUS_LIST.map(status => (
+                    <h3
+                      key={status.key}
+                      onClick={() => setActiveOrderOption(status.key)}
+                      className={activeOrderOption === status.key ? "Option-Active" : "statusOptionOrders"}
+                    >
+                      {status.label}
+                    </h3>
+                  ))}
+                </div>
+                <h6 className="LineOrder"></h6>
+
+                {currentOrders.length > 0 ? (
+                  <div className="OrdersList">
+                    {currentOrders.map(order => (
+                      <div key={order.id} className="OrderCard">
+                        <div className="OrderCardHead">
+                          <strong>کد پیگیری: {order.id}</strong>
+                          <span className="OrderCardDate">{order.date || ""}</span>
+                        </div>
+                        <div className="OrderCardRows">
+                          <span>تعداد اقلام: {toPersianDigits(order.items || 0)}</span>
+                          <span>مبلغ: {toPersianDigits(formatPrice(order.total))} تومان</span>
+                          <span className={order.status === "لغو شده" ? "OrderBadgeBad" : "OrderBadge"}>{order.status}</span>
+                        </div>
+                        <span className="OrderCardPayment">پرداخت: {order.payment || "—"}</span>
+                        <button type="button" className="OrderCardDetails" onClick={() => setSelectedOrder(order)}>
+                          <FontAwesomeIcon icon={faReceipt} /> مشاهده فاکتور
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <EmptyState message={currentOrderConfig?.emptyMessage} />
+                )}
+              </>
             )}
           </>
         )}
@@ -335,12 +451,30 @@ function Profile() {
 
         {page === "Messages" && (
           <>
-            <h2 className="TitleOptions"><FontAwesomeIcon icon={faBell} /> پیام‌ها</h2>
+            <div className="ProfileMsgHead">
+              <h2 className="TitleOptions"><FontAwesomeIcon icon={faBell} /> پیام‌ها</h2>
+              {!allMessagesRead && messages.length > 0 && (
+                <button type="button" className="ProfileMsgMarkAll" onClick={markAllMessages}>
+                  <FontAwesomeIcon icon={faCheckDouble} /> علامت‌گذاری همه
+                </button>
+              )}
+            </div>
             <h6 className="LineOrder"></h6>
             {messages.length > 0 ? (
               <div className="MessagesList">
                 {messages.map(msg => (
-                  <div key={msg.id} className="MessageCard"></div>
+                  <button
+                    key={msg.id}
+                    type="button"
+                    className={`MessageCard${msg.is_read ? " is-read" : ""}`}
+                    onClick={() => openMessage(msg)}
+                  >
+                    <span className="MessageCardDot"></span>
+                    <span className="MessageCardContent">
+                      <span className="MessageCardText">{msg.text}</span>
+                      <span className="MessageCardDate">{formatJalali(msg.created_at)}</span>
+                    </span>
+                  </button>
                 ))}
               </div>
             ) : (
