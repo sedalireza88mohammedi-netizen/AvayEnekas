@@ -389,18 +389,105 @@
     font-size: 0.83rem;
     color: #1f2937;
     width: 96px;
-    border: 1px solid #d1d5db;
+    height: 44px;
+    background: #fafafa;
+    border: 1px solid #ddd;
     border-radius: 8px;
-    padding: 7px 10px;
+    padding: 0 10px;
     outline: none;
 }
 
 .cat-filter-price input:focus {
-    border-color: #0d9488;
+    border-color: #8FA28A;
 }
 
 .cat-filter-price span {
     color: #9ca3af;
+}
+
+.cat-custom-select {
+    position: relative;
+    min-width: 165px;
+}
+
+.cat-custom-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    height: 44px;
+    padding: 0 14px;
+    font-family: inherit;
+    font-size: 0.85rem;
+    background: #fafafa;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    cursor: pointer;
+    user-select: none;
+    transition: border-color 0.2s;
+}
+
+.cat-custom-trigger:hover,
+.cat-custom-trigger.open {
+    border-color: #8FA28A;
+}
+
+.cat-custom-arrow {
+    font-size: 0.7rem;
+    color: #8a8a8a;
+    transition: transform 0.2s;
+}
+
+.cat-custom-arrow.rotate {
+    transform: rotate(180deg);
+}
+
+.cat-custom-options {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    left: 0;
+    z-index: 50;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    overflow-y: auto;
+    max-height: 260px;
+}
+
+.cat-custom-option {
+    padding: 10px 14px;
+    font-size: 0.85rem;
+    color: #1f2937;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: background 0.15s, color 0.15s;
+}
+
+.cat-custom-option:hover {
+    background: #212121;
+    color: #fff;
+}
+
+.cat-custom-option.is-selected {
+    color: #8FA28A;
+}
+
+.cat-custom-option.is-selected:hover {
+    color: #fff;
+}
+
+@media (max-width: 640px) {
+    .cat-custom-select {
+        min-width: 140px;
+        flex: 1 1 140px;
+    }
+    .cat-filter-price input {
+        width: 82px;
+    }
 }
 
 .cat-filter-reset {
@@ -534,17 +621,20 @@
 }
 
 .cat-grid .new-price {
-    font-size: 15px;
-    font-weight: 700;
-    color: #3f3f46;
+    font-size: 16px;
+    font-weight: 800;
+    color: #212121;
     display: flex;
     align-items: center;
     gap: 4px;
+    line-height: 1.2;
 }
 
 .cat-grid .currency {
     font-size: 11px;
     font-weight: 400;
+    color: #9ca3af;
+    line-height: 1;
 }
 
 .cat-grid .fav-btn {

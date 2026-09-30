@@ -709,3 +709,29 @@ a {
     direction: ltr;
     font-family: inherit;
 }
+
+.item-link--all a {
+    color: #e23744 !important;
+    font-weight: 700;
+}
+
+.IconMenuContainer a {
+    position: relative;
+}
+
+.mob-badge {
+    position: absolute;
+    top: 0;
+    right: calc(50% - 18px);
+    min-width: 14px;
+    height: 14px;
+    padding: 0 4px;
+    border-radius: 9px;
+    background: #000;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 14px;
+    text-align: center;
+    z-index: 2;
+}

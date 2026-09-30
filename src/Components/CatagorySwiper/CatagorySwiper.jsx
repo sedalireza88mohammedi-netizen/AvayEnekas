@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from "react";
 import { Link } from 'react-router-dom';
 import "./CatagorySwiper.css"
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { fetchCategories, fetchProducts } from '../../api';
+import { fetchCategories, fetchProducts, fetchHomeCategorySlides } from '../../api';
 import SafeImg from '../../SafeImg';
 
 export default function CatagorySwiper() {
@@ -11,16 +11,30 @@ export default function CatagorySwiper() {
     useEffect(() => {
         let mounted = true;
 
-        fetchCategories()
-            .then(async (cats) => {
+        // اولویت با اسلایدرهایی است که مدیر از پنل ادمین ساخته؛
+        // اگر نبود، کاشی‌ها به‌صورت خودکار از دسته‌ها و محصولات ویژه ساخته می‌شوند.
+        fetchHomeCategorySlides()
+            .then(async (slides) => {
+                if (slides && slides.length > 0) {
+                    const tiles = slides.map((s) => ({
+                        name: s.title || s.category || '',
+                        image: s.image || '',
+                        link: s.link || (s.category ? `/AllProductList?search=${encodeURIComponent(s.category)}` : '/Catagoryes'),
+                    }));
+                    if (mounted) setCategories(tiles);
+                    return;
+                }
+
+                const cats = await fetchCategories();
                 const tiles = await Promise.all(
-                    (cats || []).map(async (name) => {
+                    (cats || []).map(async (cat) => {
+                        const name = cat && typeof cat === "object" ? cat.name : cat;
                         let image = '';
                         try {
                             const list = await fetchProducts({ category: name, featured: true, limit: 1 });
                             if (list && list[0] && list[0].image) image = list[0].image;
                         } catch { /* بدون تصویر */ }
-                        return { name, image, link: `/Catagoryes?category=${encodeURIComponent(name)}` };
+                        return { name, image, link: `/Catagoryes` };
                     })
                 );
                 if (mounted) setCategories(tiles);

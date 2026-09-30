@@ -1,0 +1,143 @@
+.cat-page {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 24px 16px 64px;
+    font-family: inherit;
+}
+
+.cat-page-header {
+    margin-bottom: 24px;
+}
+
+.cat-page-header h1 {
+    font-size: 24px;
+    font-weight: 800;
+    color: #222831;
+    margin: 0 0 6px;
+}
+
+.cat-page-header p {
+    color: #81858b;
+    font-size: 14px;
+    margin: 0;
+}
+
+.cat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+}
+
+.cat-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 14px;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.cat-card:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+}
+
+.cat-card-main {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    text-decoration: none;
+    color: inherit;
+}
+
+.cat-card-img {
+    width: 72px;
+    height: 72px;
+    border-radius: 12px;
+    background: #f4f5f6;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.cat-card-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.cat-card-img span {
+    font-size: 28px;
+    font-weight: 800;
+    color: #c9cbd0;
+}
+
+.cat-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.cat-card-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: #222831;
+    margin: 0;
+}
+
+.cat-card-count {
+    font-size: 12px;
+    color: #81858b;
+}
+
+.cat-card-subs {
+    list-style: none;
+    margin: 12px 0 0;
+    padding: 10px 0 0;
+    border-top: 1px dashed #e5e7eb;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px 10px;
+}
+
+.cat-card-subs button {
+    border: none;
+    background: none;
+    padding: 0;
+    font-size: 13px;
+    color: #62666d;
+    cursor: pointer;
+    text-align: right;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: color 0.2s;
+}
+
+.cat-card-subs button:hover {
+    color: #e23744;
+}
+
+.cat-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 80px 0;
+    color: #c9cbd0;
+    font-size: 15px;
+}
+
+@media (max-width: 900px) {
+    .cat-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 560px) {
+    .cat-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+}

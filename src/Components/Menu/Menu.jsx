@@ -1,11 +1,11 @@
 import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
 import "./Menu.css";
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBars, faBell, faBurst, faCartShopping, faClockRotateLeft, faFire, faHeart, faHome, faSearch, faSun, faTrash, faUser, faUserTie } from '@fortawesome/free-solid-svg-icons';
 import { isLoggedIn as checkLogin } from '../../auth';
 import { useAuthSync } from '../../useSeo';
-import { fetchProducts, fetchPopularSearches } from '../../api';
+import { fetchProducts, fetchPopularSearches, fetchCategories, getProfile } from '../../api';
 import { getSearchHistory, saveSearch, clearSearchHistory } from '../../searchHistory';
 import { useCartStore } from '../../cartStore';
 import SafeImg from '../../SafeImg';
@@ -59,6 +59,48 @@ const CATEGORY_DATA = {
 
 const HOT_KEYWORDS = ["باند", "میکروفون", "هدفون", "آمپلی فایر", "میکسر", "کابل XLR"];
 
+// زیرمجموعه‌های پیشنهادی برای دسته‌هایی که در دیتابیس هنوز زیرمجموعه‌ای ندارند
+const CURATED_SUBGROUPS = {
+  "اسپیکر": [
+    "بلندگو اکتیو", "بلندگو پسیو", "اسپیکر مانیتورینگ", "اسپیکر دیواری",
+    "اسپیکر سقفی", "اسپیکر ستونی", "اسپیکر شیپوری و هورن", "ساب ووفر",
+  ],
+  "هدفون": [
+    "هدفون بی‌سیم", "هدفون با سیم", "هدفون مانیتورینگ", "هدفون استودیویی",
+    "هدست گیمینگ", "هندزفری و ایرپاد", "هدست حرفه‌ای",
+  ],
+  "میکروفون": [
+    "میکروفون دستی", "میکروفون یقه‌ای", "میکروفون هدمیک", "میکروفون استودیویی",
+    "میکروفون بی‌سیم", "میکروفون حرفه‌ای",
+  ],
+  "میکسر": [
+    "میکسر دیجیتال", "میکسر آنالوگ", "پاور میکسر", "میکسر رومیزی",
+  ],
+  "کابل و اتصالات": [
+    "کابل XLR", "کابل TRS", "کابل اسپیکر", "کابل رابط", "کابل HDMI",
+    "کابل برق", "آداپتور و داینامیک",
+  ],
+  "آمپلی فایر": [
+    "آمپلی فایر اهمی", "آمپلی فایر ولتی و اهمی", "آمپلی فایر پیجینگ",
+    "آمپلی فایر تیوبی", "اکو آمپلی فایر",
+  ],
+};
+
+// یکسان‌سازی نام دسته‌ها (نیم‌فاصله، عربی/فارسی ی و ک، فاصله‌های اضافه)
+const normalizeCategoryName = (name) =>
+  String(name || "")
+    .replace(/[\u200c\u200f\u200e]/g, " ")
+    .replace(/\s+/g, " ")
+    .replace(/[يى]/g, "ی")
+    .replace(/ك/g, "ک")
+    .trim();
+
+const CURATED_SUBGROUPS_INDEX = new Map(
+  Object.keys(CURATED_SUBGROUPS).map((name) => [normalizeCategoryName(name), CURATED_SUBGROUPS[name]])
+);
+
+const ADMIN_USERNAME = "sedMad77AdminPanellAllowed";
+
 const toPersianDigits = (num) =>
   num.toString().replace(/\d/g, (x) => '۰۱۲۳۴۵۶۷۸۹'[x]);
 
@@ -75,6 +117,8 @@ function Menu({ isCart }) {
   const [query, setQuery] = useState("");
   const [loggedIn, setLoggedIn] = useState(checkLogin());
   const { cartCount, refreshCart, unreadCount, refreshMessages } = useCartStore();
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [categories, setCategories] = useState(null);
 
   // --- جستجوی زنده (سبک دیجی‌کالا) ---
   const [searchOpen, setSearchOpen] = useState(false);
@@ -95,8 +139,55 @@ function Menu({ isCart }) {
           .filter(Boolean);
         if (terms.length) setPopular(terms);
       })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
+
+  // دسته‌بندی‌ها از بک‌اند برای مگامنو
+  useEffect(() => {
+    let active = true;
+    fetchCategories()
+      .then((data) => { if (active) setCategories(Array.isArray(data) && data.length ? data : null); })
+      .catch(() => { if (active) setCategories(null); });
+    return () => { active = false; };
+  }, []);
+
+  // گیت پنل ادمین: فقط وقتی نام کاربری پروفایل با مقدار مدیر برابر باشد
+  useEffect(() => {
+    if (!loggedIn) { setIsAdmin(false); return; }
+    let active = true;
+    getProfile()
+      .then((p) => { if (active) setIsAdmin(Boolean(p && p.NameAndFamily === ADMIN_USERNAME)); })
+      .catch(() => { if (active) setIsAdmin(false); });
+    return () => { active = false; };
+  }, [loggedIn, location.pathname]);
+
+  // ساختار مگامنو: از بک‌اند و در صورت نبود، fallback به داده‌ی ثابت
+  const menuCategories = useMemo(() => {
+    if (categories) {
+      return categories
+        .slice()
+        .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+        .map((c) => {
+          const dbSubgroups = (Array.isArray(c.subgroups) ? c.subgroups : [])
+            .map((s) => (typeof s === "string" ? s : s && (s.name || s.title)))
+            .filter(Boolean);
+          const subgroups = dbSubgroups.length
+            ? dbSubgroups
+            : CURATED_SUBGROUPS_INDEX.get(normalizeCategoryName(c.name)) || [];
+          return { key: "cat-" + c.id, title: c.name, subgroups };
+        });
+    }
+    return Object.keys(CATEGORY_DATA).map((k) => ({
+      key: k,
+      title: CATEGORY_DATA[k].title,
+      subgroups: CATEGORY_DATA[k].columns.flatMap((col) => col.items || []),
+    }));
+  }, [categories]);
+
+  useEffect(() => {
+    const first = menuCategories[0];
+    if (first) setActiveCategory(first.key);
+  }, [menuCategories]);
 
   // ردیف دسته‌بندی‌ها موقع اسکرول به پایین بسته و موقع اسکرول به بالا باز می‌شود.
   // با یک آستانه (buffer) کار می‌کند تا نوسانات ریز اسکرول (که باعث گیرکردن/پرش
@@ -194,7 +285,7 @@ function Menu({ isCart }) {
     e.preventDefault();
     const value = query.trim();
     if (value) setHistory(saveSearch(value));
-    navigate(value ? `/Catagoryes?search=${encodeURIComponent(value)}` : "/Catagoryes");
+    navigate(value ? `/AllProductList?search=${encodeURIComponent(value)}` : "/AllProductList");
     closeSearch();
   };
 
@@ -229,7 +320,7 @@ function Menu({ isCart }) {
     closeSearch();
   };
 
-  const linkQuery = (value) => `/Catagoryes?search=${encodeURIComponent(value)}`;
+  const linkQuery = (value) => `/AllProductList?search=${encodeURIComponent(value)}`;
 
   const openSelected = (value) => {
     setHistory(saveSearch(value));
@@ -336,9 +427,11 @@ function Menu({ isCart }) {
           </form>
 
           <div className="LeftHed">
-            <Link to="/AdminPannel" className="AdminPannel"><h6 className="AdminPannel">
-              <FontAwesomeIcon icon={faUserTie} />پنل ادمین   </h6>
-            </Link>
+            {isAdmin && (
+              <Link to="/AdminPannel" className="AdminPannel"><h6 className="AdminPannel">
+                <FontAwesomeIcon icon={faUserTie} />پنل ادمین   </h6>
+              </Link>
+            )}
             {loggedIn ? (
               <Link to="/Profile" className="UserContainer">
                 <FontAwesomeIcon icon={faUser} />
@@ -353,7 +446,7 @@ function Menu({ isCart }) {
 
             <div className="BorderLine"></div>
 
-             <button className="massege-btn" onClick={() => navigate("/Profile?tab=messages")} aria-label=" پیام ها">
+            <button className="massege-btn" onClick={() => navigate("/Profile?tab=messages")} aria-label=" پیام ها">
               <FontAwesomeIcon icon={faBell} />
               {unreadCount > 0 && <span className="bell-unread-badge">{toPersianDigits(unreadCount)}</span>}
             </button>
@@ -363,7 +456,7 @@ function Menu({ isCart }) {
               {cartCount > 0 && <span className="cart-count-badge">{toPersianDigits(cartCount)}</span>}
             </button>
 
-            
+
           </div>
         </div>
 
@@ -384,32 +477,54 @@ function Menu({ isCart }) {
               {isOpen && (
                 <div className="digikala-mega-menu">
                   <div className="sidebar">
-                    {Object.keys(CATEGORY_DATA).map((catKey) => (
+                    {menuCategories.map((cat) => (
                       <div
-                        key={catKey}
-                        className={`sidebar-item ${activeCategory === catKey ? "active" : ""}`}
-                        onMouseEnter={() => setActiveCategory(catKey)}
+                        key={cat.key}
+                        className={`sidebar-item ${activeCategory === cat.key ? "active" : ""}`}
+                        onMouseEnter={() => setActiveCategory(cat.key)}
                       >
-                        {CATEGORY_DATA[catKey].title}
+                        {cat.title}
                       </div>
                     ))}
                   </div>
                   <div className="content-area">
-                    {CATEGORY_DATA[activeCategory].columns.map((col, colIndex) => (
-                      <div key={colIndex} className="menu-column">
-                        <h4 className="column-title-MegaMenu">
-                          <span className="title-text">{col.title}</span>
-                          <span className="chevron">›</span>
-                        </h4>
-                        <ul className="item-list">
-                          {col.items.map((item, itemIndex) => (
-                            <li key={itemIndex} className="item-link">
-                              <Link onClick={() => { setIsOpen(false); setHistory(saveSearch(item)); }} to={linkQuery(item)}>{item}</Link>
+                    {(() => {
+                      const cat = menuCategories.find((c) => c.key === activeCategory) || menuCategories[0];
+                      if (!cat) return <div className="menu-column" />;
+                      if (cat.subgroups.length) {
+                        return (
+                          <div className="menu-column">
+                            <h4 className="column-title-MegaMenu">
+                              <span className="title-text">{cat.title}</span>
+                              <span className="chevron">›</span>
+                            </h4>
+                            <ul className="item-list">
+                              {cat.subgroups.map((item, itemIndex) => (
+                                <li key={itemIndex} className="item-link">
+                                  <Link onClick={() => { setIsOpen(false); setHistory(saveSearch(item)); }} to={linkQuery(item)}>{item}</Link>
+                                </li>
+                              ))}
+                              <li className="item-link item-link--all">
+                                <Link to="/Catagoryes" onClick={() => setIsOpen(false)}>مشاهده همه دسته‌بندی‌ها</Link>
+                              </li>
+                            </ul>
+                          </div>
+                        );
+                      }
+                      return (
+                        <div className="menu-column">
+                          <h4 className="column-title-MegaMenu">
+                            <span className="title-text">{cat.title}</span>
+                            <span className="chevron">›</span>
+                          </h4>
+                          <ul className="item-list">
+                            <li className="item-link">
+                              <Link to="/Catagoryes" onClick={() => setIsOpen(false)}>مشاهده همه محصولات این دسته</Link>
                             </li>
-                          ))}
-                        </ul>
-                      </div>
-                    ))}
+                          </ul>
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
               )}
@@ -436,6 +551,12 @@ function Menu({ isCart }) {
           <NavLink className={({ isActive }) => (isActive ? "active-link" : "")} to="/Cart">
             <FontAwesomeIcon icon={faCartShopping} />
             <span>سبد خرید</span>
+            {cartCount > 0 && <span className="mob-badge">{toPersianDigits(cartCount)}</span>}
+          </NavLink>
+          <NavLink className={({ isActive }) => (isActive ? "active-link" : "")} to="/Profile?tab=messages">
+            <FontAwesomeIcon icon={faBell} />
+            <span>پیام‌ها</span>
+            {unreadCount > 0 && <span className="mob-badge mob-badge--bell">{toPersianDigits(unreadCount)}</span>}
           </NavLink>
           {loggedIn ? (
             <NavLink className={({ isActive }) => (isActive ? "active-link" : "mobUser")} to="/Profile">

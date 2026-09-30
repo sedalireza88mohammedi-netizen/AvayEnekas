@@ -7,6 +7,8 @@ import {
   ArrowUpRight, ArrowDownRight, Phone, Mail, Calendar, Package2,
   CheckCircle2, Clock, XCircle, Truck, Menu, Bell, ImagePlus, Video,
   RefreshCw, FileText, MessageSquareText, Send,
+  Star, Images, PlusCircle, MinusCircle, FolderOpen, MessagesSquare,
+  Layers, GripVertical, Check,
 } from "lucide-react";
 import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -15,11 +17,16 @@ import {
 import "./AdminPannel.css";
 import {
   CATEGORY_LIST,
-  fetchProducts, createProduct, updateProduct, deleteProduct,
+  fetchProducts, createProduct, updateProduct, deleteProduct, updateProductSelection,
   fetchOrders, updateOrderStatus,
   fetchCustomers,
   fetchArticles, createArticle, updateArticle, deleteArticle,
-  fetchAdminMessages, sendAdminMessage,
+  fetchAdminMessages, sendAdminMessage, deleteAdminMessage,
+  fetchHomeSliders, createHomeSlider, updateHomeSlider, deleteHomeSlider,
+  fetchCategorySlides, createCategorySlide, updateCategorySlide, deleteCategorySlide,
+  fetchAdminCategories, createAdminCategory, updateAdminCategory, deleteAdminCategory,
+  fetchAllReviews, deleteReview,
+  faError,
 } from "../AdminPannel/Api.jsx";
 
 /**
@@ -70,8 +77,13 @@ const statusIcon = (status) => {
 const NAV = [
   { key: "dashboard", label: "داشبورد", icon: LayoutDashboard },
   { key: "products", label: "محصولات", icon: Package },
+  { key: "special", label: "شگفت‌انگیزها و محبوب‌ها", icon: Star },
+  { key: "sliders", label: "اسلایدرهای صفحه اصلی", icon: Images },
+  { key: "categorySlides", label: "اسلایدر دسته‌بندی‌ها", icon: FolderOpen },
+  { key: "categories", label: "دسته‌بندی‌ها", icon: FolderOpen },
   { key: "orders", label: "سفارش‌ها", icon: ShoppingCart },
   { key: "customers", label: "مشتریان", icon: Users },
+  { key: "reviews", label: "دیدگاه‌ها", icon: MessagesSquare },
   { key: "messages", label: "پیامک", icon: MessageSquareText },
   { key: "articles", label: "مقالات", icon: FileText },
   { key: "reports", label: "گزارش فروش", icon: BarChart3 },
@@ -173,84 +185,56 @@ function FullScreenState({ kind, message, onRetry }) {
 
 /* ============================== DASHBOARD ============================== */
 
-function Dashboard({ orders, products, onGoOrders, onGoProducts }) {
-  const totalRevenue = orders.reduce((s, o) => s + o.total, 0);
-  const pendingOrders = orders.filter((o) => o.status === "در انتظار پردازش").length;
+function Dashboard({ products, categories, reviews, messages, orders, onGoProducts, onGoOrders }) {
   const lowStock = products.filter((p) => p.stock > 0 && p.stock <= p.threshold).length;
   const outOfStock = products.filter((p) => p.stock === 0).length;
+  const selectedCount = products.filter((p) => p.is_special || p.is_popular).length;
+  const pendingOrders = (orders || []).filter((o) => o.status === "در انتظار پردازش").length;
+  const salesTotal = (orders || []).reduce((s, o) => s + (o.total || 0), 0);
+
+  const stockBadge = (p) => {
+    const cls = p.stock === 0 ? "badge--danger" : p.stock <= p.threshold ? "badge--warning" : "badge--success";
+    const label = p.stock === 0 ? "ناموجود" : p.stock <= p.threshold ? "کم‌موجودی" : "در دسترس";
+    return <span className={cx("badge", cls)}>{label}</span>;
+  };
 
   return (
     <div className="stack">
       <div className="stats-grid">
-        <StatCard icon={DollarSign} label="درآمد کل (این ماه)" value={toman(totalRevenue)} delta="۱۲.۴٪" positive level={72} />
-        <StatCard icon={ShoppingBag} label="سفارش‌های ثبت‌شده" value={num(orders.length)} delta="۸.۱٪" positive level={58} onClick={() => onGoOrders("همه")} />
-        <StatCard icon={Clock} label="در انتظار پردازش" value={num(pendingOrders)} delta="۳.۲٪" positive={false} level={34} onClick={() => onGoOrders("در انتظار پردازش")} />
-        <StatCard icon={AlertTriangle} label="موجودی رو به اتمام" value={num(lowStock + outOfStock)} delta="۲ آیتم" positive={false} level={22} onClick={onGoProducts} />
-      </div>
-
-      <div className="charts-grid">
-        <div className="card chart-card chart-card--wide">
-          <div className="chart-card-header">
-            <div>
-              <h2>روند فروش سالانه</h2>
-              <p className="muted">بر حسب میلیون تومان</p>
-            </div>
-            <span className="chip"><TrendingUp size={12} /> رشد مثبت</span>
-          </div>
-          <ResponsiveContainer width="100%" height={260}>
-            <LineChart data={salesByMonth}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#F1F2F4" vertical={false} />
-              <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#9CA3AF" }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11, fill: "#9CA3AF" }} axisLine={false} tickLine={false} />
-              <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid #E5E7EB", fontSize: 12, direction: "rtl", fontFamily: "Vazirmatn" }} />
-              <Line type="monotone" dataKey="sales" stroke={CHART_INK} strokeWidth={2.5} dot={{ r: 3, fill: CHART_INK }} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-
-        <div className="card chart-card">
-
-
-<h2>سهم دسته‌بندی‌ها</h2>
-          <p className="muted">از کل فروش</p>
-          <ResponsiveContainer width="100%" height={200}>
-            <PieChart>
-              <Pie data={categoryShare} dataKey="value" nameKey="name" innerRadius={52} outerRadius={80} paddingAngle={2}>
-                {categoryShare.map((entry, i) => <Cell key={entry.name} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
-              </Pie>
-              <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid #E5E7EB", fontSize: 12, fontFamily: "Vazirmatn" }} />
-            </PieChart>
-          </ResponsiveContainer>
-          <div className="legend">
-            {categoryShare.slice(0, 4).map((c, i) => (
-              <div key={c.name} className="legend-item">
-                <span className="legend-label"><span className="legend-dot" style={{ background: PIE_COLORS[i] }} />{c.name}</span>
-                <span className="mono">{c.value}٪</span>
-              </div>
-            ))}
-          </div>
-        </div>
+        <StatCard icon={Package} label="تعداد محصولات" value={num(products.length)} delta={`${num(selectedCount)} ویژه/محبوب`} level={86} onClick={onGoProducts} />
+        <StatCard icon={FolderOpen} label="دسته‌بندی‌ها" value={num(categories.length)} delta="دسته فعال" level={64} />
+        <StatCard icon={MessagesSquare} label="دیدگاه‌ها" value={num(reviews.length)} delta="نظر ثبت‌شده" level={52} />
+        <StatCard icon={MessageSquareText} label="پیام‌های صندوق" value={num(messages.length)} delta="پیام کاربران" level={40} />
+        <StatCard icon={ShoppingCart} label="سفارش‌ها" value={num((orders || []).length)} delta={`${num(pendingOrders)} در انتظار پردازش`} level={70} onClick={() => onGoOrders && onGoOrders("همه")} />
+        <StatCard icon={DollarSign} label="مجموع فروش" value={toman(salesTotal)} delta="از سفارش‌های ثبت‌شده" level={58} onClick={() => onGoOrders && onGoOrders("همه")} />
+        <StatCard icon={Package2} label="کم‌موجودی" value={num(lowStock)} delta="اقلام رو به اتمام" positive={false} level={28} onClick={onGoProducts} />
+        <StatCard icon={XCircle} label="ناموجود" value={num(outOfStock)} delta="اقلام بدون موجودی" positive={false} level={12} onClick={onGoProducts} />
       </div>
 
       <div className="card table-card">
-        <div className="table-card-header"><h2>آخرین سفارش‌ها</h2></div>
+        <div className="table-card-header"><h2>وضعیت کاتالوگ</h2></div>
         <div className="table-scroll">
           <table className="data-table">
             <thead>
               <tr>
-                <th>شماره سفارش</th><th>مشتری</th><th>تاریخ</th><th>مبلغ</th><th>وضعیت</th>
+                <th>محصول</th><th>دسته</th><th>قیمت</th><th>موجودی</th><th>وضعیت</th>
               </tr>
             </thead>
             <tbody>
-              {orders.slice(0, 5).map((o) => (
-                <tr key={o.id}>
-                  <td className="mono">{o.id}</td>
-                  <td className="bold">{o.customer}</td>
-                  <td className="mono muted">{o.date}</td>
-                  <td className="mono bold">{toman(o.total)}</td>
-                  <td><Badge status={o.status} /></td>
+              {products.slice(0, 6).map((p) => (
+                <tr key={p.id}>
+                  <td className="bold">{p.name}</td>
+                  <td className="muted small">{p.category}</td>
+                  <td className="mono bold">{toman(p.price)}</td>
+                  <td className="mono">{p.stock}</td>
+                  <td>{stockBadge(p)}</td>
                 </tr>
               ))}
+              {products.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="empty-row">محصولی ثبت نشده است</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -261,9 +245,9 @@ function Dashboard({ orders, products, onGoOrders, onGoProducts }) {
 
 /* ============================== PRODUCTS ============================== */
 
-const EMPTY_FORM = { name: "", category: CATEGORY_LIST[0], sku: "", price: "", stock: "", threshold: "5", images: [], video: null };
+const EMPTY_FORM = { name: "", category: CATEGORY_LIST[0], sku: "", price: "", discountPercent: "", stock: "", threshold: "5", rating: "5", description: "", images: [], video: null };
 
-function Products({ products, onCreate, onUpdate, onDelete }) {
+function Products({ products, onCreate, onUpdate, onDelete, onQuickRating }) {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("همه");
   const [modal, setModal] = useState(null);
@@ -281,8 +265,15 @@ function Products({ products, onCreate, onUpdate, onDelete }) {
 
   const openAdd = () => { setForm(EMPTY_FORM); setFormError(""); setModal({ mode: "add" }); };
   const openEdit = (p) => {
+    const discountPercent =
+      p.oldPrice && Number(p.oldPrice) > 0 && Number(p.price) > 0 && Number(p.oldPrice) > Number(p.price)
+        ? Math.round((1 - Number(p.price) / Number(p.oldPrice)) * 100)
+        : "";
     setForm({
-      name: p.name, category: p.category, sku: p.sku, price: p.price, stock: p.stock, threshold: p.threshold,
+      name: p.name, category: p.category, sku: p.sku, price: p.price, discountPercent,
+      stock: p.stock, threshold: p.threshold,
+      rating: p.rating != null ? p.rating : "5",
+      description: p.description || "",
       images: (p.images || []).map((img) => ({ ...img })),
       video: p.video ? { ...p.video } : null,
     });
@@ -318,8 +309,11 @@ const removeVideo = () => setForm((f) => ({ ...f, video: null }));
       category: form.category,
       sku: form.sku,
       price: form.price,
+      discountPercent: form.discountPercent,
       stock: form.stock,
       threshold: form.threshold,
+      rating: form.rating,
+      description: form.description,
       imageFiles: form.images.filter((img) => img.file).map((img) => img.file),
       keepImageUrls: form.images.filter((img) => !img.file).map((img) => img.url),
       videoFile: form.video && form.video.file ? form.video.file : null,
@@ -333,7 +327,7 @@ const removeVideo = () => setForm((f) => ({ ...f, video: null }));
       }
       setModal(null);
     } catch (err) {
-      setFormError(err.message || "ذخیره‌سازی با خطا مواجه شد");
+      setFormError(faError(err, "ذخیره‌سازی با خطا مواجه شد"));
     } finally {
       setSubmitting(false);
     }
@@ -345,7 +339,7 @@ const removeVideo = () => setForm((f) => ({ ...f, video: null }));
       await onDelete(deleteId);
       setDeleteId(null);
     } catch (err) {
-      setFormError(err.message || "حذف با خطا مواجه شد");
+      setFormError(faError(err, "حذف با خطا مواجه شد"));
     } finally {
       setDeleting(false);
     }
@@ -377,7 +371,7 @@ const removeVideo = () => setForm((f) => ({ ...f, video: null }));
           <table className="data-table">
             <thead>
               <tr>
-                <th>تصویر</th><th>محصول</th><th>دسته‌بندی</th><th>کد کالا</th><th>قیمت</th><th>موجودی</th><th>وضعیت</th><th></th>
+                <th>تصویر</th><th>محصول</th><th>دسته‌بندی</th><th>کد کالا</th><th>قیمت</th><th>موجودی</th><th>امتیاز</th><th>وضعیت</th><th></th>
               </tr>
             </thead>
             <tbody>
@@ -405,6 +399,17 @@ const removeVideo = () => setForm((f) => ({ ...f, video: null }));
                       {num(p.stock)}
                     </span>
                   </td>
+                  <td>
+                    <div className="rating-stepper rating-stepper--mini">
+                      <button type="button" onClick={() => onQuickRating(p, -0.5)} aria-label={"کاهش امتیاز " + p.name}>
+                        <MinusCircle size={14} aria-hidden="true" />
+                      </button>
+                      <span className="mono bold">{Number(p.rating).toLocaleString('fa-IR', { maximumFractionDigits: 1 })}</span>
+                      <button type="button" onClick={() => onQuickRating(p, +0.5)} aria-label={"افزایش امتیاز " + p.name}>
+                        <PlusCircle size={14} aria-hidden="true" />
+                      </button>
+                    </div>
+                  </td>
                   <td><Badge status={p.status} /></td>
                   <td>
                     <div className="row-actions">
@@ -420,7 +425,7 @@ const removeVideo = () => setForm((f) => ({ ...f, video: null }));
                   </td>
                 </tr>
               ))}
-              {filtered.length === 0 && <tr><td colSpan={8} className="empty-row">محصولی با این مشخصات پیدا نشد</td></tr>}
+              {filtered.length === 0 && <tr><td colSpan={9} className="empty-row">محصولی با این مشخصات پیدا نشد</td></tr>}
             </tbody>
           </table>
         </div>
@@ -447,12 +452,57 @@ const removeVideo = () => setForm((f) => ({ ...f, video: null }));
             <Field label="قیمت (تومان)">
               <input disabled={submitting} type="number" className="mono" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
             </Field>
+            <Field label="درصد تخفیف (اختیاری)">
+              <input disabled={submitting} type="number" min="0" max="99" className="mono" value={form.discountPercent} onChange={(e) => setForm({ ...form, discountPercent: e.target.value })} placeholder="۰ تا ۹۹" />
+            </Field>
+          </div>
+          {(() => {
+            const pct = Math.max(0, Math.min(99, Number(form.discountPercent) || 0));
+            const priceNow = Number(form.price) || 0;
+            if (pct > 0 && priceNow > 0) {
+              const original = Math.round(priceNow / (1 - pct / 100));
+              const saved = original - priceNow;
+              return (
+                <div className="discount-preview">
+                  <span>قیمت اصلی: <b>{toman(original)}</b></span>
+                  <span>هزینه تخفیف: <b className="text-danger">{toman(saved)}</b></span>
+                </div>
+              );
+            }
+            return null;
+          })()}
+          <div className="field-grid">
             <Field label="موجودی">
               <input disabled={submitting} type="number" className="mono" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} />
             </Field>
+            <Field label="حد هشدار موجودی کم">
+              <input disabled={submitting} type="number" className="mono" value={form.threshold} onChange={(e) => setForm({ ...form, threshold: e.target.value })} />
+            </Field>
           </div>
-          <Field label="حد هشدار موجودی کم">
-            <input disabled={submitting} type="number" className="mono" value={form.threshold} onChange={(e) => setForm({ ...form, threshold: e.target.value })} />
+
+          <Field label="امتیاز محصول (۰ تا ۵)">
+            <div className="rating-stepper">
+              <button type="button" disabled={submitting} onClick={() => setForm((f) => ({ ...f, rating: Math.max(0, (Number(f.rating) || 0) - 0.5) }))} aria-label="کاهش امتیاز">
+                <MinusCircle size={16} aria-hidden="true" />
+              </button>
+              <span className="rating-stepper-value mono">
+                {Number(form.rating || 0).toLocaleString('fa-IR', { maximumFractionDigits: 1 })}
+              </span>
+              <button type="button" disabled={submitting} onClick={() => setForm((f) => ({ ...f, rating: Math.min(5, (Number(f.rating) || 0) + 0.5) }))} aria-label="افزایش امتیاز">
+                <PlusCircle size={16} aria-hidden="true" />
+              </button>
+            </div>
+          </Field>
+
+          <Field label="توضیحات محصول">
+            <textarea
+              rows={6}
+              disabled={submitting}
+              value={form.description}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              placeholder="مشخصات فنی، ویژگی‌ها و توضیح کامل محصول..."
+            />
+            <p className="muted small" style={{ textAlign: "left", marginTop: 4 }}>{num(form.description.length)} کاراکتر</p>
           </Field>
 
           <Field label={"تصاویر محصول" + (form.images.length ? " (" + num(form.images.length) + ")" : "")}>
@@ -509,6 +559,364 @@ const removeVideo = () => setForm((f) => ({ ...f, video: null }));
           <div className="modal-actions">
             <button type="button" onClick={confirmDelete} disabled={deleting} className="btn btn-danger btn-block">
               {deleting ? "در حال حذف..." : "حذف محصول"}
+            </button>
+            <button type="button" onClick={() => setDeleteId(null)} disabled={deleting} className="btn btn-secondary">انصراف</button>
+          </div>
+        </Modal>
+      )}
+    </div>
+  );
+}
+
+/* ============================== HOME SLIDERS ============================== */
+
+const EMPTY_SLIDER = { title: "", link: "", active: true, imageFile: null, imagePreview: null };
+
+function HomeSliders({ sliders, onCreate, onUpdate, onDelete }) {
+  const [modal, setModal] = useState(null);
+  const [form, setForm] = useState(EMPTY_SLIDER);
+  const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState("");
+  const [deleteId, setDeleteId] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+  const [toggleId, setToggleId] = useState(null);
+
+  const openAdd = () => { setForm({ ...EMPTY_SLIDER }); setFormError(""); setModal({ mode: "add" }); };
+  const openEdit = (s) => {
+    setForm({ title: s.title, link: s.link || "", active: s.active, imageFile: null, imagePreview: null });
+    setFormError("");
+    setModal({ mode: "edit", slider: s });
+  };
+
+  const handleImage = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setForm((f) => ({ ...f, imageFile: file, imagePreview: URL.createObjectURL(file) }));
+    e.target.value = "";
+  };
+
+  const submit = async () => {
+    if (modal.mode === "add" && !form.imageFile) { setFormError("انتخاب عکس اسلایدر الزامی است"); return; }
+    setSubmitting(true);
+    setFormError("");
+    const payload = { title: form.title, link: form.link, active: form.active, imageFile: form.imageFile };
+    try {
+      if (modal.mode === "add") await onCreate(payload);
+      else await onUpdate(modal.slider.id, payload);
+      setModal(null);
+    } catch (err) {
+      setFormError(faError(err, "ذخیره اسلایدر با خطا مواجه شد"));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const toggleActive = async (s) => {
+    setToggleId(s.id);
+    try {
+      await onUpdate(s.id, { title: s.title, link: s.link || "", active: !s.active });
+    } catch (err) {
+      setFormError(faError(err, "بروزرسانی اسلایدر با خطا مواجه شد"));
+    } finally {
+      setToggleId(null);
+    }
+  };
+
+  const confirmDelete = async () => {
+    setDeleting(true);
+    try {
+      await onDelete(deleteId);
+      setDeleteId(null);
+    } catch (err) {
+      setFormError(faError(err, "حذف اسلایدر با خطا مواجه شد"));
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  return (
+    <div className="stack">
+      <div className="toolbar">
+        <p className="toolbar-hint">این اسلایدرها در ابتدای صفحه اصلی نمایش داده می‌شوند.</p>
+        <button type="button" onClick={openAdd} className="btn btn-primary">
+          <Plus size={16} aria-hidden="true" /> افزودن اسلایدر
+        </button>
+      </div>
+
+      {formError && <div className="inline-error"><span>{formError}</span></div>}
+
+      {sliders.length === 0 ? (
+        <div className="card empty-panel">
+          <Images size={40} className="muted" />
+          <p className="muted">هنوز اسلایدی اضافه نشده است. با دکمه «افزودن اسلایدر» شروع کنید.</p>
+        </div>
+      ) : (
+        <div className="slider-grid">
+          {sliders.map((s) => (
+            <div key={s.id} className={cx("slider-card", !s.active && "is-inactive")}>
+              <div className="slider-card-image">
+                {s.image ? <img src={s.image} alt={s.title} /> : <Images size={28} className="muted" />}
+                {!s.active && <span className="slider-card-hidden">نامرئی</span>}
+              </div>
+              <div className="slider-card-body">
+                <p className="bold small">{s.title || "بدون عنوان"}</p>
+                {s.link && <p className="muted small slider-card-link" title={s.link}>{s.link}</p>}
+                <div className="slider-card-actions">
+                  <button type="button" onClick={() => toggleActive(s)} disabled={toggleId === s.id} className={cx("switch", s.active && "is-on")} aria-label={s.active ? "غیرفعال کردن اسلایدر" : "فعال کردن اسلایدر"} role="switch" aria-checked={s.active}>
+                    <span className="switch-knob" />
+                  </button>
+                  <button type="button" onClick={() => openEdit(s)} className="icon-btn" aria-label="ویرایش اسلایدر">
+                    <Pencil size={14} aria-hidden="true" />
+                  </button>
+                  <button type="button" onClick={() => setDeleteId(s.id)} className="icon-btn icon-btn--danger" aria-label="حذف اسلایدر">
+                    <Trash2 size={14} aria-hidden="true" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {modal && (
+        <Modal title={modal.mode === "add" ? "افزودن اسلایدر جدید" : "ویرایش اسلایدر"} onClose={() => !submitting && setModal(null)}>
+          {formError && <div className="inline-error"><span>{formError}</span></div>}
+          <Field label="عنوان اسلایدر">
+            <input disabled={submitting} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="مثلاً فروشگاه تخصصی آوای انعکاس" />
+          </Field>
+          <Field label="لینک (اختیاری)">
+            <input disabled={submitting} dir="ltr" value={form.link} onChange={(e) => setForm({ ...form, link: e.target.value })} placeholder="/Catagoryes?category=اسپیکر" />
+          </Field>
+          <Field label="عکس اسلایدر">
+            {form.imagePreview ? (
+              <div className="slider-upload-preview">
+                <img src={form.imagePreview} alt="" />
+                <button type="button" onClick={() => setForm((f) => ({ ...f, imageFile: null, imagePreview: null }))} className="icon-btn icon-btn--danger" aria-label="حذف عکس جدید">
+                  <X size={14} aria-hidden="true" />
+                </button>
+              </div>
+            ) : (
+              <label className="upload-box">
+                <ImagePlus size={17} aria-hidden="true" />
+                <span>{modal.mode === "add" ? "انتخاب عکس اسلایدر" : "جایگزینی عکس فعلی (اختیاری)"}</span>
+                <input type="file" accept="image/*" disabled={submitting} onChange={handleImage} hidden />
+              </label>
+            )}
+          </Field>
+          <Field label="نمایش در صفحه اصلی">
+            <label className="check-line">
+              <input type="checkbox" disabled={submitting} checked={form.active} onChange={(e) => setForm({ ...form, active: e.target.checked })} />
+              <span>{form.active ? "فعال" : "غیرفعال"}</span>
+            </label>
+          </Field>
+          <div className="modal-actions">
+            <button type="button" onClick={submit} disabled={submitting} className="btn btn-primary btn-block">
+              {submitting ? "در حال ذخیره..." : modal.mode === "add" ? "افزودن اسلایدر" : "ذخیره تغییرات"}
+            </button>
+            <button type="button" onClick={() => setModal(null)} disabled={submitting} className="btn btn-secondary">انصراف</button>
+          </div>
+        </Modal>
+      )}
+
+      {deleteId && (
+        <Modal title="حذف اسلایدر" onClose={() => !deleting && setDeleteId(null)}>
+          <p className="muted" style={{ marginBottom: 24 }}>آیا از حذف این اسلایدر مطمئن هستید؟ این عملیات قابل بازگشت نیست.</p>
+          <div className="modal-actions">
+            <button type="button" onClick={confirmDelete} disabled={deleting} className="btn btn-danger btn-block">
+              {deleting ? "در حال حذف..." : "حذف اسلایدر"}
+            </button>
+            <button type="button" onClick={() => setDeleteId(null)} disabled={deleting} className="btn btn-secondary">انصراف</button>
+          </div>
+        </Modal>
+      )}
+    </div>
+  );
+}
+
+/* ============================== CATEGORY SLIDES ============================== */
+
+const EMPTY_CAT_SLIDE = {
+  title: "", category: "", link: "", order: 0, active: true,
+  imageFile: null, imagePreview: null,
+};
+
+function CategorySlides({ slides, onCreate, onUpdate, onDelete }) {
+  const [modal, setModal] = useState(null);
+  const [form, setForm] = useState(EMPTY_CAT_SLIDE);
+  const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState("");
+  const [deleteId, setDeleteId] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+  const [toggleId, setToggleId] = useState(null);
+
+  const openAdd = () => { setForm({ ...EMPTY_CAT_SLIDE }); setFormError(""); setModal({ mode: "add" }); };
+  const openEdit = (s) => {
+    setForm({
+      title: s.title || "", category: s.category || "", link: s.link || "",
+      order: s.order || 0, active: s.active, imageFile: null, imagePreview: null,
+    });
+    setFormError("");
+    setModal({ mode: "edit", slide: s });
+  };
+
+  const handleImage = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setForm((f) => ({ ...f, imageFile: file, imagePreview: URL.createObjectURL(file) }));
+    e.target.value = "";
+  };
+
+  const submit = async () => {
+    if (!form.title.trim()) { setFormError("عنوان اسلایدر دسته‌بندی را وارد کنید"); return; }
+    setSubmitting(true);
+    setFormError("");
+    const payload = {
+      title: form.title.trim(),
+      category: form.category,
+      link: form.link,
+      order: form.order,
+      active: form.active,
+      imageFile: form.imageFile,
+    };
+    try {
+      if (modal.mode === "add") await onCreate(payload);
+      else await onUpdate(modal.slide.id, payload);
+      setModal(null);
+    } catch (err) {
+      setFormError(faError(err, "ذخیره اسلایدر دسته‌بندی با خطا مواجه شد"));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const toggleActive = async (s) => {
+    setToggleId(s.id);
+    try {
+      await onUpdate(s.id, {
+        title: s.title, category: s.category || "", link: s.link || "",
+        order: s.order || 0, active: !s.active,
+      });
+    } catch (err) {
+      setFormError(faError(err, "بروزرسانی اسلایدر با خطا مواجه شد"));
+    } finally {
+      setToggleId(null);
+    }
+  };
+
+  const confirmDelete = async () => {
+    setDeleting(true);
+    try {
+      await onDelete(deleteId);
+      setDeleteId(null);
+    } catch (err) {
+      setFormError(faError(err, "حذف اسلایدر با خطا مواجه شد"));
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  return (
+    <div className="stack">
+      <div className="toolbar">
+        <p className="toolbar-hint">
+          این کاشی‌ها جای اسلایدر خودکار دسته‌بندی‌ها در صفحه اصلی را می‌گیرند. اگر هیچ‌کدام فعال نباشند،
+          دسته‌بندی‌ها به‌صورت خودکار از روی محصولات ویژه ساخته می‌شوند.
+        </p>
+        <button type="button" onClick={openAdd} className="btn btn-primary">
+          <Plus size={16} aria-hidden="true" /> افزودن اسلایدر دسته‌بندی
+        </button>
+      </div>
+
+      {formError && <div className="inline-error"><span>{formError}</span></div>}
+
+      {slides.length === 0 ? (
+        <div className="card empty-panel">
+          <FolderOpen size={40} className="muted" />
+          <p className="muted">هنوز اسلایدر دسته‌بندی‌ای اضافه نشده است. در حال حاضر دسته‌بندی‌ها به‌صورت خودکار نمایش داده می‌شوند.</p>
+        </div>
+      ) : (
+        <div className="slider-grid">
+          {slides.map((s) => (
+            <div key={s.id} className={cx("slider-card", !s.active && "is-inactive")}>
+              <div className="slider-card-image">
+                {s.image ? <img src={s.image} alt={s.title} /> : <FolderOpen size={28} className="muted" />}
+                {!s.active && <span className="slider-card-hidden">نامرئی</span>}
+              </div>
+              <div className="slider-card-body">
+                <p className="bold small">{s.title || "بدون عنوان"}</p>
+                {s.category && <p className="muted small">دسته: {s.category}</p>}
+                {s.link && <p className="muted small slider-card-link" title={s.link}>{s.link}</p>}
+                <div className="slider-card-actions">
+                  <button type="button" onClick={() => toggleActive(s)} disabled={toggleId === s.id} className={cx("switch", s.active && "is-on")} aria-label={s.active ? "غیرفعال کردن" : "فعال کردن"} role="switch" aria-checked={s.active}>
+                    <span className="switch-knob" />
+                  </button>
+                  <button type="button" onClick={() => openEdit(s)} className="icon-btn" aria-label="ویرایش اسلایدر دسته‌بندی">
+                    <Pencil size={14} aria-hidden="true" />
+                  </button>
+                  <button type="button" onClick={() => setDeleteId(s.id)} className="icon-btn icon-btn--danger" aria-label="حذف اسلایدر دسته‌بندی">
+                    <Trash2 size={14} aria-hidden="true" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {modal && (
+        <Modal title={modal.mode === "add" ? "افزودن اسلایدر دسته‌بندی" : "ویرایش اسلایدر دسته‌بندی"} onClose={() => !submitting && setModal(null)}>
+          {formError && <div className="inline-error"><span>{formError}</span></div>}
+          <Field label="عنوان (روی کاشی نمایش داده می‌شود)">
+            <input disabled={submitting} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="مثلاً اسپیکر و باند" />
+          </Field>
+          <div className="field-grid">
+            <Field label="دسته‌بندی (اختیاری)">
+              <input disabled={submitting} value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} placeholder="مثلاً اسپیکر" />
+            </Field>
+            <Field label="ترتیب نمایش">
+              <input disabled={submitting} className="mono" type="number" value={form.order} onChange={(e) => setForm({ ...form, order: Number(e.target.value) || 0 })} />
+            </Field>
+          </div>
+          <Field label="لینک مقصد (اختیاری)">
+            <input disabled={submitting} dir="ltr" value={form.link} onChange={(e) => setForm({ ...form, link: e.target.value })} placeholder="/AllProductList?search=اسپیکر" />
+          </Field>
+          <Field label="تصویر کاشی (اختیاری)">
+            {form.imagePreview ? (
+              <div className="slider-upload-preview">
+                <img src={form.imagePreview} alt="" />
+                <button type="button" onClick={() => setForm((f) => ({ ...f, imageFile: null, imagePreview: null }))} className="icon-btn icon-btn--danger" aria-label="حذف عکس جدید">
+                  <X size={14} aria-hidden="true" />
+                </button>
+              </div>
+            ) : (
+              <label className="upload-box">
+                <ImagePlus size={17} aria-hidden="true" />
+                <span>{modal.mode === "add" ? "انتخاب تصویر" : "جایگزینی تصویر فعلی (اختیاری)"}</span>
+                <input type="file" accept="image/*" disabled={submitting} onChange={handleImage} hidden />
+              </label>
+            )}
+          </Field>
+          <Field label="نمایش در صفحه اصلی">
+            <label className="check-line">
+              <input type="checkbox" disabled={submitting} checked={form.active} onChange={(e) => setForm({ ...form, active: e.target.checked })} />
+              <span>{form.active ? "فعال" : "غیرفعال"}</span>
+            </label>
+          </Field>
+          <div className="modal-actions">
+            <button type="button" onClick={submit} disabled={submitting} className="btn btn-primary btn-block">
+              {submitting ? "در حال ذخیره..." : modal.mode === "add" ? "افزودن" : "ذخیره تغییرات"}
+            </button>
+            <button type="button" onClick={() => setModal(null)} disabled={submitting} className="btn btn-secondary">انصراف</button>
+          </div>
+        </Modal>
+      )}
+
+      {deleteId && (
+        <Modal title="حذف اسلایدر دسته‌بندی" onClose={() => !deleting && setDeleteId(null)}>
+          <p className="muted" style={{ marginBottom: 24 }}>آیا از حذف این اسلایدر مطمئن هستید؟ این عملیات قابل بازگشت نیست.</p>
+          <div className="modal-actions">
+            <button type="button" onClick={confirmDelete} disabled={deleting} className="btn btn-danger btn-block">
+              {deleting ? "در حال حذف..." : "حذف اسلایدر"}
             </button>
             <button type="button" onClick={() => setDeleteId(null)} disabled={deleting} className="btn btn-secondary">انصراف</button>
           </div>
@@ -948,50 +1356,119 @@ keepCoverImageUrl: form.coverImage && !form.coverImage.file ? form.coverImage.ur
 
 /* ============================== REPORTS ============================== */
 
-function Reports({ products }) {
-  const totalYear = salesByMonth.reduce((s, m) => s + m.sales, 0);
-  const bestMonth = salesByMonth.reduce((a, b) => (b.sales > a.sales ? b : a));
-  const topProducts = [...products].sort((a, b) => b.price * (30 - b.stock) - a.price * (30 - a.stock)).slice(0, 5);
+function Reports({ products, orders }) {
+  const MONTH_NAMES = ["فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور", "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند"];
+
+  const salesByMonth = useMemo(() => {
+    const buckets = new Map();
+    (orders || []).forEach((o) => {
+      const parts = String(o.date || "").split("/");
+      const monthIndex = parts.length === 3 ? Number(parts[1]) - 1 : -1;
+      if (monthIndex < 0 || monthIndex > 11) return;
+      const key = parts[0] + "/" + parts[1];
+      buckets.set(key, (buckets.get(key) || 0) + (o.total || 0));
+    });
+    return Array.from(buckets.entries())
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([key, total]) => ({
+        month: (MONTH_NAMES[Number(key.split("/")[1]) - 1] || key) + " " + key.split("/")[0],
+        sales: Math.round(total / 1000000),
+      }));
+  }, [orders]);
+
+  const totalSales = (orders || []).reduce((s, o) => s + (o.total || 0), 0);
+  const totalYear = Math.round(totalSales / 1000000);
+  const bestMonth = salesByMonth.reduce((a, b) => (b.sales > a.sales ? b : a), { month: "—", sales: 0 });
+  const averageOrder = orders && orders.length ? Math.round(totalSales / orders.length) : 0;
+
+  const soldCount = useMemo(() => {
+    const counts = new Map();
+    (orders || []).forEach((o) => {
+      (o.line_items || []).forEach((li) => {
+        counts.set(li.product_id, (counts.get(li.product_id) || 0) + (li.quantity || 0));
+      });
+    });
+    return counts;
+  }, [orders]);
+
+  const topProducts = useMemo(() => {
+    const ranked = [...(products || [])].sort((a, b) => (soldCount.get(b.id) || 0) - (soldCount.get(a.id) || 0));
+    return ranked.slice(0, 5);
+  }, [products, soldCount]);
+
+  const categoryShare = useMemo(() => {
+    const counts = new Map();
+    (products || []).forEach((p) => {
+      const name = p.category || "بدون دسته‌بندی";
+      counts.set(name, (counts.get(name) || 0) + 1);
+    });
+    return Array.from(counts.entries())
+      .sort((a, b) => b[1] - a[1])
+      .map(([name, value]) => ({ name, value }));
+  }, [products]);
 
   return (
     <div className="stack">
       <div className="stats-grid stats-grid--3">
-        <StatCard icon={TrendingUp} label="فروش سالانه (میلیون تومان)" value={num(totalYear)} delta="۱۸٪" positive level={80} />
-        <StatCard icon={Calendar} label="پرفروش‌ترین ماه" value={bestMonth.month} delta={num(bestMonth.sales)} positive level={95} />
-        <StatCard icon={ShoppingBag} label="میانگین سفارش" value={toman(19400000)} delta="۵.۶٪" positive level={64} />
+        <StatCard icon={TrendingUp} label="فروش کل (میلیون تومان)" value={num(totalYear)} delta={num(orders ? orders.length : 0) + " سفارش"} positive level={80} />
+        <StatCard icon={Calendar} label="پرفروش‌ترین ماه" value={bestMonth.month} delta={num(bestMonth.sales) + " میلیون"} positive level={95} />
+        <StatCard icon={ShoppingBag} label="میانگین سفارش" value={toman(averageOrder)} delta={num(products ? products.length : 0) + " محصول"} positive level={64} />
       </div>
 
       <div className="card chart-card">
         <h2>فروش ماهانه</h2>
-        <p className="muted">بر حسب میلیون تومان</p>
-        <ResponsiveContainer width="100%" height={280}>
-          <BarChart data={salesByMonth}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#F1F2F4" vertical={false} />
-            <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#9CA3AF" }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fontSize: 11, fill: "#9CA3AF" }} axisLine={false} tickLine={false} />
-            <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid #E5E7EB", fontSize: 12, fontFamily: "Vazirmatn" }} />
-            <Bar dataKey="sales" fill={CHART_INK} radius={[6, 6, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
+        <p className="muted">بر حسب میلیون تومان — محاسبه‌شده از سفارش‌های واقعی</p>
+        {salesByMonth.length ? (
+          <ResponsiveContainer width="100%" height={280}>
+            <BarChart data={salesByMonth}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#F1F2F4" vertical={false} />
+              <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#9CA3AF" }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 11, fill: "#9CA3AF" }} axisLine={false} tickLine={false} />
+              <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid #E5E7EB", fontSize: 12, fontFamily: "Vazirmatn" }} />
+              <Bar dataKey="sales" fill={CHART_INK} radius={[6, 6, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        ) : (
+          <p className="empty-row">هنوز سفارشی برای نمایش نمودار وجود ندارد</p>
+        )}
       </div>
 
       <div className="card table-card">
         <div className="table-card-header"><h2>پرفروش‌ترین محصولات</h2></div>
         <div className="table-scroll">
           <table className="data-table">
-            <thead><tr><th>رتبه</th><th>محصول</th><th>دسته‌بندی</th><th>قیمت واحد</th></tr></thead>
+            <thead><tr><th>رتبه</th><th>محصول</th><th>دسته‌بندی</th><th>فروش (عدد)</th><th>قیمت واحد</th></tr></thead>
             <tbody>
               {topProducts.map((p, i) => (
                 <tr key={p.id}>
                   <td><span className="rank-badge mono">{i + 1}</span></td>
                   <td className="bold">{p.name}</td>
                   <td className="muted">{p.category}</td>
+                  <td className="mono">{num(soldCount.get(p.id) || 0)}</td>
                   <td className="mono bold">{toman(p.price)}</td>
                 </tr>
               ))}
+              {topProducts.length === 0 && <tr><td colSpan={5} className="empty-row">محصولی برای نمایش نیست</td></tr>}
             </tbody>
           </table>
         </div>
+      </div>
+
+      <div className="card chart-card">
+        <h2>سهم دسته‌بندی‌ها از تعداد محصولات</h2>
+        <p className="muted">محاسبه‌شده از محصولات ثبت‌شده</p>
+        {products && products.length ? (
+          <ResponsiveContainer width="100%" height={280}>
+            <PieChart>
+              <Pie data={categoryShare} dataKey="value" nameKey="name" innerRadius={55} outerRadius={90} paddingAngle={2}>
+                {categoryShare.map((entry, i) => <Cell key={entry.name} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
+              </Pie>
+              <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid #E5E7EB", fontSize: 12, fontFamily: "Vazirmatn" }} />
+            </PieChart>
+          </ResponsiveContainer>
+        ) : (
+          <p className="empty-row">محصولی برای نمایش نیست</p>
+        )}
       </div>
     </div>
   );
@@ -1025,9 +1502,107 @@ function SettingsView() {
   );
 }
 
+/* ============================== SPECIAL SECTIONS ============================== */
+
+function SpecialProducts({ products, onToggleFlag }) {
+  const [search, setSearch] = useState("");
+  const [pending, setPending] = useState(null);
+
+  const filtered = useMemo(() => products.filter((p) =>
+    (p.name || "").includes(search) || (p.sku || "").toLowerCase().includes(search.toLowerCase())
+  ), [products, search]);
+
+  const toggle = async (p, flag, next) => {
+    setPending(p.id + ":" + flag);
+    try {
+      await onToggleFlag(p, flag, next);
+    } catch (err) {
+      /* در صورت خطا، مدیر می‌تواند دوباره تلاش کند */
+    } finally {
+      setPending(null);
+    }
+  };
+
+  return (
+    <div className="stack">
+      <div className="info-note">
+        <Star size={15} aria-hidden="true" />
+        <span>
+          محصولات علامت‌خورده «شگفت‌انگیز» در اسلایدر پیشنهاد شگفت‌انگیز و «محبوب»ها در اسلایدر محبوب‌ترین‌های صفحه اصلی نمایش داده می‌شوند.
+        </span>
+      </div>
+      <div className="toolbar">
+        <div className="toolbar-filters">
+          <div className="search-box">
+            <Search size={16} />
+            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="جستجوی محصول یا کد..." />
+          </div>
+        </div>
+      </div>
+
+      <div className="card table-card">
+        <div className="table-scroll">
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>تصویر</th><th>محصول</th><th>دسته‌بندی</th><th>امتیاز</th><th>شگفت‌انگیز</th><th>محبوب</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((p) => {
+                const amazing = !!p.Empressive;
+                const popular = !!p.is_popular;
+                return (
+                  <tr key={p.id}>
+                    <td>
+                      {p.images && p.images.length > 0 ? (
+                        <img src={p.images[0].url} alt="" className="table-thumb" />
+                      ) : (
+                        <div className="table-thumb table-thumb--empty"><Package size={14} /></div>
+                      )}
+                    </td>
+                    <td className="bold cell-wide">{p.name}</td>
+                    <td className="muted">{p.category}</td>
+                    <td className="mono bold">{Number(p.rating).toLocaleString('fa-IR', { maximumFractionDigits: 1 })}</td>
+                    <td>
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={amazing}
+                        disabled={pending === p.id + ":is_featured"}
+                        onClick={() => toggle(p, "is_featured", !amazing)}
+                        className={cx("switch", amazing && "is-on")}
+                      >
+                        <span className="switch-knob" />
+                      </button>
+                    </td>
+                    <td>
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={popular}
+                        disabled={pending === p.id + ":is_popular"}
+                        onClick={() => toggle(p, "is_popular", !popular)}
+                        className={cx("switch", popular && "is-on")}
+                      >
+                        <span className="switch-knob" />
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+              {filtered.length === 0 && <tr><td colSpan={6} className="empty-row">محصولی پیدا نشد</td></tr>}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ============================== MESSAGES (پیامک به مشتریان) ============================== */
 
-function MessagesSection({ messages, customers, onSend }) {
+function MessagesSection({ messages, customers, onSend, onDelete }) {
   const [text, setText] = useState("");
   const [targetMode, setTargetMode] = useState("all");
   const [selectedPhones, setSelectedPhones] = useState(new Set());
@@ -1035,6 +1610,21 @@ function MessagesSection({ messages, customers, onSend }) {
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState("");
   const [feedbackErr, setFeedbackErr] = useState("");
+  const [deletingId, setDeletingId] = useState(null);
+
+  const handleDelete = async (id) => {
+    setDeletingId(id);
+    setFeedback("");
+    setFeedbackErr("");
+    try {
+      await onDelete(id);
+      setFeedback("پیام حذف و از بخش «پیام‌های من» کاربر نیز حذف شد ✓");
+    } catch (err) {
+      setFeedbackErr(faError(err, "حذف ناموفق بود"));
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   const togglePhone = (phone) => {
     setSelectedPhones((prev) => {
@@ -1074,7 +1664,7 @@ function MessagesSection({ messages, customers, onSend }) {
       setText("");
       setSelectedPhones(new Set());
     } catch (err) {
-      setFeedbackErr(err.message || "ارسال ناموفق بود");
+      setFeedbackErr(faError(err, "ارسال ناموفق بود"));
     } finally {
       setSubmitting(false);
     }
@@ -1192,12 +1782,13 @@ function MessagesSection({ messages, customers, onSend }) {
                 <th>گیرنده</th>
                 <th>متن پیام</th>
                 <th>وضعیت</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
               {messages.length === 0 ? (
                 <tr>
-                  <td colSpan={3} className="empty-row">هنوز پیامی ارسال نشده است</td>
+                  <td colSpan={4} className="empty-row">هنوز پیامی ارسال نشده است</td>
                 </tr>
               ) : (
                 messages.map((m) => (
@@ -1212,6 +1803,18 @@ function MessagesSection({ messages, customers, onSend }) {
                         ? <Badge status="خوانده شده" />
                         : <Badge status="جدید" />}
                     </td>
+                    <td>
+                      <button
+                        type="button"
+                        className="icon-btn icon-btn--danger"
+                        onClick={() => handleDelete(m.id)}
+                        disabled={deletingId === m.id}
+                        aria-label="حذف پیام"
+                        title="حذف پیام (برای کاربر هم حذف می‌شود)"
+                      >
+                        {deletingId === m.id ? <RefreshCw size={14} className="spin" /> : <Trash2 size={14} />}
+                      </button>
+                    </td>
                   </tr>
                 ))
               )}
@@ -1223,19 +1826,226 @@ function MessagesSection({ messages, customers, onSend }) {
   );
 }
 
-/* ============================== MOCK CHART DATA (dashboard/reports only) ============================== */
+/* ============================== CATEGORIES (دسته‌بندی‌ها) ============================== */
 
-const salesByMonth = [
-  { month: "فروردین", sales: 320 }, { month: "اردیبهشت", sales: 410 }, { month: "خرداد", sales: 380 },
-  { month: "تیر", sales: 460 }, { month: "مرداد", sales: 520 }, { month: "شهریور", sales: 610 },
-  { month: "مهر", sales: 540 }, { month: "آبان", sales: 590 }, { month: "آذر", sales: 670 },
-  { month: "دی", sales: 720 }, { month: "بهمن", sales: 640 }, { month: "اسفند", sales: 780 },
-];
+function CategoriesManager({ categories, onCreate, onUpdate, onDelete }) {
+  const [newName, setNewName] = useState("");
+  const [newSubs, setNewSubs] = useState("");
+  const [editingId, setEditingId] = useState(null);
+  const [editName, setEditName] = useState("");
+  const [editSubs, setEditSubs] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [feedback, setFeedback] = useState("");
 
-const categoryShare = [
-  { name: "اسپیکر", value: 32 }, { name: "هدفون", value: 26 }, { name: "آمپلی‌فایر", value: 14 },
-  { name: "میکروفون", value: 16 }, { name: "میکسر", value: 8 }, { name: "کابل و اتصالات", value: 4 },
-];
+  const parseSubs = (raw) => raw.split(/[,،\n]/).map((s) => s.trim()).filter(Boolean);
+
+  const resetForm = () => { setNewName(""); setNewSubs(""); setError(""); setFeedback(""); };
+
+  const handleCreate = async () => {
+    if (!newName.trim()) { setError("نام دسته را وارد کنید"); return; }
+    setBusy(true); setError(""); setFeedback("");
+    try {
+      const subs = parseSubs(newSubs);
+      await onCreate({ name: newName.trim(), subgroups: subs });
+      resetForm();
+      setFeedback("دسته جدید اضافه شد ✓");
+    } catch (err) {
+      setError(faError(err, "افزودن دسته ناموفق بود"));
+    } finally { setBusy(false); }
+  };
+
+  const handleUpdate = async () => {
+    if (!editName.trim()) { setError("نام دسته را وارد کنید"); return; }
+    setBusy(true); setError(""); setFeedback("");
+    try {
+      const subs = parseSubs(editSubs);
+      await onUpdate(editingId, { name: editName.trim(), subgroups: subs });
+      setEditingId(null);
+      setFeedback("دسته به‌روزرسانی شد ✓");
+    } catch (err) {
+      setError(faError(err, "ویرایش ناموفق بود"));
+    } finally { setBusy(false); }
+  };
+
+  const handleDelete = async (id) => {
+    setBusy(true); setError(""); setFeedback("");
+    try {
+      await onDelete(id);
+      setFeedback("دسته حذف شد ✓");
+    } catch (err) {
+      setError(faError(err, "حذف ناموفق بود"));
+    } finally { setBusy(false); }
+  };
+
+  return (
+    <div className="stack">
+      <div className="card">
+        <div className="section-head">
+          <FolderOpen size={18} />
+          <div>
+            <h2>افزودن دسته‌بندی جدید</h2>
+            <p className="muted small">زیردسته‌ها را با «،» یا Enter از هم جدا کنید.</p>
+          </div>
+        </div>
+        <div className="field-grid">
+          <Field label="نام دسته">
+            <input disabled={busy} value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="مثلاً کارت صدا" />
+          </Field>
+          <Field label="زیردسته‌ها (اختیاری)">
+            <input disabled={busy} value={newSubs} onChange={(e) => setNewSubs(e.target.value)} placeholder="مثلاً USB، حرفه‌ای، اقتصادی" />
+          </Field>
+        </div>
+        {error && <p className="form-error">{error}</p>}
+        {feedback && <p className="form-success">{feedback}</p>}
+        <button type="button" className="btn btn-primary" onClick={handleCreate} disabled={busy}>
+          <Plus size={16} /> افزودن دسته
+        </button>
+      </div>
+
+      <div className="card">
+        <div className="section-head">
+          <Layers size={18} />
+          <h2>دسته‌بندی‌های موجود ({num(categories.length)})</h2>
+        </div>
+        <div className="table-scroll">
+          <table className="data-table">
+            <thead>
+              <tr><th>ترتیب</th><th>نام دسته</th><th>زیردسته‌ها</th><th></th></tr>
+            </thead>
+            <tbody>
+              {categories.length === 0 ? (
+                <tr><td colSpan={4} className="empty-row">دسته‌ای ثبت نشده است</td></tr>
+              ) : (
+                categories.map((c) => (
+                  <tr key={c.id}>
+                    <td className="mono muted">{num((c.order ?? 0) + 1)}</td>
+                    <td className="bold">
+                      {editingId === c.id ? (
+                        <input className="mono" value={editName} onChange={(e) => setEditName(e.target.value)} style={{ width: '100%' }} />
+                      ) : (
+                        c.name
+                      )}
+                    </td>
+                    <td className="small">
+                      {editingId === c.id ? (
+                        <input value={editSubs} onChange={(e) => setEditSubs(e.target.value)} placeholder="زیردسته‌ها با «،» جدا شوند" className="mono" style={{ width: '100%' }} />
+                      ) : (
+                        (c.subgroups && c.subgroups.length ? c.subgroups.join("، ") : <span className="muted">—</span>)
+                      )}
+                    </td>
+                    <td>
+                      <div className="row-actions">
+                        {editingId === c.id ? (
+                          <>
+                            <button type="button" className="icon-btn" onClick={handleUpdate} disabled={busy} aria-label="ذخیره دسته" title="ذخیره">
+                              <Check size={14} />
+                            </button>
+                            <button type="button" className="icon-btn" onClick={() => setEditingId(null)} disabled={busy} aria-label="انصراف">
+                              <X size={14} />
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              type="button"
+                              className="icon-btn"
+                              onClick={() => { setEditingId(c.id); setEditName(c.name); setEditSubs((c.subgroups || []).join("، ")); setError(""); setFeedback(""); }}
+                              aria-label={"ویرایش " + c.name}
+                              title="ویرایش"
+                            >
+                              <Pencil size={14} />
+                            </button>
+                            <button type="button" className="icon-btn icon-btn--danger" onClick={() => handleDelete(c.id)} disabled={busy} aria-label={"حذف " + c.name}>
+                              <Trash2 size={14} />
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================== REVIEWS (دیدگاه‌ها) ============================== */
+
+function ReviewsManager({ reviews, onDelete }) {
+  const [deletingId, setDeletingId] = useState(null);
+  const [error, setError] = useState("");
+  const [feedback, setFeedback] = useState("");
+
+  const fmtDate = (iso) => {
+    if (!iso) return "—";
+    try { return new Date(iso).toLocaleDateString("fa-IR"); } catch { return "—"; }
+  };
+
+  const handleDelete = async (id) => {
+    setDeletingId(id); setError(""); setFeedback("");
+    try {
+      await onDelete(id);
+      setFeedback("دیدگاه حذف شد ✓");
+    } catch (err) {
+      setError(faError(err, "حذف دیدگاه ناموفق بود"));
+    } finally { setDeletingId(null); }
+  };
+
+  return (
+    <div className="stack">
+      {error && <p className="form-error">{error}</p>}
+      {feedback && <p className="form-success">{feedback}</p>}
+      <div className="card">
+        <div className="section-head">
+          <MessagesSquare size={18} />
+          <h2>دیدگاه‌های ثبت‌شده ({num(reviews.length)})</h2>
+        </div>
+        <div className="table-scroll">
+          <table className="data-table">
+            <thead>
+              <tr><th>محصول</th><th>کاربر</th><th>امتیاز</th><th>دیدگاه</th><th>تاریخ</th><th></th></tr>
+            </thead>
+            <tbody>
+              {reviews.length === 0 ? (
+                <tr><td colSpan={6} className="empty-row">دیدگاهی ثبت نشده است</td></tr>
+              ) : (
+                reviews.map((r) => (
+                  <tr key={r.id}>
+                    <td className="bold cell-wide">{r.product_name || ("#" + r.product_id)}</td>
+                    <td className="small">{r.author || "—"}</td>
+                    <td>
+                      <span className="mono bold" style={{ color: "#c28b00" }}>{r.rating != null ? r.rating : "—"}</span>
+                      <span className="muted"> / ۵</span>
+                    </td>
+                    <td className="small">{r.comment || "—"}</td>
+                    <td className="mono muted small">{fmtDate(r.created_at)}</td>
+                    <td>
+                      <button
+                        type="button"
+                        className="icon-btn icon-btn--danger"
+                        onClick={() => handleDelete(r.id)}
+                        disabled={deletingId === r.id}
+                        aria-label="حذف دیدگاه"
+                        title="حذف دیدگاه"
+                      >
+                        {deletingId === r.id ? <RefreshCw size={14} className="spin" /> : <Trash2 size={14} />}
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 /* ============================== MAIN APP ============================== */
 
@@ -1246,10 +2056,14 @@ export default function AdminPanel() {
 
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
+  const [ordersFilterSeed, setOrdersFilterSeed] = useState("همه");
   const [customers, setCustomers] = useState([]);
   const [articles, setArticles] = useState([]);
   const [messages, setMessages] = useState([]);
-  const [ordersFilterSeed, setOrdersFilterSeed] = useState("همه");
+  const [sliders, setSliders] = useState([]);
+  const [categorySlides, setCategorySlides] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [reviews, setReviews] = useState([]);
 
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
@@ -1258,16 +2072,21 @@ export default function AdminPanel() {
     setLoading(true);
     setLoadError("");
     try {
-      const [productsData, ordersData, customersData, articlesData, messagesData] = await Promise.all([
+      const [productsData, ordersData, customersData, articlesData, messagesData, slidersData, categorySlidesData, categoriesData, reviewsData] = await Promise.all([
         fetchProducts(), fetchOrders(), fetchCustomers(), fetchArticles(), fetchAdminMessages(),
+        fetchHomeSliders(), fetchCategorySlides(), fetchAdminCategories(), fetchAllReviews(),
       ]);
       setProducts(productsData);
-      setOrders(ordersData);
+      setOrders(ordersData || []);
       setCustomers(customersData);
-      setArticles(articlesData);
+      setArticles(articlesData || []);
       setMessages(messagesData || []);
+      setSliders(slidersData || []);
+      setCategorySlides(categorySlidesData || []);
+      setCategories(categoriesData || []);
+      setReviews(reviewsData || []);
     } catch (err) {
-      setLoadError(err.message || "اتصال به سرور برقرار نشد");
+      setLoadError(faError(err, "اتصال به سرور برقرار نشد"));
     } finally {
       setLoading(false);
     }
@@ -1281,8 +2100,29 @@ export default function AdminPanel() {
   };
 
   const goToOrders = (filterStatus) => {
-    setOrdersFilterSeed(filterStatus);
-    setActiveTab("orders");
+    setOrdersFilterSeed(filterStatus || "همه");
+    selectTab("orders");
+  };
+
+  const handleUpdateOrderStatus = async (id, status) => {
+    const updated = await updateOrderStatus(id, status);
+    setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, status: (updated && updated.status) || status } : o)));
+    return updated;
+  };
+
+  const handleCreateArticle = async (payload) => {
+    const created = await createArticle(payload);
+    setArticles((prev) => [created, ...prev]);
+  };
+
+  const handleUpdateArticle = async (id, payload) => {
+    const updated = await updateArticle(id, payload);
+    setArticles((prev) => prev.map((a) => (a.id === id ? updated : a)));
+  };
+
+  const handleDeleteArticle = async (id) => {
+    await deleteArticle(id);
+    setArticles((prev) => prev.filter((a) => a.id !== id));
   };
 
   const handleCreateProduct = async (payload) => {
@@ -1300,25 +2140,47 @@ export default function AdminPanel() {
     setProducts((prev) => prev.filter((p) => p.id !== id));
   };
 
-  const handleUpdateOrderStatus = async (id, status) => {
-    const updated = await updateOrderStatus(id, status);
-    setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, status: updated?.status || status } : o)));
+  const handleQuickRating = async (p, delta) => {
+    const next = Math.max(0, Math.min(5, Math.round((Number(p.rating) || 0) * 2 + delta * 2) / 2));
+    const updated = await updateProductSelection(p.id, { rating: next });
+    setProducts((prev) => prev.map((x) => (x.id === p.id ? updated : x)));
+    return updated;
   };
 
-  const handleCreateArticle = async (payload) => {
-    const created = await createArticle(payload);
-    setArticles((prev) => [created, ...prev]);
+  const handleToggleProductFlag = async (p, flag, value) => {
+    const updated = await updateProductSelection(p.id, { [flag]: value });
+    setProducts((prev) => prev.map((x) => (x.id === p.id ? updated : x)));
+    return updated;
   };
 
-  const handleUpdateArticle = async (id, payload) => {
-    const updated = await updateArticle(id, payload);
-    setArticles((prev) => prev.map((a) => (a.id === id ? updated : a)));
+  const handleCreateSlider = async (payload) => {
+    const created = await createHomeSlider(payload);
+    setSliders((prev) => [...prev, created]);
   };
 
+  const handleUpdateSlider = async (id, payload) => {
+    const updated = await updateHomeSlider(id, payload);
+    setSliders((prev) => prev.map((s) => (s.id === id ? updated : s)));
+  };
 
-const handleDeleteArticle = async (id) => {
-    await deleteArticle(id);
-    setArticles((prev) => prev.filter((a) => a.id !== id));
+  const handleDeleteSlider = async (id) => {
+    await deleteHomeSlider(id);
+    setSliders((prev) => prev.filter((s) => s.id !== id));
+  };
+
+  const handleCreateCategorySlide = async (payload) => {
+    const created = await createCategorySlide(payload);
+    setCategorySlides((prev) => [...prev, created]);
+  };
+
+  const handleUpdateCategorySlide = async (id, payload) => {
+    const updated = await updateCategorySlide(id, payload);
+    setCategorySlides((prev) => prev.map((s) => (s.id === id ? updated : s)));
+  };
+
+  const handleDeleteCategorySlide = async (id) => {
+    await deleteCategorySlide(id);
+    setCategorySlides((prev) => prev.filter((s) => s.id !== id));
   };
 
   const handleSendMessage = async (payload) => {
@@ -1326,6 +2188,31 @@ const handleDeleteArticle = async (id) => {
     const list = await fetchAdminMessages();
     setMessages(list || []);
     return res;
+  };
+
+  const handleDeleteMessage = async (id) => {
+    await deleteAdminMessage(id);
+    setMessages((prev) => prev.filter((m) => m.id !== id));
+  };
+
+  const handleCreateCategory = async (payload) => {
+    const created = await createAdminCategory(payload);
+    setCategories((prev) => [...prev, created]);
+  };
+
+  const handleUpdateCategory = async (id, payload) => {
+    const updated = await updateAdminCategory(id, payload);
+    setCategories((prev) => prev.map((c) => (c.id === id ? updated : c)));
+  };
+
+  const handleDeleteCategory = async (id) => {
+    await deleteAdminCategory(id);
+    setCategories((prev) => prev.filter((c) => c.id !== id));
+  };
+
+  const handleDeleteReview = async (id) => {
+    await deleteReview(id);
+    setReviews((prev) => prev.filter((r) => r.id !== id));
   };
 
   if (loading) {
@@ -1430,10 +2317,13 @@ const handleDeleteArticle = async (id) => {
 <div className="content">
             {activeTab === "dashboard" && (
               <Dashboard
-                orders={orders}
                 products={products}
-                onGoOrders={goToOrders}
+                categories={categories}
+                reviews={reviews}
+                messages={messages}
+                orders={orders}
                 onGoProducts={() => selectTab("products")}
+                onGoOrders={goToOrders}
               />
             )}
             {activeTab === "products" && (
@@ -1442,7 +2332,41 @@ const handleDeleteArticle = async (id) => {
                 onCreate={handleCreateProduct}
                 onUpdate={handleUpdateProduct}
                 onDelete={handleDeleteProduct}
+                onQuickRating={handleQuickRating}
               />
+            )}
+            {activeTab === "special" && (
+              <SpecialProducts
+                products={products}
+                onToggleFlag={handleToggleProductFlag}
+              />
+            )}
+            {activeTab === "sliders" && (
+              <HomeSliders
+                sliders={sliders}
+                onCreate={handleCreateSlider}
+                onUpdate={handleUpdateSlider}
+                onDelete={handleDeleteSlider}
+              />
+            )}
+            {activeTab === "categorySlides" && (
+              <CategorySlides
+                slides={categorySlides}
+                onCreate={handleCreateCategorySlide}
+                onUpdate={handleUpdateCategorySlide}
+                onDelete={handleDeleteCategorySlide}
+              />
+            )}
+            {activeTab === "categories" && (
+              <CategoriesManager
+                categories={categories}
+                onCreate={handleCreateCategory}
+                onUpdate={handleUpdateCategory}
+                onDelete={handleDeleteCategory}
+              />
+            )}
+            {activeTab === "reviews" && (
+              <ReviewsManager reviews={reviews} onDelete={handleDeleteReview} />
             )}
             {activeTab === "orders" && (
               <Orders
@@ -1457,6 +2381,7 @@ const handleDeleteArticle = async (id) => {
                 messages={messages}
                 customers={customers}
                 onSend={handleSendMessage}
+                onDelete={handleDeleteMessage}
               />
             )}
             {activeTab === "articles" && (
@@ -1467,7 +2392,7 @@ const handleDeleteArticle = async (id) => {
                 onDelete={handleDeleteArticle}
               />
             )}
-            {activeTab === "reports" && <Reports products={products} />}
+            {activeTab === "reports" && <Reports products={products} orders={orders} />}
             {activeTab === "settings" && <SettingsView />}
           </div>
         </main>

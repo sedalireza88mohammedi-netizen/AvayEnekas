@@ -1433,12 +1433,12 @@
 }
 
 .app .btn-danger {
-    background: var(--danger);
+    background: #2b2b2b;
     color: #fff;
 }
 
 .app .btn-danger:hover {
-    background: #C81743;
+    background: #000;
 }
 
 /* ================= SETTINGS ================= */
@@ -1661,4 +1661,282 @@
     .app .messages-section .data-table td:nth-child(2) {
         max-width: 160px;
     }
+}
+
+/* ================= HOME SLIDERS ================= */
+
+.app .toolbar-hint {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.app .empty-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    text-align: center;
+    padding: 44px 20px;
+}
+
+.app .slider-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 14px;
+}
+
+.app .slider-card {
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease), opacity 0.2s var(--ease);
+}
+
+.app .slider-card:hover {
+    border-color: var(--accent);
+    box-shadow: 0 6px 20px rgba(15, 23, 42, 0.08);
+}
+
+.app .slider-card.is-inactive {
+    opacity: 0.62;
+}
+
+.app .slider-card-image {
+    position: relative;
+    aspect-ratio: 16 / 7;
+    background: #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.app .slider-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.app .slider-card-hidden {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background: rgba(15, 23, 42, 0.75);
+    color: #fff;
+    font-size: 11px;
+    padding: 3px 9px;
+    border-radius: 999px;
+}
+
+.app .slider-card-body {
+    padding: 12px 14px 14px;
+}
+
+.app .slider-card-link {
+    margin: 6px 0 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    direction: ltr;
+    text-align: right;
+}
+
+.app .slider-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.app .slider-card-actions .switch {
+    margin-left: auto;
+}
+
+.app .slider-upload-preview {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border-soft);
+}
+
+.app .slider-upload-preview img {
+    width: 100%;
+    max-height: 180px;
+    object-fit: cover;
+    display: block;
+}
+
+.app .slider-upload-preview .icon-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+}
+
+/* ================= SWITCH ================= */
+
+.app .switch {
+    position: relative;
+    width: 42px;
+    height: 24px;
+    border-radius: 999px;
+    border: none;
+    background: #d1d5db;
+    cursor: pointer;
+    padding: 0;
+    transition: background 0.2s var(--ease);
+    flex-shrink: 0;
+}
+
+.app .switch:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.app .switch:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 4px var(--accent-soft);
+}
+
+.app .switch.is-on {
+    background: var(--accent);
+}
+
+.app .switch-knob {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    left: auto;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+    transition: transform 0.2s var(--ease), right 0.2s var(--ease), left 0.2s var(--ease);
+}
+
+.app .switch.is-on .switch-knob {
+    right: auto;
+    left: 2px;
+}
+
+/* ================= RATING STEPPER ================= */
+
+.app .rating-stepper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.app .rating-stepper button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    border: 1px solid var(--border);
+    background: #fbfbfc;
+    color: var(--text);
+    cursor: pointer;
+    transition: border-color 0.2s var(--ease), background 0.2s var(--ease), color 0.2s var(--ease);
+}
+
+.app .rating-stepper button:hover:not(:disabled) {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--accent-dark);
+}
+
+.app .rating-stepper button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.app .rating-stepper-value {
+    min-width: 52px;
+    text-align: center;
+    font-size: 15px;
+}
+
+.app .rating-stepper--mini {
+    gap: 2px;
+}
+
+.app .rating-stepper--mini button {
+    width: 26px;
+    height: 26px;
+    border-radius: 7px;
+}
+
+.app .rating-stepper--mini .mono {
+    min-width: 34px;
+    text-align: center;
+    font-size: 12.5px;
+}
+
+/* ================= SPECIAL PRODUCTS ================= */
+
+.app .info-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: var(--accent-soft);
+    border: 1px solid var(--accent);
+    color: var(--accent-dark);
+    font-size: 12.5px;
+    line-height: 1.7;
+}
+
+.app .info-note svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.app .cell-wide {
+    max-width: 320px;
+}
+
+/* ================= DISCOUNT PREVIEW ================= */
+
+.app .discount-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 18px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: var(--accent-soft);
+    border: 1px dashed var(--accent);
+    color: var(--text);
+    font-size: 13px;
+    margin: 10px 0;
+}
+
+.app .discount-preview b {
+    font-weight: 700;
+}
+
+.app .discount-preview .text-danger {
+    color: var(--danger, #d33a2c);
+}
+
+.app .spin {
+    animation: app-spin 0.9s linear infinite;
+}
+
+@keyframes app-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.app .data-table .cell-wide {
+    white-space: normal;
+}
+
+.app .data-table .row-actions {
+    justify-content: flex-start;
 }

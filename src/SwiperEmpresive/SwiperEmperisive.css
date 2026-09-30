@@ -312,17 +312,20 @@
 }
 
 .new-price {
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--text-dark);
+    font-size: 16px;
+    font-weight: 800;
+    color: #212121;
     display: flex;
     align-items: center;
     gap: 4px;
+    line-height: 1.2;
 }
 
 .currency {
     font-size: 11px;
     font-weight: 400;
+    color: #9ca3af;
+    line-height: 1;
 }
 
 .end-card {

@@ -55,13 +55,17 @@ const ProductCard = ({ product, onDrag }) => {
             </div>
             <div className="product-price-section">
                 <div className="price-details">
-                    <span className="old-price">{toPersianDigits(formatPrice(product.oldPrice))}</span>
+                    {product.discount > 0 && (
+                        <span className="old-price">{toPersianDigits(formatPrice(product.oldPrice))}</span>
+                    )}
                     <div className="new-price">
                         <span>{toPersianDigits(formatPrice(product.price))}</span>
                         <span className="currency">تومان</span>
                     </div>
                 </div>
-                <div className="discount-badge">{toPersianDigits(product.discount)}٪</div>
+                {product.discount > 0 && (
+                    <div className="discount-badge">{toPersianDigits(product.discount)}٪</div>
+                )}
             </div>
         </Link>
    
@@ -111,12 +115,17 @@ const handlePointerDown = (e) => {
 
     useEffect(() => {
         let mounted = true;
-        // محبوب‌ترین‌ها = پرامتیازترین محصولات
-        fetchProducts({ limit: 12, sort: 'rating' })
+        // محبوب‌ترین‌ها = محصولاتی که ادمین در بخش «محبوب‌ها» انتخاب کرده
+        fetchProducts({ limit: 12, popular: true })
             .then((data) => { if (mounted) setProducts(data); })
             .catch(() => { if (mounted) setProducts([]); });
         return () => { mounted = false; };
     }, []);
+
+    // در مرورگرهای RTL اسکرول می‌تواند از انتها شروع شود؛ به ابتدا برگردان
+    useEffect(() => {
+        if (swiperRef.current) swiperRef.current.scrollLeft = 0;
+    }, [products]);
 
     return (<>
     <div className='PopulerTitleContainer'><h2>محبوب ترین ها</h2></div>
@@ -142,7 +151,7 @@ const handlePointerDown = (e) => {
                     {(products || []).map((product) => (
                         <ProductCard key={product.id} product={product} onDrag={() => dragMoved.current} />
                     ))}
-                    <Link to="/Catagoryes" className="end-card" aria-label="مشاهده همه محصولات">
+                    <Link to="/AllProductList" className="end-card" aria-label="مشاهده همه محصولات">
                         <div className="end-card-icon-wrapper"><ArrowLeft size={24} /></div>
                         <span className="end-card-text">مشاهده همه</span>
                     </Link>

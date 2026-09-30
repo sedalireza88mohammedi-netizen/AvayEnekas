@@ -116,6 +116,8 @@ const ORDER_STATUS_LIST = [
   { key: "Canceled", label: "لغو شده", emptyMessage: "هنوز هیچ سفارشی لغو نشده" },
 ]
 
+const ADMIN_USERNAME = "sedMad77AdminPanellAllowed";
+
 function Profile() {
   const [page, setPage] = useState("Profile")
   const [activeOrderOption, setActiveOrderOption] = useState("InProgress")
@@ -145,6 +147,10 @@ function Profile() {
 
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
+
+  const editName = profile.NameAndFamily || formData.NameAndFamily;
+  const isAdmin = editName === ADMIN_USERNAME;
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedGender, setSelectedGender] = useState({ label: "لطفاً انتخاب کنید", value: "" });
@@ -155,7 +161,18 @@ function Profile() {
 
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { markOneMessageRead } = useCartStore();
+  const { markOneMessageRead, favorites } = useCartStore();
+  const favBootRef = useRef(false);
+
+  useEffect(() => {
+    if (!logged) return;
+    if (!favBootRef.current) {
+      favBootRef.current = true;
+      return;
+    }
+    reloadFavorites();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [favorites, logged]);
 
   const allMessagesRead = messages.length > 0 && messages.every((m) => m.is_read);
 
@@ -229,21 +246,44 @@ function Profile() {
     setSelectedGender({ label, value });
     setIsDropdownOpen(false);
     setErrorMessage("");
+    setFieldErrors((prev) => ({ ...prev, gender: "" }));
   };
 
   const handleChange = (e) => {
+    const name = e.target.name;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [name]: e.target.value
     });
     setErrorMessage("");
+    setFieldErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
   const handleSubmitProfile = async (e) => {
     e.preventDefault();
 
-    if (!formData.NameAndFamily.trim()) {
-      setErrorMessage("لطفاً نام و نام خانوادگی را وارد کنید.");
+    const errors = {};
+    if (!formData.NameAndFamily.trim()) errors.NameAndFamily = "نام و نام خانوادگی الزامی است.";
+    if (!formData.BirthDate.trim()) errors.BirthDate = "تاریخ تولد الزامی است.";
+    if (!selectedGender.value) errors.gender = "جنسیت را انتخاب کنید.";
+    if (!formData.IdCard.trim()) {
+      errors.IdCard = "کد ملی الزامی است.";
+    } else if (!/^\d{10}$/.test(String(formData.IdCard).trim())) {
+      errors.IdCard = "کد ملی باید ۱۰ رقم باشد.";
+    }
+    if (!formData.Number.trim()) {
+      errors.Number = "شماره تلفن الزامی است.";
+    } else if (String(formData.Number).replace(/[^0-9]/g, "").length < 11) {
+      errors.Number = "شماره تلفن باید حداقل ۱۱ رقم باشد.";
+    }
+    if (formData.Email.trim()) {
+      const mailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.Email.trim());
+      if (!mailOk) errors.Email = "ایمیل واردشده صحیح نیست.";
+    }
+
+    setFieldErrors(errors);
+    if (Object.keys(errors).length > 0) {
+      setErrorMessage("لطفاً خطاهای مشخص‌شده را اصلاح کنید.");
       return;
     }
 
@@ -256,6 +296,7 @@ function Profile() {
 
     try {
       await updateProfile(finalData);
+      setProfile((prev) => ({ ...prev, ...finalData }));
       setSuccessMessage("اطلاعات پروفایل با موفقیت ثبت شد!");
     } catch {
       setErrorMessage("در ذخیره‌سازی اطلاعات خطایی رخ داد. دوباره تلاش کنید.");
@@ -546,6 +587,11 @@ function Profile() {
         {page === "Profile" && (
           <>
             <form onSubmit={handleSubmitProfile} className="ProfileContainer">
+              {isAdmin && (
+                <div className="admin-welcome">
+                  خوش آمدید مدیر؛ دسترسی به پنل مدیریت باز شد ✓
+                </div>
+              )}
               <div className="FildContainer">
                 <label htmlFor="NameAndFamily">نام و نام خانوادگی</label>
                 <input
@@ -555,7 +601,9 @@ function Profile() {
                   placeholder="سید محمد محمدی"
                   value={formData.NameAndFamily}
                   onChange={handleChange}
+                  className={fieldErrors.NameAndFamily ? "input-error" : ""}
                 />
+                {fieldErrors.NameAndFamily && <span className="field-error">{fieldErrors.NameAndFamily}</span>}
               </div>
               <div className="FildContainer">
                 <label htmlFor="BirthDate">تاریخ تولد</label>
@@ -566,14 +614,16 @@ function Profile() {
                   placeholder="1377/1/6"
                   value={formData.BirthDate}
                   onChange={handleChange}
+                  className={fieldErrors.BirthDate ? "input-error" : ""}
                 />
+                {fieldErrors.BirthDate && <span className="field-error">{fieldErrors.BirthDate}</span>}
               </div>
 
               <div className="FildContainer" ref={dropdownRef}>
                 <label>جنسیت</label>
                 <div className="custom-select-wrapper">
                   <div
-                    className={`custom-select-trigger ${isDropdownOpen ? 'open' : ''}`}
+                    className={`custom-select-trigger ${isDropdownOpen ? 'open' : ''} ${fieldErrors.gender ? 'input-error' : ''}`}
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                   >
                     <span style={{ color: selectedGender.value === "" ? "#888" : "#212121" }}>
@@ -593,6 +643,7 @@ function Profile() {
                     </div>
                   )}
                 </div>
+                {fieldErrors.gender && <span className="field-error">{fieldErrors.gender}</span>}
               </div>
 
               <div className="FildContainer">
@@ -604,7 +655,9 @@ function Profile() {
                   placeholder="037350854"
                   value={formData.IdCard}
                   onChange={handleChange}
+                  className={fieldErrors.IdCard ? "input-error" : ""}
                 />
+                {fieldErrors.IdCard && <span className="field-error">{fieldErrors.IdCard}</span>}
               </div>
               <div className="FildContainer">
                 <label htmlFor="Email">ایمیل</label>
@@ -615,7 +668,9 @@ function Profile() {
                   placeholder="SedMad@gmail.com"
                   value={formData.Email}
                   onChange={handleChange}
+                  className={fieldErrors.Email ? "input-error" : ""}
                 />
+                {fieldErrors.Email && <span className="field-error">{fieldErrors.Email}</span>}
               </div>
               <div className="FildContainer">
                 <label htmlFor="Number">شماره تلفن</label>
@@ -626,7 +681,9 @@ function Profile() {
                   placeholder="09027741653"
                   value={formData.Number}
                   onChange={handleChange}
+                  className={fieldErrors.Number ? "input-error" : ""}
                 />
+                {fieldErrors.Number && <span className="field-error">{fieldErrors.Number}</span>}
               </div>
 
               {errorMessage && <div className="form-error-msg">{errorMessage}</div>}
@@ -636,7 +693,9 @@ function Profile() {
                 <button type="submit" className="SubmitProfileBtn">ثبت تغییرات</button>
               </div>
             </form>
-            <button onClick={() => navigate("/AdminPannel")} className="AdmiPannelPro">  <FontAwesomeIcon icon={faUserTie} />پنل ادمین </button>
+            {isAdmin && (
+              <button onClick={() => navigate("/AdminPannel")} className="AdmiPannelPro">  <FontAwesomeIcon icon={faUserTie} />پنل ادمین </button>
+            )}
           </>
         )}
       </div>

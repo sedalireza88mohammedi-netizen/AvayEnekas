@@ -88,8 +88,15 @@ async function request(path, options = {}) {
   }
 
   if (!res.ok && res.status >= 400) {
-    const detail = await res.text().catch(() => "");
-    const err = new Error(detail || "خطا در ارتباط با سرور (کد " + res.status + ")");
+    const raw = await res.text().catch(() => "");
+    let detail = "";
+    try {
+      const parsed = JSON.parse(raw);
+      detail = parsed.error || parsed.detail || "";
+    } catch {
+      /* صفحه‌ی خطای HTML یا متن خام — نادیده گرفته می‌شود */
+    }
+    const err = new Error(detail || "خطا در برقراری ارتباط با سرور (کد " + res.status + ")");
     err.status = res.status;
     throw err;
   }
@@ -113,6 +120,7 @@ function mapProduct(p) {
     id: p.id,
     title: p.title || p.name || "",
     subtitle: p.subtitle || p.category || "",
+    description: p.description || "",
     category: p.category || "",
     sku: p.sku || "",
     price,
@@ -133,6 +141,7 @@ export async function fetchProducts(params = {}) {
   if (params.category) query.set("category", params.category);
   if (params.search) query.set("search", params.search);
   if (params.featured) query.set("featured", "true");
+  if (params.popular) query.set("popular", "true");
   if (params.brand) query.set("brand", params.brand);
   if (params.minPrice != null && params.minPrice !== "") query.set("min_price", String(params.minPrice));
   if (params.maxPrice != null && params.maxPrice !== "") query.set("max_price", String(params.maxPrice));
@@ -233,10 +242,9 @@ export async function verifyOtpCode(phone, code, sessionKey) {
 
 /* ------------------------------ profile / orders / favorites / addresses ------------------------------ */
 
-// برای بک‌اند قدیمی (بدون توکن) شماره موبایل هم ارسال می‌شود
+// بک‌اند قدیمی (بدون توکن) شماره موبایل هم ارسال می‌شود
 export async function getProfile() {
-  const token = getAccessToken();
-  const qs = token ? "" : "?phone=" + encodeURIComponent(getPhone() || "");
+  const qs = "?phone=" + encodeURIComponent(getPhone() || "");
   const data = await request("/me" + qs);
   return data || {};
 }
@@ -258,16 +266,29 @@ export async function getMyOrders() {
 }
 
 export async function getFavorites() {
-  const data = await request("/favorites");
+  const qs = "?phone=" + encodeURIComponent(getPhone() || "");
+  const data = await request("/favorites" + qs);
   return Array.isArray(data) ? data.map(mapProduct) : [];
 }
 
 export async function addFavorite(productId) {
-  return request("/favorites/" + productId, { method: "POST" });
+  const qs = "?phone=" + encodeURIComponent(getPhone() || "");
+  return request("/favorites/" + productId + qs, { method: "POST" });
 }
 
 export async function removeFavorite(productId) {
-  return request("/favorites/" + productId, { method: "DELETE" });
+  const qs = "?phone=" + encodeURIComponent(getPhone() || "");
+  return request("/favorites/" + productId + qs, { method: "DELETE" });
+}
+
+export async function fetchHomeSliders() {
+  const data = await request("/home/sliders?active=1");
+  return Array.isArray(data) ? data : [];
+}
+
+export async function fetchHomeCategorySlides() {
+  const data = await request("/home/category-slides?active=1");
+  return Array.isArray(data) ? data : [];
 }
 
 export async function getAddresses() {

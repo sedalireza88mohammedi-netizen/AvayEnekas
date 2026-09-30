@@ -2,15 +2,17 @@ import { Suspense, lazy, useEffect } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Menu from './Components/Menu/Menu';
 import Footer from './Components/Footer/Footer';
+import ContactUs from './Components/ContactUs/ContactUs';
 
 const Home = lazy(() => import('./Components/Home/Home'));
 const LogIn = lazy(() => import('./LoggIn/Login'));
-const Catagoryes = lazy(() => import('./Components/Catagoryes/Catagortes'));
+const AllProductList = lazy(() => import('./Components/AllProductList/AllProductList'));
 const Cart = lazy(() => import('./Components/Cart/Cart'));
 const Profile = lazy(() => import('./Components/Profile/Profile'));
 const AdminPanel = lazy(() => import('./Components/AdminPannel/AdminPannel'));
 const ProductDeatelse = lazy(() => import('./Components/ProductDeatelse/ProductDeatelse'));
 const ArticleDeatelse = lazy(() => import('./Components/Articles/ArticleDeatelse'));
+const CategoriesPage = lazy(() => import('./Components/Categories/Categories'));
 
 
 function ScrollToTop() {
@@ -54,10 +56,26 @@ function App() {
           }
         />
         <Route
+          path="/AllProductList"
+          element={
+            <Suspense fallback={<div className="page-loader" />}>
+              <AllProductList />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/Categories"
+          element={
+            <Suspense fallback={<div className="page-loader" />}>
+              <CategoriesPage />
+            </Suspense>
+          }
+        />
+        <Route
           path="/Catagoryes"
           element={
             <Suspense fallback={<div className="page-loader" />}>
-              <Catagoryes />
+              <CategoriesPage />
             </Suspense>
           }
         />
@@ -98,6 +116,14 @@ function App() {
           element={
             <Suspense fallback={<div className="page-loader" />}>
               <ArticleDeatelse />
+            </Suspense>
+          }
+        />
+         <Route
+          path="/ContactUs"
+          element={
+            <Suspense fallback={<div className="page-loader" />}>
+              <ContactUs />
             </Suspense>
           }
         />

@@ -1,6 +1,25 @@
 
 import React, { useState, useEffect, useRef } from 'react';
+import { fetchHomeSliders } from '../../api.js';
 import "./HeroSlider.css"
+
+const FALLBACK_SLIDES = [
+  {
+    id: 1,
+    title: 'فروشگاه تخصصی صوتی تصویری آوای انعکاس',
+    image: 'Images/MainSwiper Images/Swiper1.jpg',
+  },
+  {
+    id: 2,
+    title: 'تجهیزات حرفه‌ای استودیو از آوای انعکاس',
+    image: 'Images/MainSwiper Images/Swiper2.jpg',
+  },
+  {
+    id: 3,
+    title: 'مشاوره و نصب تخصصی تجهیزات صوت و تصویر',
+    image: 'Images/MainSwiper Images/Swiper3.jpg',
+  },
+];
 
 export default function HeroSlider() {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -10,23 +29,32 @@ export default function HeroSlider() {
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
 
-  const slidesData = [
-    {
-      id: 1,
-      title: 'فروشگاه تخصصی صوتی تصویری آوای انعکاس',
-      image: 'Images/MainSwiper Images/Swiper1.jpg',
-    },
-    {
-      id: 2,
-      title: 'تجهیزات حرفه‌ای استودیو از آوای انعکاس',
-      image: 'Images/MainSwiper Images/Swiper2.jpg',
-    },
-    {
-      id: 3,
-      title: 'مشاوره و نصب تخصصی تجهیزات صوت و تصویر',
-      image: 'Images/MainSwiper Images/Swiper3.jpg',
-    },
-  ];
+  const [slidesData, setSlidesData] = useState(FALLBACK_SLIDES);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const remote = await fetchHomeSliders();
+        if (mounted && Array.isArray(remote) && remote.length > 0) {
+          setSlidesData(remote.map((s) => ({
+            id: s.id,
+            title: s.title,
+            image: s.image,
+            link: s.link || undefined,
+          })));
+        }
+      } catch (err) {
+        /* در صورت خطا اسلایدهای پیش‌فرض نمایش داده می‌شوند */
+      }
+    })();
+    return () => { mounted = false; };
+  }, []);
+
+  useEffect(() => {
+    setCurrentSlide(0);
+    prevSlideRef.current = 0;
+  }, [slidesData]);
 
   const changeSlide = (steps) => {
     setCurrentSlide((prev) => {
@@ -152,6 +180,9 @@ onTouchEnd={handleDragEnd}
               fetchPriority={index === 0 ? 'high' : 'auto'}
               decoding="async"
             />
+            {slide.link && (
+              <a href={slide.link} className="slide-link" aria-label={slide.title} />
+            )}
           </div>
         ))}
         <div className="slider-pagination">

@@ -1,0 +1,40 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+
+.TopPartContact{
+    width: 100%;
+    height: 500px;
+    background-color: #696969;
+    display: flex;
+    justify-content: space-evenly;
+    padding: 50px;
+}
+.ChildConatct{
+    width: 30%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    align-items: center;
+}
+.IconContact{
+    color: #959d9c !important;
+    font-size: 50px !important;
+    width: 100px;
+    height: 100px;
+    background-color: #EEEEEE;
+    border-radius: 50%;
+    line-height: 100px;
+}
+.ChildConatct h1{
+    font-size: 27px;
+color: white;
+}
+.ChildConatct h2 {
+    color:#e8e8e8 ;
+}
+.ChildConatct h3{
+    color:#e1e1e1 ;
+}

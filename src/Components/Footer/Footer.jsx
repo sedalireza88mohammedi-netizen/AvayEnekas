@@ -30,47 +30,55 @@ function Footer() {
                 </div>
 
                 <div className="LeftSide">
-                    <div className="PoruductListFooter">
-                        <ul className="footerList">
-                            <h2>محصولات</h2>
-                            <li>
-                                <Link to="/Catagoryes?search=باند">باند</Link>
-                            </li>
-                            <li>
-                                <Link to="/Catagoryes?search=آمپلی فایر">آمپلی فایر</Link>
-                            </li>
-                            <li>
-                                <Link to="/Catagoryes?search=باند پسیو">باند پسیو</Link>
-                            </li>
-                            <li>
-                                <Link to="/Catagoryes?search=میکسر">میکسر دیجیتال</Link>
-                            </li>
-                            <li>
-                                <Link to="/Catagoryes?search=پاور میکسر">پاور میکسر</Link>
-                            </li>
-                            <li>
-                                <Link to="/Catagoryes?search=میکروفون">میکرفون</Link>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <div className="EasyToch">
+                      <div className="EasyToch">
                         <ul className="footerList">
                             <h2>دسترسی آسان</h2>
                             <li>
                                 <Link to="/">صفحه اصلی</Link>
                             </li>
-                            <li>
-                                <Link to="/Catagoryes"> دسته بندی ها</Link>
+                              <li>
+                                 <Link to="/ContactUs">ارتباط با ما</Link>
                             </li>
-                            <li>
+                              <li>
+                                 <Link to="">درباره ما</Link>
+                            </li>
+                              <li>
                                 <Link to="/Cart">سبد خرید</Link>
                             </li>
+                             <li>
+                                <Link to="/AllProductList"> دسته بندی ها</Link>
+                            </li>
                             <li>
-                                <a href="tel:09027741653">مشاوره رایگان</a>
+                                 <Link to="">مشاوره رایگان</Link>
+                            </li>
+                            
+                        </ul>
+                    </div>
+                    <div className="PoruductListFooter">
+                        <ul className="footerList">
+                            <h2>محصولات</h2>
+                            <li>
+                                <Link to="/AllProductList?search=باند">باند</Link>
+                            </li>
+                            <li>
+                                <Link to="/AllProductList?search=آمپلی فایر">آمپلی فایر</Link>
+                            </li>
+                            <li>
+                                <Link to="/AllProductList?search=باند پسیو">باند پسیو</Link>
+                            </li>
+                            <li>
+                                <Link to="/AllProductList?search=میکسر">میکسر دیجیتال</Link>
+                            </li>
+                            <li>
+                                <Link to="/AllProductList?search=پاور میکسر">پاور میکسر</Link>
+                            </li>
+                            <li>
+                                <Link to="/AllProductList?search=میکروفون">میکرفون</Link>
                             </li>
                         </ul>
                     </div>
+
+                  
 
                     <div className="footer-map" onClick={() => window.open(neshanUrl, "_blank")}>
                         <img title="موقعیت مکانی فروشگاه آوای" src="Images/Map-Image.jpg" alt="لوکیشن فروشگاه آوای انعکاس" className="map-image" />

@@ -1,8 +1,8 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch } from '@fortawesome/free-solid-svg-icons';
-import { useState, useEffect } from 'react';
+import { faSearch, faChevronDown } from '@fortawesome/free-solid-svg-icons';
+import { useState, useEffect, useRef } from 'react';
 import { PackageX } from 'lucide-react';
-import "./Catagoryes.css";
+import "./AllProductList.css";
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { fetchProducts, fetchCategories } from '../../api';
 import { usePageMeta } from '../../useSeo';
@@ -15,6 +15,53 @@ const toPersianDigits = (num) =>
   num.toString().replace(/\d/g, (x) => '۰۱۲۳۴۵۶۷۸۹'[x]);
 
 const formatPrice = (price) => price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+function FilterSelect({ value, onChange, options, placeholder, ariaLabel }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (ref.current && !ref.current.contains(event.target)) setOpen(false);
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const current = options.find((o) => String(o.value) === String(value));
+
+  return (
+    <div className="cat-custom-select" ref={ref}>
+      <div
+        className={`cat-custom-trigger ${open ? 'open' : ''}`}
+        onClick={() => setOpen(!open)}
+        aria-label={ariaLabel}
+      >
+        <span style={{ color: current ? '#212121' : '#888' }}>
+          {current ? current.label : placeholder}
+        </span>
+        <FontAwesomeIcon icon={faChevronDown} className={`cat-custom-arrow ${open ? 'rotate' : ''}`} />
+      </div>
+
+      {open && (
+        <div className="cat-custom-options">
+          {options.map((o) => (
+            <div
+              key={o.value}
+              className={`cat-custom-option ${String(o.value) === String(value) ? 'is-selected' : ''}`}
+              onClick={() => {
+                onChange(o.value);
+                setOpen(false);
+              }}
+            >
+              {o.label}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 function ProductCard({ product }) {
   return (
@@ -59,7 +106,7 @@ function ProductCard({ product }) {
   );
 }
 
-export default function Catagoryes() {
+export default function AllProductList() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const search = searchParams.get('search') || '';
@@ -164,17 +211,16 @@ export default function Catagoryes() {
           <h2 className="main-title">{title}</h2>
 
           <div className="cat-filters">
-            <select
-              className="cat-filter"
+            <FilterSelect
               value={brand}
-              onChange={(e) => setBrand(e.target.value)}
-              aria-label="برند"
-            >
-              <option value="">همه برندها</option>
-              {brandOptions.map((b) => (
-                <option key={b} value={b}>{b}</option>
-              ))}
-            </select>
+              onChange={setBrand}
+              ariaLabel="برند"
+              placeholder="انتخاب برند"
+              options={[
+                { value: '', label: 'همه برندها' },
+                ...brandOptions.map((b) => ({ value: b, label: b })),
+              ]}
+            />
 
             <div className="cat-filter-price">
               <input
@@ -196,31 +242,33 @@ export default function Catagoryes() {
               />
             </div>
 
-            <select
-              className="cat-filter"
+            <FilterSelect
               value={minRating}
-              onChange={(e) => setMinRating(Number(e.target.value))}
-              aria-label="حداقل امتیاز"
-            >
-              <option value="0">همه امتیازها</option>
-              <option value="3">از ۳ به بالا</option>
-              <option value="3.5">از ۳.۵ به بالا</option>
-              <option value="4">از ۴ به بالا</option>
-              <option value="4.5">از ۴.۵ به بالا</option>
-            </select>
+              onChange={(v) => setMinRating(Number(v))}
+              ariaLabel="حداقل امتیاز"
+              placeholder="انتخاب امتیاز"
+              options={[
+                { value: '0', label: 'همه امتیازها' },
+                { value: '3', label: 'از ۳ به بالا' },
+                { value: '3.5', label: 'از ۳.۵ به بالا' },
+                { value: '4', label: 'از ۴ به بالا' },
+                { value: '4.5', label: 'از ۴.۵ به بالا' },
+              ]}
+            />
 
-            <select
-              className="cat-filter"
+            <FilterSelect
               value={sort}
-              onChange={(e) => setSort(e.target.value)}
-              aria-label="مرتب‌سازی"
-            >
-              <option value="default">مرتب‌سازی پیش‌فرض</option>
-              <option value="price_asc">ارزان‌ترین</option>
-              <option value="price_desc">گران‌ترین</option>
-              <option value="rating">بیشترین امتیاز</option>
-              <option value="newest">جدیدترین</option>
-            </select>
+              onChange={setSort}
+              ariaLabel="مرتب‌سازی"
+              placeholder="مرتب‌سازی"
+              options={[
+                { value: 'default', label: 'مرتب‌سازی پیش‌فرض' },
+                { value: 'price_asc', label: 'ارزان‌ترین' },
+                { value: 'price_desc', label: 'گران‌ترین' },
+                { value: 'rating', label: 'بیشترین امتیاز' },
+                { value: 'newest', label: 'جدیدترین' },
+              ]}
+            />
 
             {hasFilters && (
               <button className="cat-filter-reset" onClick={resetFilters}>

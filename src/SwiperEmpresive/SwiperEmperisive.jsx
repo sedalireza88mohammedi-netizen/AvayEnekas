@@ -55,13 +55,17 @@ const ProductCard = ({ product, onDrag }) => {
       </div>
       <div className="product-price-section">
         <div className="price-details">
-          <span className="old-price">{toPersianDigits(formatPrice(product.oldPrice))}</span>
+          {product.discount > 0 && (
+            <span className="old-price">{toPersianDigits(formatPrice(product.oldPrice))}</span>
+          )}
           <div className="new-price">
             <span>{toPersianDigits(formatPrice(product.price))}</span>
             <span className="currency">تومان</span>
           </div>
         </div>
-        <div className="discount-badge">{toPersianDigits(product.discount)}٪</div>
+        {product.discount > 0 && (
+          <div className="discount-badge">{toPersianDigits(product.discount)}٪</div>
+        )}
       </div>
     </Link>
   </div>
@@ -184,7 +188,7 @@ export default function EmperiseveSwiper() {
           {(products || []).filter((product) => product.Empressive).map((product) => (
             <ProductCard key={product.id} product={product} onDrag={() => dragMoved.current} />
           ))}
-          <Link to="/Catagoryes" className="end-card" aria-label="مشاهده همه محصولات">
+          <Link to="/AllProductList" className="end-card" aria-label="مشاهده همه محصولات">
             <div className="end-card-icon-wrapper"><ArrowLeft size={24} /></div>
             <span className="end-card-text">مشاهده همه</span>
           </Link>

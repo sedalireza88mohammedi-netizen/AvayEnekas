@@ -272,6 +272,17 @@ export default function ProductDeatelse() {
         </section>
       )}
 
+      {product.description && (
+        <section className="pd-video">
+          <h3 className="pd-video-title">توضیحات محصول</h3>
+          <div className="pd-description">
+            {product.description.split(/\n{2,}/).map((para, i) => (
+              <p key={i}>{para}</p>
+            ))}
+          </div>
+        </section>
+      )}
+
       <div className="pd-reviews">
         <div className="pd-reviews-head">
           <h3 className="pd-reviews-title">
@@ -320,8 +331,8 @@ export default function ProductDeatelse() {
               >
                 <Star
                   size={22}
-                  fill={n <= reviewForm.rating ? '#f7a600' : 'transparent'}
-                  stroke={n <= reviewForm.rating ? '#f7a600' : '#c7c7c7'}
+                  fill={n <= reviewForm.rating ? '#edc309' : 'transparent'}
+                  stroke={n <= reviewForm.rating ? '#edc309' : '#c7c7c7'}
                 />
               </button>
             ))}

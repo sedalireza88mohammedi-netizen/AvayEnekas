@@ -246,6 +246,47 @@
   text-decoration: none;
 }
 
+.cart-auth-note {
+  margin-top: 12px;
+  padding: 12px 14px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 9px;
+}
+
+.cart-auth-note p {
+  margin: 0 0 8px;
+  color: #b91c1c;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.cart-auth-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--brand);
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.cart-auth-link:hover {
+  text-decoration: underline;
+}
+
+.cart-address-select {
+  width: 100%;
+  font-family: inherit;
+  font-size: 0.9rem;
+  color: #111827;
+  background: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 9px;
+  padding: 11px 12px;
+  outline: none;
+}
+
 .cart-empty,
 .cart-order-success {
   text-align: center;

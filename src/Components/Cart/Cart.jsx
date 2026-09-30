@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Minus, Plus, Trash2, ShoppingCart, ShoppingBag, Loader2, X } from 'lucide-react';
+import { Minus, Plus, Trash2, ShoppingCart, ShoppingBag, Loader2, X, LogIn, UserCheck } from 'lucide-react';
 import "./Cart.css";
-import { getCart, updateCartItem, removeCartItem, checkoutCart } from '../../api';
+import { getCart, updateCartItem, removeCartItem, checkoutCart, getProfile, getAddresses } from '../../api';
 import { useCartStore } from '../../cartStore';
 import { usePageMeta } from '../../useSeo';
 import SafeImg from '../../SafeImg';
+import { isLoggedIn } from '../../auth';
 
 const toPersianDigits = (num) =>
   (num || 0).toString().replace(/\d/g, (x) => '۰۱۲۳۴۵۶۷۸۹'[x]);
@@ -18,9 +19,14 @@ export default function Cart() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
-  const [form, setForm] = useState({ customer: '', phone: '', address: '', email: '' });
+  const [form, setForm] = useState({ customer: '', phone: '', address: '', email: '', location: '' });
   const [order, setOrder] = useState(null);
   const [error, setError] = useState('');
+  const [authNote, setAuthNote] = useState('');
+  const [profile, setProfile] = useState({});
+  const [addresses, setAddresses] = useState([]);
+  const [selectedAddressId, setSelectedAddressId] = useState('');
+  const logged = isLoggedIn();
   const { refreshCart } = useCartStore();
 
   usePageMeta({ title: 'سبد خرید | آوای انعکاس' });
@@ -32,8 +38,16 @@ export default function Cart() {
       .catch(() => active && setCart({ total_items: 0, total_price: 0, items: [] }))
       .finally(() => active && setLoading(false));
     refreshCart();
+    if (logged) {
+      getProfile()
+        .catch(() => ({}))
+        .then((p) => active && setProfile(p || {}));
+      getAddresses()
+        .catch(() => [])
+        .then((a) => active && setAddresses(a || []));
+    }
     return () => { active = false; };
-  }, [refreshCart]);
+  }, [refreshCart, logged]);
 
   const refresh = async () => {
     try {
@@ -73,6 +87,29 @@ export default function Cart() {
     }
   };
 
+  const openCheckout = () => {
+    setAuthNote('');
+    setError('');
+    if (!logged) {
+      setAuthNote('برای ثبت سفارش ابتدا وارد حساب کاربری شوید.');
+      return;
+    }
+    const p = profile || {};
+    if (!p.NameAndFamily || !p.Number) {
+      setAuthNote('برای ثبت سفارش ابتدا اطلاعات حساب کاربری خود را در بخش پروفایل تکمیل کنید.');
+      return;
+    }
+    setForm({
+      customer: p.NameAndFamily || '',
+      phone: p.Number || '',
+      email: p.Email || '',
+      address: '',
+      location: '',
+    });
+    setSelectedAddressId('');
+    setCheckoutOpen(true);
+  };
+
   const submitCheckout = async (e) => {
     e.preventDefault();
     if (!form.customer.trim() || !form.phone.trim()) {
@@ -87,10 +124,11 @@ export default function Cart() {
         phone: form.phone.trim(),
         address: form.address.trim(),
         email: form.email.trim(),
+        location: form.location.trim(),
       });
       setOrder(result);
       setCheckoutOpen(false);
-      setForm({ customer: '', phone: '', address: '', email: '' });
+      setForm({ customer: '', phone: '', address: '', email: '', location: '' });
       await refresh();
     } catch (err) {
       setError('ثبت سفارش ناموفق بود؛ دوباره تلاش کنید.');
@@ -213,11 +251,25 @@ export default function Cart() {
             )}
             <button
               className="cart-checkout-btn"
-              onClick={() => setCheckoutOpen(true)}
+              onClick={openCheckout}
               disabled={busy}
             >
               ثبت سفارش
             </button>
+            {authNote && (
+              <div className="cart-auth-note">
+                <p>{authNote}</p>
+                {logged ? (
+                  <Link to="/Profile" className="cart-auth-link">
+                    <UserCheck size={15} /> تکمیل اطلاعات در پروفایل
+                  </Link>
+                ) : (
+                  <Link to="/LogIn/SinUp" className="cart-auth-link">
+                    <LogIn size={15} /> ورود به حساب کاربری
+                  </Link>
+                )}
+              </div>
+            )}
             <Link to="/" className="cart-continue">ادامه خرید</Link>
           </div>
         </div>
@@ -241,10 +293,37 @@ export default function Cart() {
                 value={form.phone}
                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
               />
+              {addresses.length > 0 && (
+                <select
+                  className="cart-address-select"
+                  value={selectedAddressId}
+                  onChange={(e) => {
+                    const id = e.target.value;
+                    setSelectedAddressId(id);
+                    const sel = addresses.find((a) => String(a.id) === id);
+                    setForm({ ...form, address: sel ? sel.address : '' });
+                  }}
+                >
+                  <option value="">انتخاب از آدرس‌های ذخیره‌شده...</option>
+                  {addresses.map((a) => (
+                    <option key={a.id} value={a.id}>
+                      {a.title ? a.title + ' — ' : ''}{a.address}
+                    </option>
+                  ))}
+                </select>
+              )}
               <input
-                placeholder="آدرس"
+                placeholder={addresses.length > 0 ? 'یا آدرس جدید را بنویسید' : 'آدرس'}
                 value={form.address}
-                onChange={(e) => setForm({ ...form, address: e.target.value })}
+                onChange={(e) => {
+                  setForm({ ...form, address: e.target.value });
+                  setSelectedAddressId('');
+                }}
+              />
+              <input
+                placeholder="لوکیشن (اختیاری) — لینک یا مختصات"
+                value={form.location}
+                onChange={(e) => setForm({ ...form, location: e.target.value })}
               />
               <input
                 placeholder="ایمیل (اختیاری)"

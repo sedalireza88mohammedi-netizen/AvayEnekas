@@ -330,7 +330,7 @@
 .pd-related-card:hover {
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
   transform: translateY(-2px);
-}
+}c8aa24
 
 .pd-related-card img {
   width: 100%;
@@ -519,6 +519,7 @@
 .pd-review-stars {
   display: flex;
   gap: 4px;
+ color: #edc309;
 }
 
 .pd-review-stars button {
@@ -543,7 +544,7 @@
 
 .pd-review-name:focus,
 .pd-review-comment:focus {
-  border-color: #0d9488;
+  border-color: #000000;
 }
 
 .pd-review-error {
@@ -648,4 +649,22 @@
   height: 100%;
   border: none;
   display: block;
+}
+
+.pd-description {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 18px 20px;
+  color: #334155;
+  font-size: 0.95rem;
+  line-height: 2.1;
+}
+
+.pd-description p {
+  margin: 0 0 12px;
+}
+
+.pd-description p:last-child {
+  margin-bottom: 0;
 }

@@ -2,21 +2,22 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faStar } from '@fortawesome/free-solid-svg-icons';
 import './RatingStars.css';
 
+function formatFaStars(value) {
+  return value.toLocaleString('fa-IR', { maximumFractionDigits: 1 });
+}
+
 export default function RatingStars({ rating = 0, size = 14, showValue = true }) {
   const value = Math.min(5, Math.max(0, Number(rating) || 0));
+  const rounded = Math.round(value * 10) / 10;
+  if (rounded <= 0) return null;
   return (
-    <div className="rating-stars" style={{ gap: Math.max(1, Math.round(size * 0.15)) }} aria-label={`امتیاز ${value} از ۵`}>
-      <div className="rating-stars-track" style={{ fontSize: size, width: size * 5 + Math.round(size * 0.15) * 4 }}>
-        {[1, 2, 3, 4, 5].map((i) => (
-          <FontAwesomeIcon key={i} icon={faStar} className="rating-stars-empty" style={{ fontSize: size }} />
-        ))}
-        <div className="rating-stars-fill" style={{ width: `${(value / 5) * 100}%` }}>
-          {[1, 2, 3, 4, 5].map((i) => (
-            <FontAwesomeIcon key={i} icon={faStar} className="rating-stars-full" style={{ fontSize: size }} />
-          ))}
-        </div>
-      </div>
-      {showValue && <span className="rating-stars-value" style={{ fontSize: Math.round(size * 0.85) }}>{value.toLocaleString('fa-IR')}</span>}
+    <div className="rating-single" style={{ gap: Math.max(2, Math.round(size * 0.25)) }}>
+      <FontAwesomeIcon icon={faStar} className="rating-single-star" style={{ fontSize: size }} />
+      {showValue && (
+        <span className="rating-single-value" style={{ fontSize: Math.round(size * 0.9) }}>
+          {formatFaStars(rounded)}
+        </span>
+      )}
     </div>
   );
 }

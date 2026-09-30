@@ -33,6 +33,14 @@ export function uid() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }
 
+/** تبدیل خطا به متن کاربرپسند فارسی؛ خطاهای خام انگلیسی هرگز به UI نمی‌رسند */
+export function faError(err, fallback = "خطا در برقراری ارتباط با سرور") {
+  const msg = err && err.message ? String(err.message) : "";
+  if (!msg) return fallback;
+  if (/[آ-ی]/.test(msg)) return msg;
+  return fallback;
+}
+
 async function request(path, options = {}) {
   const method = (options.method || "GET").toUpperCase();
   let res;
@@ -53,14 +61,21 @@ async function request(path, options = {}) {
     }
   }
   if (!res.ok) {
-    const message = await res.text().catch(() => "");
-    throw new Error(message || ("خطا در ارتباط با سرور (کد " + res.status + ")"));
+    const raw = await res.text().catch(() => "");
+    let detail = "";
+    try {
+      const parsed = JSON.parse(raw);
+      detail = parsed.error || parsed.detail || "";
+    } catch {
+      /* صفحه‌ی خطای HTML یا متن خام — نادیده گرفته می‌شود */
+    }
+    throw new Error(detail || "خطا در برقراری ارتباط با سرور (کد " + res.status + ")");
   }
   const contentType = res.headers.get("content-type") || "";
   return contentType.includes("application/json") ? res.json() : null;
 }
 
-export const CATEGORY_LIST = ["اسپیکر", "هدفون", "آمپلی‌فایر", "میکروفون", "میکسر", "کابل و اتصالات"];
+export const CATEGORY_LIST = ["اسپیکر", "هدفون", "آمپلی فایر", "میکروفون", "میکسر", "کابل و اتصالات"];
 
 function buildProductFormData(payload) {
   const formData = new FormData();
@@ -68,8 +83,11 @@ function buildProductFormData(payload) {
   formData.append("category", payload.category);
   formData.append("sku", payload.sku);
   formData.append("price", payload.price);
+  formData.append("discountPercent", payload.discountPercent != null ? payload.discountPercent : "");
   formData.append("stock", payload.stock);
   formData.append("threshold", payload.threshold);
+  formData.append("rating", payload.rating != null ? payload.rating : "");
+  formData.append("description", payload.description || "");
   formData.append("existingImageUrls", JSON.stringify(payload.keepImageUrls || []));
   (payload.imageFiles || []).forEach((file) => formData.append("images", file));
   if (payload.videoFile) formData.append("video", payload.videoFile);
@@ -111,6 +129,15 @@ export async function deleteProduct(id) {
   return request("/products/" + id, { method: "DELETE" });
 }
 
+/** به‌روزرسانی سریع پرچم‌های نمایشی محصول بدون دست زدن به تصاویر/ویدئو */
+export async function updateProductSelection(id, patch) {
+  return request("/products/" + id + "/select", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(patch),
+  });
+}
+
 /* ============================== ORDERS ============================== */
 
 export async function fetchOrders() {
@@ -149,6 +176,62 @@ export async function deleteArticle(id) {
   return request("/articles/" + id, { method: "DELETE" });
 }
 
+/* ============================== HOME SLIDERS ============================== */
+
+function buildHomeSliderFormData(payload) {
+  const formData = new FormData();
+  formData.append("title", payload.title || "");
+  formData.append("link", payload.link || "");
+  formData.append("active", payload.active ? "true" : "false");
+  if (payload.imageFile) formData.append("image", payload.imageFile);
+  return formData;
+}
+
+export async function fetchHomeSliders() {
+  return request("/home/sliders");
+}
+
+export async function createHomeSlider(payload) {
+  return request("/home/sliders", { method: "POST", body: buildHomeSliderFormData(payload) });
+}
+
+export async function updateHomeSlider(id, payload) {
+  return request("/home/sliders/" + id, { method: "PUT", body: buildHomeSliderFormData(payload) });
+}
+
+export async function deleteHomeSlider(id) {
+  return request("/home/sliders/" + id, { method: "DELETE" });
+}
+
+/* ============================== CATEGORY SLIDES ============================== */
+
+function buildCategorySlideFormData(payload) {
+  const formData = new FormData();
+  formData.append("title", payload.title || "");
+  formData.append("category", payload.category || "");
+  formData.append("link", payload.link || "");
+  formData.append("order", payload.order != null ? payload.order : 0);
+  formData.append("active", payload.active ? "true" : "false");
+  if (payload.imageFile) formData.append("image", payload.imageFile);
+  return formData;
+}
+
+export async function fetchCategorySlides() {
+  return request("/admin/category-slides");
+}
+
+export async function createCategorySlide(payload) {
+  return request("/admin/category-slides", { method: "POST", body: buildCategorySlideFormData(payload) });
+}
+
+export async function updateCategorySlide(id, payload) {
+  return request("/admin/category-slides/" + id, { method: "PUT", body: buildCategorySlideFormData(payload) });
+}
+
+export async function deleteCategorySlide(id) {
+  return request("/admin/category-slides/" + id, { method: "DELETE" });
+}
+
 /* ============================== MESSAGES (پیامک) ============================== */
 
 export async function fetchAdminMessages() {
@@ -161,4 +244,44 @@ export async function sendAdminMessage(payload) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
+}
+
+export async function deleteAdminMessage(id) {
+  return request("/admin/messages/" + id, { method: "DELETE" });
+}
+
+/* ============================== CATEGORIES (دسته‌بندی) ============================== */
+
+export async function fetchAdminCategories() {
+  return request("/admin/categories");
+}
+
+export async function createAdminCategory(payload) {
+  return request("/admin/categories", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function updateAdminCategory(id, payload) {
+  return request("/admin/categories/" + id, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function deleteAdminCategory(id) {
+  return request("/admin/categories/" + id, { method: "DELETE" });
+}
+
+/* ============================== REVIEWS (دیدگاه‌ها) ============================== */
+
+export async function fetchAllReviews() {
+  return request("/admin/reviews");
+}
+
+export async function deleteReview(id) {
+  return request("/admin/reviews/" + id, { method: "DELETE" });
 }
