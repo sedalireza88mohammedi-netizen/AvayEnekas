@@ -1,0 +1,341 @@
+/* ===================== شگفت‌انگیزها ===================== */
+.SectionAmazing {
+  --section-accent: #c28b00;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px 16px 64px;
+  direction: rtl;
+}
+
+/* ---------- سربرگ بخش ---------- */
+.SectionAmazing__hero {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 26px 28px;
+  background:
+    radial-gradient(120% 160% at 100% 0%, #c28b0022, transparent 60%),
+    linear-gradient(180deg, #ffffff, #fbfbfd);
+  border: 1px solid #ececf1;
+  border-radius: 22px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+}
+
+.SectionAmazing__crumbs {
+  flex: 1 0 100%;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: #8a8a94;
+}
+
+.SectionAmazing__crumbs a {
+  color: #6b6b76;
+  text-decoration: none;
+}
+
+.SectionAmazing__crumbs a:hover {
+  color: var(--section-accent);
+}
+
+.SectionAmazing__heading {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+.SectionAmazing__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  flex: 0 0 56px;
+  color: #fff;
+  background: linear-gradient(140deg, var(--section-accent), var(--section-accent) 60%, #111827);
+  border-radius: 18px;
+  box-shadow: 0 10px 22px #c28b0040;
+}
+
+.SectionAmazing__heading-text h1 {
+  margin: 0 0 4px;
+  font-size: 1.55rem;
+  font-weight: 800;
+  color: #14141a;
+}
+
+.SectionAmazing__heading-text p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.9;
+  color: #6b6b76;
+}
+
+.SectionAmazing__count {
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--section-accent);
+  background: #c28b0014;
+  border: 1px solid #c28b0033;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+/* ---------- بدنه ---------- */
+.SectionAmazing__body {
+  margin-top: 24px;
+}
+
+.SectionAmazing__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 18px;
+}
+
+/* ---------- کارت محصول ---------- */
+.SectionAmazing__card {
+  display: flex;
+  height: 475px;
+  flex-direction: column;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #eeeef3;
+  border-radius: 18px;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.SectionAmazing__card:hover {
+  transform: translateY(-3px);
+  border-color: #c28b0055;
+  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.08);
+}
+
+.SectionAmazing__media {
+  position: relative;
+  display: block;
+  aspect-ratio: 1 / 1;
+
+}
+
+.SectionAmazing__media img {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+}
+
+.SectionAmazing__discount {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 4px 9px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #fff;
+  background: #1b1b1b;
+  border-radius: 999px;
+}
+
+.SectionAmazing__body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 14px 16px;
+}
+
+.SectionAmazing__category {
+  align-self: flex-start;
+  padding: 3px 9px;
+  font-size: 0.72rem;
+  color: var(--section-accent);
+  background: #c28b0012;
+  border-radius: 999px;
+}
+
+.SectionAmazing__title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.9em;
+  font-size: 0.92rem;
+  font-weight: 700;
+  line-height: 1.45;
+  color: #1c1c22;
+  text-decoration: none;
+}
+
+.SectionAmazing__title:hover {
+  color: var(--section-accent);
+}
+
+.SectionAmazing__footer {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px dashed #ededf2;
+}
+
+.SectionAmazing__price {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.SectionAmazing__price strong {
+  color: #111827;
+}
+
+.SectionAmazing__price-old {
+  font-size: 0.78rem;
+  color: #9a9aa4;
+  text-decoration: line-through;
+}
+
+.SectionAmazing__currency {
+  font-size: 0.74rem;
+  color: #8a8a94;
+}
+
+/* ---------- حالت خالی و اسکلت ---------- */
+.SectionAmazing__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 70px 24px;
+  text-align: center;
+  background: #fff;
+  border: 1px dashed #c28b0044;
+  border-radius: 22px;
+}
+
+.SectionAmazing__empty-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 68px;
+  height: 68px;
+  color: var(--section-accent);
+  background: #c28b0014;
+  border-radius: 22px;
+}
+
+.SectionAmazing__empty h2 {
+  margin: 6px 0 0;
+  font-size: 1.1rem;
+  color: #1c1c22;
+}
+
+.SectionAmazing__empty p {
+  max-width: 46ch;
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 2;
+  color: #6b6b76;
+}
+
+.SectionAmazing__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 11px 22px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #fff;
+  text-decoration: none;
+  background: var(--section-accent);
+  border-radius: 999px;
+}
+
+.SectionAmazing__message {
+  padding: 34px;
+  text-align: center;
+  border-radius: 18px;
+}
+
+.SectionAmazing__message--error {
+  color: #b42318;
+  background: #fef3f2;
+  border: 1px solid #fda29b;
+}
+
+.SectionAmazing__card--skeleton {
+  min-height: 320px;
+  background: linear-gradient(100deg, #f2f2f6 30%, #fafafc 50%, #f2f2f6 70%);
+  background-size: 200% 100%;
+  animation: SectionAmazing-shimmer 1.3s ease-in-out infinite;
+  border: 1px solid #f0f0f4;
+}
+
+@keyframes SectionAmazing-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* ---------- پایین صفحه ---------- */
+.SectionAmazing__more {
+  display: flex;
+  justify-content: center;
+  margin-top: 32px;
+}
+
+.SectionAmazing__more-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #33333d;
+  text-decoration: none;
+  background: #fff;
+  border: 1px solid #e7e7ee;
+  border-radius: 999px;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.SectionAmazing__more-link:hover {
+  color: var(--section-accent);
+  border-color: #c28b0066;
+}
+
+/* ---------- موبایل ---------- */
+@media (max-width: 768px) {
+  .SectionAmazing {
+    padding: 16px 12px 48px;
+  }
+
+  .SectionAmazing__hero {
+    padding: 20px;
+    border-radius: 18px;
+  }
+
+  .SectionAmazing__heading-text h1 {
+    font-size: 1.25rem;
+  }
+
+  .SectionAmazing__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .SectionAmazing__title {
+    font-size: 0.84rem;
+  }
+}

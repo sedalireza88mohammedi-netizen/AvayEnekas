@@ -8,22 +8,25 @@ import {
   CheckCircle2, Clock, XCircle, Truck, Menu, Bell, ImagePlus, Video,
   RefreshCw, FileText, MessageSquareText, Send,
   Star, Images, PlusCircle, MinusCircle, FolderOpen, MessagesSquare,
-  Layers, GripVertical, Check,
+  Layers, Check, Link2, SlidersHorizontal, Eye, EyeOff,
 } from "lucide-react";
 import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, PieChart, Pie, Cell,
 } from "recharts";
 import "./AdminPannel.css";
+import { getAccessToken, isLoggedIn } from "../../auth";
 import {
   CATEGORY_LIST,
   fetchProducts, createProduct, updateProduct, deleteProduct, updateProductSelection,
   fetchOrders, updateOrderStatus,
-  fetchCustomers,
+  fetchCustomers, setCustomerBlocked, deleteCustomer,
+  fetchPopularSearchesAdmin, createPopularSearch, updatePopularSearch, deletePopularSearch,
   fetchArticles, createArticle, updateArticle, deleteArticle,
   fetchAdminMessages, sendAdminMessage, deleteAdminMessage,
   fetchHomeSliders, createHomeSlider, updateHomeSlider, deleteHomeSlider,
   fetchCategorySlides, createCategorySlide, updateCategorySlide, deleteCategorySlide,
+  fetchSectionSliders, createSectionSliderItem, updateSectionSliderItem, deleteSectionSlider,
   fetchAdminCategories, createAdminCategory, updateAdminCategory, deleteAdminCategory,
   fetchAllReviews, deleteReview,
   faError,
@@ -51,6 +54,8 @@ const ORDER_STATUSES = ["در انتظار پردازش", "در حال ارسا�
 
 const toman = (n) => n.toLocaleString("fa-IR") + " تومان";
 const num = (n) => n.toLocaleString("fa-IR");
+const sortPopularSearches = (list) =>
+  [...list].sort((a, b) => (a.order ?? 0) - (b.order ?? 0) || a.id - b.id);
 
 const statusClass = (status) => {
   switch (status) {
@@ -79,11 +84,13 @@ const NAV = [
   { key: "products", label: "محصولات", icon: Package },
   { key: "special", label: "شگفت‌انگیزها و محبوب‌ها", icon: Star },
   { key: "sliders", label: "اسلایدرهای صفحه اصلی", icon: Images },
+  { key: "events", label: "رویدادهای ویژه (بخش‌های منو)", icon: Star },
   { key: "categorySlides", label: "اسلایدر دسته‌بندی‌ها", icon: FolderOpen },
   { key: "categories", label: "دسته‌بندی‌ها", icon: FolderOpen },
   { key: "orders", label: "سفارش‌ها", icon: ShoppingCart },
   { key: "customers", label: "مشتریان", icon: Users },
   { key: "reviews", label: "دیدگاه‌ها", icon: MessagesSquare },
+  { key: "popularSearches", label: "جستجوهای پرطرفدار", icon: TrendingUp },
   { key: "messages", label: "پیامک", icon: MessageSquareText },
   { key: "articles", label: "مقالات", icon: FileText },
   { key: "reports", label: "گزارش فروش", icon: BarChart3 },
@@ -188,7 +195,9 @@ function FullScreenState({ kind, message, onRetry }) {
 function Dashboard({ products, categories, reviews, messages, orders, onGoProducts, onGoOrders }) {
   const lowStock = products.filter((p) => p.stock > 0 && p.stock <= p.threshold).length;
   const outOfStock = products.filter((p) => p.stock === 0).length;
-  const selectedCount = products.filter((p) => p.is_special || p.is_popular).length;
+  const selectedCount = products.filter((p) =>
+    p.Empressive || p.is_popular || p.is_trending || p.is_best_seller,
+  ).length;
   const pendingOrders = (orders || []).filter((o) => o.status === "در انتظار پردازش").length;
   const salesTotal = (orders || []).reduce((s, o) => s + (o.total || 0), 0);
 
@@ -1038,11 +1047,43 @@ function Orders({ orders, onUpdateStatus, initialStatusFilter }) {
 }
 
 /* ============================== CUSTOMERS ============================== */
+/* مدیریت مشتریان: مسدود/رفع مسدود و حذف حساب.                            */
+/* حذف، فقط حساب و داده‌های شخصی را پاک می‌کند و سوابق سفارش حفظ می‌شود.  */
 
-function Customers({ customers }) {
+function Customers({ customers, onBlockToggle, onDelete }) {
   const [search, setSearch] = useState("");
   const [detail, setDetail] = useState(null);
-  const filtered = customers.filter((c) => c.name.includes(search) || c.phone.includes(search));
+  const [busyId, setBusyId] = useState(null);
+  const [removeTarget, setRemoveTarget] = useState(null);
+  const [error, setError] = useState("");
+
+  const filtered = useMemo(() => {
+    const q = search.trim();
+    if (!q) return customers;
+    return customers.filter(
+      (c) => (c.name || "").includes(q) || (c.phone || "").includes(q),
+    );
+  }, [customers, search]);
+
+  const act = async (id, fn) => {
+    setBusyId(id);
+    setError("");
+    try {
+      await fn();
+    } catch (e) {
+      setError(faError(e, "عملیات انجام نشد؛ دوباره تلاش کنید"));
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const confirmDelete = async () => {
+    const target = removeTarget;
+    setRemoveTarget(null);
+    if (!target) return;
+    setDetail((d) => (d && d.id === target.id ? null : d));
+    await act(target.id, () => onDelete(target));
+  };
 
   return (
     <div className="stack">
@@ -1051,24 +1092,90 @@ function Customers({ customers }) {
         <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="جستجوی مشتری..." />
       </div>
 
+      {error && <p className="form-error">{error}</p>}
+      {customers.length === 0 && (
+        <p className="empty-row">
+          هنوز مشتری واقعی ثبت نشده است؛ هر حساب که با ورود شماره ساخته شود اینجا دیده می‌شود.
+        </p>
+      )}
+
       <div className="customers-grid">
-        {filtered.map((c) => (
-          <button key={c.id} type="button" onClick={() => setDetail(c)} className="card customer-card" aria-label={"مشاهده پروفایل " + c.name}>
-            <div className="customer-card-top">
-              <div className="customer-avatar">{c.name.slice(0, 1)}</div>
-              <div className="customer-info">
-                <p className="bold">{c.name}</p>
-                <p className="mono muted small">{c.phone}</p>
+        {filtered.map((c) => {
+          const busy = busyId === c.id;
+          return (
+            <div key={c.id} className={cx("card", "customer-card", c.is_blocked && "is-blocked")}>
+              <button
+                type="button"
+                onClick={() => setDetail(c)}
+                className="customer-card-main"
+                aria-label={"مشاهده پروفایل " + c.name}
+              >
+                <div className="customer-card-top">
+                  <div className="customer-avatar">{c.name.slice(0, 1)}</div>
+                  <div className="customer-info">
+                    <p className="bold">{c.name}</p>
+                    <p className="mono muted small">{c.phone}</p>
+                  </div>
+                </div>
+                <div className="customer-stats">
+                  <div><p className="muted small">سفارش‌ها</p><p className="mono bold">{num(c.orders)}</p></div>
+                  <div><p className="muted small">خرید کل</p><p className="mono bold small">{toman(c.spent)}</p></div>
+                </div>
+              </button>
+
+              <div className="customer-card-actions">
+                {c.is_blocked ? (
+                  <span className="badge badge--danger">مسدود</span>
+                ) : (
+                  <span className="badge badge--success">فعال</span>
+                )}
+                <button
+                  type="button"
+                  className="btn btn--ghost btn--sm"
+                  disabled={busy}
+                  onClick={() => act(c.id, () => onBlockToggle(c, !c.is_blocked))}
+                >
+                  {busy ? "..." : c.is_blocked ? "رفع مسدودی" : "مسدود کردن"}
+                </button>
+                <button
+                  type="button"
+                  className="btn btn--danger btn--sm"
+                  disabled={busy}
+                  onClick={() => setRemoveTarget(c)}
+                >
+                  <Trash2 size={14} /> حذف
+                </button>
               </div>
             </div>
-            <div className="customer-stats">
-              <div><p className="muted small">سفارش‌ها</p><p className="mono bold">{num(c.orders)}</p></div>
-              <div><p className="muted small">خرید کل</p><p className="mono bold small">{toman(c.spent)}</p></div>
-            </div>
-          </button>
-        ))}
-        {filtered.length === 0 && <p className="empty-row" style={{ gridColumn: "1/-1" }}>مشتری‌ای پیدا نشد</p>}
+          );
+        })}
+        {filtered.length === 0 && customers.length > 0 && (
+          <p className="empty-row" style={{ gridColumn: "1/-1" }}>مشتری‌ای پیدا نشد</p>
+        )}
       </div>
+
+      {removeTarget && (
+        <Modal title="حذف مشتری" onClose={() => setRemoveTarget(null)}>
+          <div className="stack">
+            <p className="small">
+              حساب <strong>{removeTarget.name}</strong> با شماره{" "}
+              <span className="mono">{removeTarget.phone}</span> برای همیشه حذف می‌شود و امکان ورود او
+              (دریافت کد تأیید) بسته می‌ماند.
+            </p>
+            <p className="muted small">
+              سوابق سفارش حذف نمی‌شود و بدون حساب مشتری باقی می‌ماند. این عمل قابل بازگشت نیست.
+            </p>
+            <div className="modal-actions">
+              <button type="button" className="btn btn--ghost" onClick={() => setRemoveTarget(null)}>
+                انصراف
+              </button>
+              <button type="button" className="btn btn--danger" onClick={confirmDelete}>
+                حذف دائمی
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
 
       {detail && (
         <Modal title="پروفایل مشتری" onClose={() => setDetail(null)}>
@@ -1076,8 +1183,7 @@ function Customers({ customers }) {
             <div className="customer-avatar customer-avatar--lg">{detail.name.slice(0, 1)}</div>
             <div>
               <p className="bold">{detail.name}</p>
-
-<p className="mono muted small">مشتری از {detail.joined}</p>
+              <p className="mono muted small">مشتری از {detail.joined}</p>
             </div>
           </div>
           <div className="detail-list">
@@ -1085,9 +1191,207 @@ function Customers({ customers }) {
             <div className="detail-row"><span className="muted"><Mail size={14} /> ایمیل</span><span className="mono small">{detail.email}</span></div>
             <div className="detail-row"><span className="muted"><Package2 size={14} /> تعداد سفارش</span><span className="mono bold">{num(detail.orders)}</span></div>
             <div className="detail-row"><span className="muted"><DollarSign size={14} /> مجموع خرید</span><span className="mono bold">{toman(detail.spent)}</span></div>
+            <div className="detail-row">
+              <span className="muted"><AlertTriangle size={14} /> وضعیت حساب</span>
+              <span className={detail.is_blocked ? "badge badge--danger" : "badge badge--success"}>
+                {detail.is_blocked ? "مسدود — ورود با OTP بسته است" : "فعال"}
+              </span>
+            </div>
+          </div>
+          <div className="modal-actions">
+            <button
+              type="button"
+              className="btn btn--ghost"
+              disabled={busyId === detail.id}
+              onClick={() =>
+                act(detail.id, async () => {
+                  await onBlockToggle(detail, !detail.is_blocked);
+                  setDetail((d) => (d ? { ...d, is_blocked: !d.is_blocked } : d));
+                })
+              }
+            >
+              {detail.is_blocked ? "رفع مسدودی" : "مسدود کردن"}
+            </button>
+            <button
+              type="button"
+              className="btn btn--danger"
+              onClick={() => { setRemoveTarget(detail); setDetail(null); }}
+            >
+              <Trash2 size={14} /> حذف مشتری
+            </button>
           </div>
         </Modal>
       )}
+    </div>
+  );
+}
+
+/* ================== POPULAR SEARCHES (جستجوهای پرطرفدار) ================== */
+/* ادمین خودش تعیین می‌کند چه عبارت‌هایی در جستجوی سایت پیشنهاد شوند.   */
+
+function PopularSearches({ items, onCreate, onUpdate, onDelete }) {
+  const [form, setForm] = useState({ term: "", order: 0, active: true });
+  const [editId, setEditId] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [listError, setListError] = useState("");
+
+  const submit = async (e) => {
+    e.preventDefault();
+    const term = form.term.trim();
+    if (!term) return;
+    setBusy(true);
+    setError("");
+    try {
+      if (editId) await onUpdate(editId, { term, order: form.order, active: form.active });
+      else await onCreate({ term, order: form.order, active: form.active });
+      setForm({ term: "", order: form.order + 1, active: true });
+      setEditId(null);
+    } catch (err) {
+      setError(faError(err, "ثبت عبارت انجام نشد؛ دوباره تلاش کنید"));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const startEdit = (item) => {
+    setEditId(item.id);
+    setError("");
+    setForm({ term: item.term, order: item.order, active: item.active });
+  };
+
+  const cancelEdit = () => {
+    setEditId(null);
+    setForm({ term: "", order: 0, active: true });
+  };
+
+  const toggleActive = async (item) => {
+    setListError("");
+    try {
+      await onUpdate(item.id, { term: item.term, order: item.order, active: !item.active });
+    } catch (err) {
+      setListError(faError(err, "تغییر وضعیت انجام نشد"));
+    }
+  };
+
+  const remove = async (item) => {
+    setListError("");
+    try {
+      await onDelete(item.id);
+    } catch (err) {
+      setListError(faError(err, "حذف انجام نشد"));
+    }
+  };
+
+  return (
+    <div className="stack">
+      <form className="card stack" onSubmit={submit}>
+        <p className="bold">افزودن / ویرایش عبارت پیشنهادی</p>
+        <p className="muted small">
+          این عبارت‌ها در جعبه جستجوی سایت به‌عنوان «جستجوهای پرطرفدار» نمایش داده می‌شوند.
+          اگر هیچ عبارت فعالی ثبت نشود، پایه سایت به‌صورت خودکار پرجستجوترین عبارت‌های واقعی کاربران را نشان می‌دهد.
+        </p>
+
+        <div className="field">
+          <label htmlFor="ps-term">عبارت جستجو</label>
+          <input
+            id="ps-term"
+            value={form.term}
+            onChange={(e) => setForm((f) => ({ ...f, term: e.target.value }))}
+            placeholder="مثلاً میکروفون Rode"
+            maxLength={80}
+          />
+        </div>
+
+        <div className="field-row">
+          <div className="field">
+            <label htmlFor="ps-order">ترتیب نمایش</label>
+            <input
+              id="ps-order"
+              type="number"
+              min={0}
+              max={999}
+              value={form.order}
+              onChange={(e) => setForm((f) => ({ ...f, order: Number(e.target.value) || 0 }))}
+            />
+          </div>
+          <label className="checkbox-row">
+            <input
+              type="checkbox"
+              checked={form.active}
+              onChange={(e) => setForm((f) => ({ ...f, active: e.target.checked }))}
+            />
+            فعال باشد
+          </label>
+        </div>
+
+        {error && <p className="form-error">{error}</p>}
+
+        <div className="modal-actions">
+          {editId && (
+            <button type="button" className="btn btn--ghost" onClick={cancelEdit}>
+              انصراف از ویرایش
+            </button>
+          )}
+          <button type="submit" className="btn" disabled={busy || !form.term.trim()}>
+            {busy ? "..." : editId ? "ذخیره تغییرات" : "افزودن عبارت"}
+          </button>
+        </div>
+      </form>
+
+      {listError && <p className="form-error">{listError}</p>}
+
+      <div className="card">
+        <div className="section-head">
+          <TrendingUp size={18} />
+          <h2>عبارت‌های ثبت‌شده ({num(items.length)})</h2>
+        </div>
+
+        {items.length === 0 ? (
+          <p className="empty-row">هنوز عبارتی ثبت نشده است.</p>
+        ) : (
+          <div className="table-scroll">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>ترتیب</th>
+                  <th>عبارت</th>
+                  <th>جستجوی واقعی</th>
+                  <th>وضعیت</th>
+                  <th>عملیات</th>
+                </tr>
+              </thead>
+              <tbody>
+                {items.map((item) => (
+                  <tr key={item.id} className={cx(item.active && "is-active")}>
+                    <td className="mono">{num(item.order)}</td>
+                    <td>{item.term}</td>
+                    <td className="mono muted">{num(item.count)}</td>
+                    <td>
+                      <span className={item.active ? "badge badge--success" : "badge badge--neutral"}>
+                        {item.active ? "فعال" : "غیرفعال"}
+                      </span>
+                    </td>
+                    <td>
+                      <div className="table-actions">
+                      <button type="button" className="btn btn--ghost btn--sm" onClick={() => toggleActive(item)}>
+                        {item.active ? "غیرفعال کردن" : "فعال کردن"}
+                      </button>
+                      <button type="button" className="btn btn--ghost btn--sm" onClick={() => startEdit(item)}>
+                        <Pencil size={14} /> ویرایش
+                      </button>
+                      <button type="button" className="btn btn--danger btn--sm" onClick={() => remove(item)}>
+                        <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -1354,6 +1658,175 @@ keepCoverImageUrl: form.coverImage && !form.coverImage.file ? form.coverImage.ur
   );
 }
 
+/* ====================== SECTION SLIDERS (عضویت محصول در ریل بخش‌ها) ====================== */
+
+const SLIDER_TABS = [
+  { key: "amazing", label: "شگفت‌انگیزها", hint: "محصولاتی که در ریل «پیشنهاد شگفت‌انگیز» صفحه اصلی دیده می‌شوند." },
+  { key: "popular", label: "محبوب‌ها", hint: "محصولاتی که در ریل «محبوب‌ترین‌ها» صفحه اصلی دیده می‌شوند." },
+];
+
+function SectionSliders({ sliders, products, onAdd, onUpdate, onDelete }) {
+  const [activeKey, setActiveKey] = useState(SLIDER_TABS[0].key);
+  const [search, setSearch] = useState("");
+  const [pending, setPending] = useState(null);
+
+  const active = SLIDER_TABS.find((s) => s.key === activeKey) || SLIDER_TABS[0];
+
+  const members = useMemo(
+    () =>
+      [...(sliders || [])]
+        .filter((s) => s.section === active.key)
+        .sort((a, b) => (a.order ?? 0) - (b.order ?? 0) || a.id - b.id),
+    [sliders, active.key],
+  );
+
+  const memberIds = useMemo(() => new Set(members.map((m) => m.product?.id)), [members]);
+  const candidates = useMemo(
+    () => products.filter((p) => !memberIds.has(p.id) && matchesProduct(p, search)),
+    [products, memberIds, search],
+  );
+
+  const run = async (key, action) => {
+    setPending(key);
+    try {
+      await action();
+    } catch (err) {
+      /* وضعیت سرور تغییری نکرده است؛ مدیر می‌تواند دوباره تلاش کند */
+    } finally {
+      setPending(null);
+    }
+  };
+
+  return (
+    <div className="stack">
+      <div className="info-note">
+        <SlidersHorizontal size={15} aria-hidden="true" />
+        <span>
+          محصولاتی که اینجا اضافه می‌کنید فقط در ریل مربوطه در صفحه اصلی نمایش داده می‌شوند. این لیست کاملاً از بخش‌های ویژه جداست؛ حذف محصول از اینجا آن را از بخش ویژه‌اش حذف نمی‌کند و یک محصول می‌تواند در هر دو ریل باشد.
+        </span>
+      </div>
+
+      <div className="special-tabs" role="tablist" aria-label="ریل‌های صفحه اصلی">
+        {SLIDER_TABS.map((s) => {
+          const count = (sliders || []).filter((item) => item.section === s.key).length;
+          return (
+            <button
+              key={s.key}
+              type="button"
+              role="tab"
+              aria-selected={s.key === active.key}
+              className={cx("special-tab", s.key === active.key && "is-active")}
+              onClick={() => setActiveKey(s.key)}
+            >
+              <span className="special-tab-label">{s.label}</span>
+              <span className="special-tab-count">{num(count)}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="special-head">
+        <h2>{active.label}</h2>
+        <span className="muted">{active.hint}</span>
+      </div>
+
+      <div className="card table-card">
+        <div className="table-card-header"><h2>محصولات این ریل</h2></div>
+        <div className="special-grid">
+          {members.map((item) => {
+            const product = item.product;
+            if (!product) return null;
+            return (
+              <div key={item.id} className={cx("special-chip", !item.active && "is-muted")}>
+                {product.images && product.images.length > 0 ? (
+                  <img src={product.images[0].url} alt="" className="special-chip-thumb" />
+                ) : (
+                  <div className="special-chip-thumb special-chip-thumb--empty"><Package size={14} /></div>
+                )}
+                <div className="special-chip-body">
+                  <span className="special-chip-name" title={product.name}>{product.name}</span>
+                  <span className="special-chip-meta muted">
+                    {product.category} · {product.sku}
+                    {!item.active ? " · پنهان" : ""}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  className="special-chip-remove"
+                  disabled={pending === item.id}
+                  title={item.active ? "پنهان کردن از ریل" : "نمایش در ریل"}
+                  aria-label={(item.active ? "پنهان کردن " : "نمایش ") + product.name}
+                  onClick={() => run(item.id, () => onUpdate(item.id, { active: !item.active }))}
+                >
+                  {item.active ? <Eye size={15} /> : <EyeOff size={15} />}
+                </button>
+                <button
+                  type="button"
+                  className="special-chip-remove"
+                  disabled={pending === item.id}
+                  title="حذف از این ریل"
+                  aria-label={"حذف " + product.name + " از " + active.label}
+                  onClick={() => run(item.id, () => onDelete(item.id))}
+                >
+                  <X size={15} />
+                </button>
+              </div>
+            );
+          })}
+          {members.length === 0 && (
+            <p className="special-empty">هنوز محصولی به ریل «{active.label}» اضافه نشده است.</p>
+          )}
+        </div>
+      </div>
+
+      <div className="card table-card">
+        <div className="table-card-header"><h2>افزودن محصول به «{active.label}»</h2></div>
+        <div className="toolbar">
+          <div className="toolbar-filters">
+            <div className="search-box">
+              <Search size={16} />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="جستجوی نام، کد یا دسته‌بندی محصول..."
+              />
+            </div>
+          </div>
+        </div>
+        <div className="special-grid">
+          {candidates.map((p) => (
+            <div key={p.id} className="special-chip">
+              {p.images && p.images.length > 0 ? (
+                <img src={p.images[0].url} alt="" className="special-chip-thumb" />
+              ) : (
+                <div className="special-chip-thumb special-chip-thumb--empty"><Package size={14} /></div>
+              )}
+              <div className="special-chip-body">
+                <span className="special-chip-name" title={p.name}>{p.name}</span>
+                <span className="special-chip-meta muted">
+                  {p.category} · {p.sku}
+                </span>
+              </div>
+              <button
+                type="button"
+                className="special-chip-add"
+                disabled={pending === p.id}
+                onClick={() => run(p.id, () => onAdd(active.key, p.id))}
+              >
+                <Plus size={15} />
+                <span>افزودن</span>
+              </button>
+            </div>
+          ))}
+          {candidates.length === 0 && (
+            <p className="special-empty">محصول دیگری برای افزودن پیدا نشد.</p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ============================== REPORTS ============================== */
 
 function Reports({ products, orders }) {
@@ -1504,20 +1977,46 @@ function SettingsView() {
 
 /* ============================== SPECIAL SECTIONS ============================== */
 
+/** چهار بخش ویژه سایت؛ هر کدام پرچم مستقل خود را روی محصول دارد. */
+const SPECIAL_SECTIONS = [
+  { key: "is_featured", label: "شگفت‌انگیزها", hint: "نمایش در پیشنهاد شگفت‌انگیز صفحه اصلی" },
+  { key: "is_popular", label: "محبوب‌ترین‌ها", hint: "نمایش در اسلایدر محبوب‌ترین‌ها" },
+  { key: "is_trending", label: "ترندترین‌ها", hint: "نمایش در اسلایدر ترندترین‌ها" },
+  { key: "is_best_seller", label: "پرفروش‌ترین‌ها", hint: "نمایش در اسلایدر پرفروش‌ترین‌ها" },
+];
+
+const matchesProduct = (p, term) => {
+  if (!term) return true;
+  const t = term.trim().toLowerCase();
+  if (!t) return true;
+  return (
+    (p.name || "").toLowerCase().includes(t) ||
+    (p.sku || "").toLowerCase().includes(t) ||
+    (p.category || "").toLowerCase().includes(t)
+  );
+};
+
 function SpecialProducts({ products, onToggleFlag }) {
+  const [activeKey, setActiveKey] = useState(SPECIAL_SECTIONS[0].key);
   const [search, setSearch] = useState("");
   const [pending, setPending] = useState(null);
 
-  const filtered = useMemo(() => products.filter((p) =>
-    (p.name || "").includes(search) || (p.sku || "").toLowerCase().includes(search.toLowerCase())
-  ), [products, search]);
+  const active = SPECIAL_SECTIONS.find((s) => s.key === activeKey) || SPECIAL_SECTIONS[0];
+  const inSection = useMemo(
+    () => products.filter((p) => !!p[active.key]),
+    [products, active.key],
+  );
+  const candidates = useMemo(
+    () => products.filter((p) => !p[active.key] && matchesProduct(p, search)),
+    [products, active.key, search],
+  );
 
-  const toggle = async (p, flag, next) => {
-    setPending(p.id + ":" + flag);
+  const toggle = async (p, next) => {
+    setPending(p.id);
     try {
-      await onToggleFlag(p, flag, next);
+      await onToggleFlag(p, active.key, next);
     } catch (err) {
-      /* در صورت خطا، مدیر می‌تواند دوباره تلاش کند */
+      /* مدیر می‌تواند دوباره تلاش کند؛ وضعیت سرور تغییری نکرده است */
     } finally {
       setPending(null);
     }
@@ -1528,72 +2027,110 @@ function SpecialProducts({ products, onToggleFlag }) {
       <div className="info-note">
         <Star size={15} aria-hidden="true" />
         <span>
-          محصولات علامت‌خورده «شگفت‌انگیز» در اسلایدر پیشنهاد شگفت‌انگیز و «محبوب»ها در اسلایدر محبوب‌ترین‌های صفحه اصلی نمایش داده می‌شوند.
+          هر بخش جداگانه مدیریت می‌شود؛ محصولی که در این بخش اضافه کنید فقط در اسلایدر همان بخش از صفحه اصلی نمایش داده می‌شود. یک محصول می‌تواند هم‌زمان در چند بخش باشد.
         </span>
       </div>
-      <div className="toolbar">
-        <div className="toolbar-filters">
-          <div className="search-box">
-            <Search size={16} />
-            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="جستجوی محصول یا کد..." />
-          </div>
+
+      <div className="special-tabs" role="tablist" aria-label="بخش‌های ویژه">
+        {SPECIAL_SECTIONS.map((s) => {
+          const count = products.filter((p) => !!p[s.key]).length;
+          return (
+            <button
+              key={s.key}
+              type="button"
+              role="tab"
+              aria-selected={s.key === active.key}
+              className={cx("special-tab", s.key === active.key && "is-active")}
+              onClick={() => setActiveKey(s.key)}
+            >
+              <span className="special-tab-label">{s.label}</span>
+              <span className="special-tab-count">{num(count)}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="special-head">
+        <h2>{active.label}</h2>
+        <span className="muted">{active.hint}</span>
+      </div>
+
+      <div className="card table-card">
+        <div className="table-card-header"><h2>محصولات این بخش</h2></div>
+        <div className="special-grid">
+          {inSection.map((p) => (
+            <div key={p.id} className="special-chip">
+              {p.images && p.images.length > 0 ? (
+                <img src={p.images[0].url} alt="" className="special-chip-thumb" />
+              ) : (
+                <div className="special-chip-thumb special-chip-thumb--empty"><Package size={14} /></div>
+              )}
+              <div className="special-chip-body">
+                <span className="special-chip-name" title={p.name}>{p.name}</span>
+                <span className="special-chip-meta muted">
+                  {p.category} · {Number(p.rating || 0).toLocaleString("fa-IR", { maximumFractionDigits: 1 })}
+                </span>
+              </div>
+              <button
+                type="button"
+                className="special-chip-remove"
+                disabled={pending === p.id}
+                title="حذف از این بخش"
+                aria-label={"حذف " + p.name + " از " + active.label}
+                onClick={() => toggle(p, false)}
+              >
+                <X size={15} />
+              </button>
+            </div>
+          ))}
+          {inSection.length === 0 && (
+            <p className="special-empty">هنوز محصولی به «{active.label}» اضافه نشده است.</p>
+          )}
         </div>
       </div>
 
       <div className="card table-card">
-        <div className="table-scroll">
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>تصویر</th><th>محصول</th><th>دسته‌بندی</th><th>امتیاز</th><th>شگفت‌انگیز</th><th>محبوب</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((p) => {
-                const amazing = !!p.Empressive;
-                const popular = !!p.is_popular;
-                return (
-                  <tr key={p.id}>
-                    <td>
-                      {p.images && p.images.length > 0 ? (
-                        <img src={p.images[0].url} alt="" className="table-thumb" />
-                      ) : (
-                        <div className="table-thumb table-thumb--empty"><Package size={14} /></div>
-                      )}
-                    </td>
-                    <td className="bold cell-wide">{p.name}</td>
-                    <td className="muted">{p.category}</td>
-                    <td className="mono bold">{Number(p.rating).toLocaleString('fa-IR', { maximumFractionDigits: 1 })}</td>
-                    <td>
-                      <button
-                        type="button"
-                        role="switch"
-                        aria-checked={amazing}
-                        disabled={pending === p.id + ":is_featured"}
-                        onClick={() => toggle(p, "is_featured", !amazing)}
-                        className={cx("switch", amazing && "is-on")}
-                      >
-                        <span className="switch-knob" />
-                      </button>
-                    </td>
-                    <td>
-                      <button
-                        type="button"
-                        role="switch"
-                        aria-checked={popular}
-                        disabled={pending === p.id + ":is_popular"}
-                        onClick={() => toggle(p, "is_popular", !popular)}
-                        className={cx("switch", popular && "is-on")}
-                      >
-                        <span className="switch-knob" />
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-              {filtered.length === 0 && <tr><td colSpan={6} className="empty-row">محصولی پیدا نشد</td></tr>}
-            </tbody>
-          </table>
+        <div className="table-card-header"><h2>افزودن محصول به «{active.label}»</h2></div>
+        <div className="toolbar">
+          <div className="toolbar-filters">
+            <div className="search-box">
+              <Search size={16} />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="جستجوی نام، کد یا دسته‌بندی محصول..."
+              />
+            </div>
+          </div>
+        </div>
+        <div className="special-grid">
+          {candidates.map((p) => (
+            <div key={p.id} className="special-chip">
+              {p.images && p.images.length > 0 ? (
+                <img src={p.images[0].url} alt="" className="special-chip-thumb" />
+              ) : (
+                <div className="special-chip-thumb special-chip-thumb--empty"><Package size={14} /></div>
+              )}
+              <div className="special-chip-body">
+                <span className="special-chip-name" title={p.name}>{p.name}</span>
+                <span className="special-chip-meta muted">
+                  {p.category} · {p.sku}
+                </span>
+              </div>
+              <button
+                type="button"
+                className="special-chip-add"
+                disabled={pending === p.id}
+                onClick={() => toggle(p, true)}
+              >
+                <Plus size={15} />
+                <span>افزودن</span>
+              </button>
+            </div>
+          ))}
+          {candidates.length === 0 && (
+            <p className="special-empty">محصول دیگری برای افزودن پیدا نشد.</p>
+          )}
         </div>
       </div>
     </div>
@@ -2059,29 +2596,35 @@ export default function AdminPanel() {
   const [ordersFilterSeed, setOrdersFilterSeed] = useState("همه");
   const [customers, setCustomers] = useState([]);
   const [articles, setArticles] = useState([]);
+  const [popularSearches, setPopularSearches] = useState([]);
   const [messages, setMessages] = useState([]);
   const [sliders, setSliders] = useState([]);
+  const [sectionSliders, setSectionSliders] = useState([]);
   const [categorySlides, setCategorySlides] = useState([]);
   const [categories, setCategories] = useState([]);
   const [reviews, setReviews] = useState([]);
 
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
+  const [signedIn] = useState(() => isLoggedIn() && Boolean(getAccessToken()));
 
   const loadAll = useCallback(async () => {
     setLoading(true);
     setLoadError("");
     try {
-      const [productsData, ordersData, customersData, articlesData, messagesData, slidersData, categorySlidesData, categoriesData, reviewsData] = await Promise.all([
+      const [productsData, ordersData, customersData, articlesData, messagesData, slidersData, categorySlidesData, categoriesData, reviewsData, popularSearchesData, sectionSlidersData] = await Promise.all([
         fetchProducts(), fetchOrders(), fetchCustomers(), fetchArticles(), fetchAdminMessages(),
         fetchHomeSliders(), fetchCategorySlides(), fetchAdminCategories(), fetchAllReviews(),
+        fetchPopularSearchesAdmin(), fetchSectionSliders(),
       ]);
       setProducts(productsData);
       setOrders(ordersData || []);
       setCustomers(customersData);
       setArticles(articlesData || []);
+      setPopularSearches(popularSearchesData || []);
       setMessages(messagesData || []);
       setSliders(slidersData || []);
+      setSectionSliders(sectionSlidersData || []);
       setCategorySlides(categorySlidesData || []);
       setCategories(categoriesData || []);
       setReviews(reviewsData || []);
@@ -2118,6 +2661,34 @@ export default function AdminPanel() {
   const handleUpdateArticle = async (id, payload) => {
     const updated = await updateArticle(id, payload);
     setArticles((prev) => prev.map((a) => (a.id === id ? updated : a)));
+  };
+
+  const handleBlockCustomer = async (customer, isBlocked) => {
+    const updated = await setCustomerBlocked(customer.id, isBlocked);
+    setCustomers((prev) =>
+      prev.map((c) => (c.id === customer.id ? { ...c, is_blocked: Boolean(updated.is_blocked) } : c)),
+    );
+  };
+
+  const handleDeleteCustomer = async (customer) => {
+    await deleteCustomer(customer.id);
+    setCustomers((prev) => prev.filter((c) => c.id !== customer.id));
+    setOrders((prev) => prev.map((o) => (o.userId === customer.id ? { ...o, userId: null } : o)));
+  };
+
+  const handleCreatePopularSearch = async (payload) => {
+    const created = await createPopularSearch(payload);
+    setPopularSearches((prev) => sortPopularSearches([...prev, created]));
+  };
+
+  const handleUpdatePopularSearch = async (id, payload) => {
+    const updated = await updatePopularSearch(id, payload);
+    setPopularSearches((prev) => sortPopularSearches(prev.map((s) => (s.id === id ? updated : s))));
+  };
+
+  const handleDeletePopularSearch = async (id) => {
+    await deletePopularSearch(id);
+    setPopularSearches((prev) => prev.filter((s) => s.id !== id));
   };
 
   const handleDeleteArticle = async (id) => {
@@ -2166,6 +2737,23 @@ export default function AdminPanel() {
   const handleDeleteSlider = async (id) => {
     await deleteHomeSlider(id);
     setSliders((prev) => prev.filter((s) => s.id !== id));
+  };
+
+  const handleAddSectionSliderItem = async (section, productId) => {
+    const created = await createSectionSliderItem(section, productId);
+    setSectionSliders((prev) => [...prev, created]);
+  };
+
+  const handleUpdateSectionSlider = async (id, payload) => {
+    const updated = await updateSectionSliderItem(id, payload);
+    setSectionSliders((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, ...updated } : s)),
+    );
+  };
+
+  const handleDeleteSectionSlider = async (id) => {
+    await deleteSectionSlider(id);
+    setSectionSliders((prev) => prev.filter((s) => s.id !== id));
   };
 
   const handleCreateCategorySlide = async (payload) => {
@@ -2219,6 +2807,18 @@ export default function AdminPanel() {
     return (
       <div className="app" dir="rtl" lang="fa">
         <FullScreenState kind="loading" />
+      </div>
+    );
+  }
+
+  if (!signedIn) {
+    return (
+      <div className="app" dir="rtl" lang="fa">
+        <FullScreenState
+          kind="error"
+          message="پنل مدیریت فقط برای حساب مدیر باز است. لطفاً با شماره مدیر وارد شوید."
+          onRetry={loadAll}
+        />
       </div>
     );
   }
@@ -2335,10 +2935,19 @@ export default function AdminPanel() {
                 onQuickRating={handleQuickRating}
               />
             )}
-            {activeTab === "special" && (
+            {activeTab === "events" && (
               <SpecialProducts
                 products={products}
                 onToggleFlag={handleToggleProductFlag}
+              />
+            )}
+            {activeTab === "special" && (
+              <SectionSliders
+                sliders={sectionSliders}
+                products={products}
+                onAdd={handleAddSectionSliderItem}
+                onUpdate={handleUpdateSectionSlider}
+                onDelete={handleDeleteSectionSlider}
               />
             )}
             {activeTab === "sliders" && (
@@ -2349,7 +2958,7 @@ export default function AdminPanel() {
                 onDelete={handleDeleteSlider}
               />
             )}
-            {activeTab === "categorySlides" && (
+                        {activeTab === "categorySlides" && (
               <CategorySlides
                 slides={categorySlides}
                 onCreate={handleCreateCategorySlide}
@@ -2375,7 +2984,22 @@ export default function AdminPanel() {
                 initialStatusFilter={ordersFilterSeed}
               />
             )}
-            {activeTab === "customers" && <Customers customers={customers} />}
+            {activeTab === "customers" && (
+        <Customers
+          customers={customers}
+          onBlockToggle={handleBlockCustomer}
+          onDelete={handleDeleteCustomer}
+        />
+      )}
+
+      {activeTab === "popularSearches" && (
+        <PopularSearches
+          items={popularSearches}
+          onCreate={handleCreatePopularSearch}
+          onUpdate={handleUpdatePopularSearch}
+          onDelete={handleDeletePopularSearch}
+        />
+      )}
             {activeTab === "messages" && (
               <MessagesSection
                 messages={messages}

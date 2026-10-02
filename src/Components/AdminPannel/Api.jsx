@@ -14,6 +14,13 @@
  *   PATCH  /orders/:id/status       → Order           body: { status }
  *
  *   GET    /customers               → Customer[]
+ *   PATCH  /customers/:id/block     → Customer        body: { is_blocked }
+ *   DELETE /customers/:id           → { success, kept_orders }
+ *
+ *   GET    /admin/popular-searches       → PopularSearch[]
+ *   POST   /admin/popular-searches       → PopularSearch  body: { term, order, active }
+ *   PUT    /admin/popular-searches/:id   → PopularSearch
+ *   DELETE /admin/popular-searches/:id   → { success }
  *
  *   GET    /articles                → Article[]
  *   POST   /articles                → Article        (multipart/form-data)
@@ -25,9 +32,10 @@
  * ================================================================
  */
 
-export const API_BASE_URL =
-  (typeof window !== "undefined" && window.__ADMIN_API_BASE_URL__) ||
-  "http://localhost:4000/api";
+import { API_BASE_URL, mediaUrl } from "../../api";
+import { getAccessToken } from "../../auth";
+
+export { API_BASE_URL, mediaUrl };
 
 export function uid() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
@@ -44,6 +52,14 @@ export function faError(err, fallback = "خطا در برقراری ارتباط
 async function request(path, options = {}) {
   const method = (options.method || "GET").toUpperCase();
   let res;
+
+  // پنل ادمین با حساب مدیر (JWT) احراز هویت می‌شود؛ بک‌اند برای
+  // عملیات مدیریتی توکن معتبر می‌خواهد.
+  const token = getAccessToken();
+  if (token) {
+    options.headers = { ...(options.headers || {}), Authorization: "Bearer " + token };
+  }
+
   const doFetchOnce = () => fetch(API_BASE_URL + path, options);
   try {
     res = await doFetchOnce();
@@ -68,6 +84,11 @@ async function request(path, options = {}) {
       detail = parsed.error || parsed.detail || "";
     } catch {
       /* صفحه‌ی خطای HTML یا متن خام — نادیده گرفته می‌شود */
+    }
+    if (res.status === 401 || res.status === 403) {
+      throw new Error(
+        "برای ورود به پنل مدیریت ابتدا با حساب مدیر وارد شوید (صفحه ورود سایت)",
+      );
     }
     throw new Error(detail || "خطا در برقراری ارتباط با سرور (کد " + res.status + ")");
   }
@@ -158,6 +179,46 @@ export async function fetchCustomers() {
   return request("/customers");
 }
 
+/** مسدود/رفع مسدود کردن مشتری (ورود او با OTP هم مسدود می‌شود) */
+export async function setCustomerBlocked(id, isBlocked) {
+  return request("/customers/" + id + "/block", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ is_blocked: Boolean(isBlocked) }),
+  });
+}
+
+/** حذف مشتری؛ سوابق سفارش او حذف نمی‌شود و فقط از حساب جدا می‌ماند */
+export async function deleteCustomer(id) {
+  return request("/customers/" + id, { method: "DELETE" });
+}
+
+/* ================== POPULAR SEARCHES (جستجوهای پرطرفدار) ================== */
+
+export async function fetchPopularSearchesAdmin() {
+  return request("/admin/popular-searches");
+}
+
+export async function createPopularSearch(payload) {
+  return request("/admin/popular-searches", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function updatePopularSearch(id, payload) {
+  return request("/admin/popular-searches/" + id, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function deletePopularSearch(id) {
+  return request("/admin/popular-searches/" + id, { method: "DELETE" });
+}
+
 /* ============================== ARTICLES ============================== */
 
 export async function fetchArticles() {
@@ -230,6 +291,38 @@ export async function updateCategorySlide(id, payload) {
 
 export async function deleteCategorySlide(id) {
   return request("/admin/category-slides/" + id, { method: "DELETE" });
+}
+
+/* ============================== SECTION SLIDERS (عضویت محصول در اسلایدر بخش‌های منو) ============================== */
+
+export const SLIDER_SECTIONS = [
+  { key: "amazing", label: "شگفت‌انگیزها" },
+  { key: "popular", label: "محبوب‌ها" },
+];
+
+export async function fetchSectionSliders(section) {
+  const query = section ? "?section=" + encodeURIComponent(section) : "";
+  return request("/admin/section-sliders" + query);
+}
+
+export async function createSectionSliderItem(section, productId) {
+  return request("/admin/section-sliders/create", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ section, product_id: productId }),
+  });
+}
+
+export async function updateSectionSliderItem(id, payload) {
+  return request("/admin/section-sliders/" + id, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function deleteSectionSlider(id) {
+  return request("/admin/section-sliders/" + id, { method: "DELETE" });
 }
 
 /* ============================== MESSAGES (پیامک) ============================== */

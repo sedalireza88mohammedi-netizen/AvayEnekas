@@ -13,6 +13,10 @@ const AdminPanel = lazy(() => import('./Components/AdminPannel/AdminPannel'));
 const ProductDeatelse = lazy(() => import('./Components/ProductDeatelse/ProductDeatelse'));
 const ArticleDeatelse = lazy(() => import('./Components/Articles/ArticleDeatelse'));
 const CategoriesPage = lazy(() => import('./Components/Categories/Categories'));
+const SectionAmazing = lazy(() => import('./Components/Events/SectionAmazing/SectionAmazing'));
+const SectionPopular = lazy(() => import('./Components/Events/SectionPopular/SectionPopular'));
+const SectionTrending = lazy(() => import('./Components/Events/SectionTrending/SectionTrending'));
+const SectionBestSeller = lazy(() => import('./Components/Events/SectionBestSeller/SectionBestSeller'));
 
 
 function ScrollToTop() {
@@ -60,6 +64,38 @@ function App() {
           element={
             <Suspense fallback={<div className="page-loader" />}>
               <AllProductList />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/Sections/Amazing"
+          element={
+            <Suspense fallback={<div className="page-loader" />}>
+              <SectionAmazing />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/Sections/Popular"
+          element={
+            <Suspense fallback={<div className="page-loader" />}>
+              <SectionPopular />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/Sections/Trending"
+          element={
+            <Suspense fallback={<div className="page-loader" />}>
+              <SectionTrending />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/Sections/BestSeller"
+          element={
+            <Suspense fallback={<div className="page-loader" />}>
+              <SectionBestSeller />
             </Suspense>
           }
         />

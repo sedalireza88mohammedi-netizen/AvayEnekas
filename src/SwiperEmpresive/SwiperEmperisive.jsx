@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { Clock, Sparkles, ChevronLeft, ArrowLeft } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import "./SwiperEmperisive.css";
-import { fetchProducts } from '../api';
+import { fetchSectionSliderProducts } from '../api';
 import RatingStars from '../RatingStars';
 import SafeImg from '../SafeImg';
 import { FavButton, AddToCartBtn } from '../ProductActions';
@@ -160,7 +160,7 @@ export default function EmperiseveSwiper() {
 
   useEffect(() => {
     let mounted = true;
-    fetchProducts({ featured: true, limit: 12 })
+    fetchSectionSliderProducts("amazing", 12)
       .then((data) => { if (mounted) setProducts(data); })
       .catch(() => { if (mounted) setProducts([]); });
     return () => { mounted = false; };
@@ -185,10 +185,10 @@ export default function EmperiseveSwiper() {
           onPointerMove={handlePointerMove}
         >
           <AmazingOfferCard />
-          {(products || []).filter((product) => product.Empressive).map((product) => (
+          {(products || []).map((product) => (
             <ProductCard key={product.id} product={product} onDrag={() => dragMoved.current} />
           ))}
-          <Link to="/AllProductList" className="end-card" aria-label="مشاهده همه محصولات">
+          <Link to="/Sections/Amazing" className="end-card" aria-label="مشاهده همه محصولات">
             <div className="end-card-icon-wrapper"><ArrowLeft size={24} /></div>
             <span className="end-card-text">مشاهده همه</span>
           </Link>

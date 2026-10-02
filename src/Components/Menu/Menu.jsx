@@ -99,7 +99,7 @@ const CURATED_SUBGROUPS_INDEX = new Map(
   Object.keys(CURATED_SUBGROUPS).map((name) => [normalizeCategoryName(name), CURATED_SUBGROUPS[name]])
 );
 
-const ADMIN_USERNAME = "sedMad77AdminPanellAllowed";
+const ADMIN_USERNAME = "sedMad77AdminPanellAllowed"; // نقش پشتیبان؛ منبع اصلی پرچم بک‌اند است
 
 const toPersianDigits = (num) =>
   num.toString().replace(/\d/g, (x) => '۰۱۲۳۴۵۶۷۸۹'[x]);
@@ -156,7 +156,11 @@ function Menu({ isCart }) {
     if (!loggedIn) { setIsAdmin(false); return; }
     let active = true;
     getProfile()
-      .then((p) => { if (active) setIsAdmin(Boolean(p && p.NameAndFamily === ADMIN_USERNAME)); })
+      .then((p) => {
+        if (!active) return;
+        // پرچم مدیریت از خود بک‌اند می‌آید؛ نام تاریخی فقط نقش پشتیبان دارد
+        setIsAdmin(Boolean(p && (p.IsAdmin || p.NameAndFamily === ADMIN_USERNAME)));
+      })
       .catch(() => { if (active) setIsAdmin(false); });
     return () => { active = false; };
   }, [loggedIn, location.pathname]);
@@ -530,10 +534,10 @@ function Menu({ isCart }) {
               )}
             </li>
 
-            <li><Link to="/"><FontAwesomeIcon icon={faBurst} /> شگفت‌انگیزها</Link></li>
-            <li><Link to="/"><FontAwesomeIcon icon={faSun} /> ترندترین‌ها</Link></li>
-            <li><Link to="/"><FontAwesomeIcon icon={faFire} /> پرفروش‌ترین‌ها</Link></li>
-            <li><Link to="/"><FontAwesomeIcon icon={faHeart} /> محبوب‌ترین‌ها</Link></li>
+            <li><Link to="/Sections/Amazing"><FontAwesomeIcon icon={faBurst} /> شگفت‌انگیزها</Link></li>
+            <li><Link to="/Sections/Trending"><FontAwesomeIcon icon={faSun} /> ترندترین‌ها</Link></li>
+            <li><Link to="/Sections/BestSeller"><FontAwesomeIcon icon={faFire} /> پرفروش‌ترین‌ها</Link></li>
+            <li><Link to="/Sections/Popular"><FontAwesomeIcon icon={faHeart} /> محبوب‌ترین‌ها</Link></li>
           </ul>
         </nav>
       </div>

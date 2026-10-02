@@ -176,6 +176,7 @@
     background-color: white;
     min-width: 200px;
     width: 250px;
+    height: 320px;
     padding: 16px;
     display: flex;
     flex-direction: column;

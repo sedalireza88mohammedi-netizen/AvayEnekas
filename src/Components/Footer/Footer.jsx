@@ -46,7 +46,7 @@ function Footer() {
                                 <Link to="/Cart">سبد خرید</Link>
                             </li>
                              <li>
-                                <Link to="/AllProductList"> دسته بندی ها</Link>
+                                <Link to="/Categories"> دسته بندی ها</Link>
                             </li>
                             <li>
                                  <Link to="">مشاوره رایگان</Link>

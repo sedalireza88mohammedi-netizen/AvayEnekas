@@ -1775,6 +1775,29 @@
     right: 8px;
 }
 
+/* ================= SECTION SLIDERS (slider har faze) ================= */
+
+.app .slider-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 4px;
+}
+
+.app .chip--success {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.app .chip--muted {
+    background: #f1f5f9;
+    color: #64748b;
+}
+
+.app .rotate-180 {
+    transform: rotate(180deg);
+}
+
 /* ================= SWITCH ================= */
 
 .app .switch {
@@ -1939,4 +1962,271 @@
 
 .app .data-table .row-actions {
     justify-content: flex-start;
+}
+
+/* ================= CUSTOMERS (کارت + عملیات) ================= */
+
+.app .customer-card {
+    padding: 16px;
+}
+
+.app .customer-card.is-blocked {
+    border-color: var(--danger, #d64545);
+    box-shadow: inset 0 0 0 1px rgba(214, 69, 69, 0.25);
+}
+
+.app .customer-card-main {
+    all: unset;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    cursor: pointer;
+    width: 100%;
+}
+
+.app .customer-card-main:focus-visible {
+    outline: 2px solid var(--accent, #111);
+    outline-offset: 4px;
+    border-radius: 12px;
+}
+
+.app .customer-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border, #e6e7ea);
+}
+
+.app .customer-card-actions .btn {
+    flex: 1;
+}
+
+.app .customer-card-actions .btn svg {
+    flex-shrink: 0;
+}
+
+/* ================= POPULAR SEARCHES ================= */
+
+.app .checkbox-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.app .checkbox-row input {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--surface-dark, #16181B);
+}
+
+.app .field-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 16px;
+}
+
+.app .field-row .field {
+    flex: 0 0 160px;
+}
+
+.app .btn--sm {
+    padding: 7px 12px;
+    font-size: 12px;
+    gap: 6px;
+}
+
+.app .btn--ghost {
+    background: transparent;
+    color: var(--text, #16181B);
+    border: 1px solid var(--border, #d8d9dd);
+}
+
+.app .btn--ghost:hover:not(:disabled) {
+    background: var(--surface, #f6f6f8);
+}
+
+.app .btn--danger {
+    background: var(--danger, #000000);
+    color: #fff;
+    border: 1px solid transparent;
+}
+
+.app .btn--danger:hover:not(:disabled) {
+    filter: brightness(0.94);
+}
+
+.app .data-table tr.is-active {
+    background: rgba(22, 24, 27, 0.04);
+}
+
+.app .data-table td .table-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+@media (max-width: 640px) {
+    .app .customer-card-actions {
+        flex-wrap: wrap;
+    }
+
+    .app .field-row .field {
+        flex: 1 1 100%;
+    }
+}
+
+/* ===================== بخش‌های ویژه محصولات (پنل ادمین) ===================== */
+.special-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.special-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  font: inherit;
+  font-weight: 700;
+  color: var(--muted);
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.special-tab:hover {
+  border-color: var(--brand, #c28b00);
+}
+
+.special-tab.is-active {
+  color: #fff;
+  background: var(--brand, #c28b00);
+  border-color: var(--brand, #c28b00);
+}
+
+.special-head {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.special-head h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.special-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+  padding: 16px;
+}
+
+.special-chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.special-chip-thumb {
+  flex: 0 0 46px;
+  width: 46px;
+  height: 46px;
+  object-fit: cover;
+  border-radius: 9px;
+  background: #f1f1f4;
+}
+
+.special-chip-thumb--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+}
+
+.special-chip-body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.special-chip-name {
+  overflow: hidden;
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.special-chip-meta {
+  overflow: hidden;
+  font-size: 0.76rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+.special-tab-count {
+  min-width: 26px;
+  padding: 1px 7px;
+  font-size: 0.78rem;
+  color: var(--muted);
+  text-align: center;
+  background: #f1f1f4;
+  border-radius: 999px;
+}
+
+.special-tab.is-active .special-tab-count {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.special-chip-remove,
+.special-chip-add {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 4px;
+  padding: 7px 10px;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #b42318;
+  background: #fef3f2;
+  border: 1px solid #fda29b;
+  border-radius: 9px;
+  cursor: pointer;
+}
+
+.special-chip-add {
+  color: #067647;
+  background: #ecfdf3;
+  border-color: #a6f4c5;
+}
+
+.special-chip-remove:disabled,
+.special-chip-add:disabled {
+  opacity: 0.5;
+  cursor: progress;
+}
+
+.special-empty {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 8px 4px;
+  color: var(--muted);
+  text-align: center;
 }

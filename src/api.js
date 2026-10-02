@@ -17,13 +17,33 @@ import {
   getAccessToken,
   getRefreshToken,
   setAuth,
+  clearAuth,
   getPhone,
   getSessionKey,
 } from "./auth";
 
 export const API_BASE_URL =
-  (typeof window !== "undefined" && window.__API_BASE_URL__) ||
-  "http://localhost:4000/api";
+  (typeof window !== "undefined" && window.__API_BASE_URL__) || "/api";
+
+/**
+ * تبدیل آدرس رسانه به مسیر هم‌مبدأ.
+ * بک‌اند آدرس مطلق (مثلاً http://localhost:4000/media/...) برمی‌گرداند که
+ * در پروداکشن یا روی دامنه دیگر تصاویر را می‌شکند؛ این تابع لوکال/بی‌هم‌مبدأ را
+ * به مسیر نسبی تبدیل می‌کند تا همیشه از همان دامنه‌ای که سایت روی آن باز شده سرو شود.
+ */
+export function mediaUrl(url) {
+  if (!url) return "";
+  const raw = String(url).trim();
+  if (/^data:/i.test(raw)) return raw;
+  if (raw.startsWith("/")) return raw;
+  try {
+    const parsed = new URL(raw);
+    if (parsed.pathname) return parsed.pathname + parsed.search;
+    return raw;
+  } catch {
+    return raw;
+  }
+}
 
 /* ------------------------------ helpers ------------------------------ */
 
@@ -36,6 +56,15 @@ function getHeaders({ auth = true, guest = false, json = true, form = false }) {
 }
 
 /* ------------------------------ request ------------------------------ */
+
+/** پیام‌هایی که یعنی حساب کاربری توسط ادمین مسدود شده است. */
+const BLOCKED_MARKERS = ["مسدود شده", "مسدودسازی", "user_inactive"];
+
+function isBlockedError(status, message) {
+  if (!message) return false;
+  if (status !== 401 && status !== 403) return false;
+  return BLOCKED_MARKERS.some((marker) => message.includes(marker));
+}
 
 async function request(path, options = {}) {
   const { method = "GET", body, auth = true, guest = false, form = false } = options;
@@ -77,8 +106,10 @@ async function request(path, options = {}) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ refresh: getRefreshToken() }),
       });
-      const data = await refreshRes.json();
-      if (refreshRes.ok && data.access) {
+      const data = await refreshRes.json().catch(() => null);
+      if (!refreshRes.ok && isBlockedError(refreshRes.status, data && (data.error || data.detail))) {
+        clearAuth();
+      } else if (refreshRes.ok && data && data.access) {
         setAuth({ access: data.access });
         res = await doFetch(retryable ? controller.signal : undefined);
       }
@@ -98,6 +129,11 @@ async function request(path, options = {}) {
     }
     const err = new Error(detail || "خطا در برقراری ارتباط با سرور (کد " + res.status + ")");
     err.status = res.status;
+    // حساب مسدود: نشست کاربر بسته می‌شود تا با همان شماره دوباره وارد نشود
+    if (getAccessToken() && isBlockedError(res.status, detail)) {
+      clearAuth();
+      err.blocked = true;
+    }
     throw err;
   }
 
@@ -107,15 +143,27 @@ async function request(path, options = {}) {
 
 /* ------------------------------ products ------------------------------ */
 
+/**
+ * بخش‌های ویژه‌ی که ادمین محصولات را دستی به آن‌ها اضافه می‌کند.
+ * key: کلید مورد استفاده در فرانت | label: عنوان فارسی | flag: فیلد بک‌اند
+ * query: نام پارامتر فیلتر در API
+ */
+export const PRODUCT_SECTIONS = [
+  { key: "amazing", label: "شگفت‌انگیزها", flag: "Empressive", query: "featured" },
+  { key: "popular", label: "محبوب‌ترین‌ها", flag: "is_popular", query: "popular" },
+  { key: "trending", label: "ترند‌ترین‌ها", flag: "is_trending", query: "trending" },
+  { key: "best_seller", label: "پرفروش‌ترین‌ها", flag: "is_best_seller", query: "best_seller" },
+];
+
+export const PRODUCT_SECTION_MAP = Object.fromEntries(
+  PRODUCT_SECTIONS.map((s) => [s.key, s]),
+);
+
 // تبدیل محصول بک‌اند به شکل مورد انتظار کارت‌های فروشگاه
 function mapProduct(p) {
   const price = Number(p.price) || 0;
-  const featured =
-    p.Empressive !== undefined
-      ? p.Empressive === true
-      : p.is_featured !== undefined
-        ? p.is_featured === true
-        : true;
+  const flag = (name) => p[name] === true;
+  const featured = p.Empressive !== undefined ? p.Empressive === true : flag("is_featured");
   return {
     id: p.id,
     title: p.title || p.name || "",
@@ -128,11 +176,18 @@ function mapProduct(p) {
     discount: Number(p.discount) || 0,
     rating: Number(p.rating) || 0,
     Empressive: featured,
+    is_popular: flag("is_popular"),
+    is_trending: flag("is_trending"),
+    is_best_seller: flag("is_best_seller"),
     stock: p.stock,
     image:
-      (Array.isArray(p.images) && p.images.length > 0 && p.images[0].url) || p.image || "",
-    images: Array.isArray(p.images) ? p.images : [],
-    video: p.video || null,
+      mediaUrl(
+        (Array.isArray(p.images) && p.images.length > 0 && p.images[0].url) || p.image || "",
+      ),
+    images: (Array.isArray(p.images) ? p.images : []).map((img) =>
+      img && typeof img === "object" ? { ...img, url: mediaUrl(img.url) } : img,
+    ),
+    video: p.video && p.video.url ? { ...p.video, url: mediaUrl(p.video.url) } : p.video || null,
   };
 }
 
@@ -142,6 +197,12 @@ export async function fetchProducts(params = {}) {
   if (params.search) query.set("search", params.search);
   if (params.featured) query.set("featured", "true");
   if (params.popular) query.set("popular", "true");
+  if (params.trending) query.set("trending", "true");
+  if (params.best_seller || params.bestSeller) query.set("best_seller", "true");
+  // فیلتر یکپارچه‌ی بخش ویژه (مثلاً { section: "trending" })
+  if (params.section && PRODUCT_SECTION_MAP[params.section]) {
+    query.set(PRODUCT_SECTION_MAP[params.section].query, "true");
+  }
   if (params.brand) query.set("brand", params.brand);
   if (params.minPrice != null && params.minPrice !== "") query.set("min_price", String(params.minPrice));
   if (params.maxPrice != null && params.maxPrice !== "") query.set("max_price", String(params.maxPrice));
@@ -197,8 +258,10 @@ function mapArticle(a) {
     author: a.author || "",
     publishedAt: a.publishedAt || "",
     status: a.status || "",
-    coverImage: a.coverImage && a.coverImage.url ? a.coverImage.url : "",
-    videos: Array.isArray(a.videos) ? a.videos : [],
+    coverImage: mediaUrl(a.coverImage && a.coverImage.url ? a.coverImage.url : ""),
+    videos: (Array.isArray(a.videos) ? a.videos : []).map((v) =>
+      v && typeof v === "object" ? { ...v, url: mediaUrl(v.url) } : v,
+    ),
   };
 }
 
@@ -289,6 +352,25 @@ export async function fetchHomeSliders() {
 export async function fetchHomeCategorySlides() {
   const data = await request("/home/category-slides?active=1");
   return Array.isArray(data) ? data : [];
+}
+
+export async function fetchSectionSliders(section) {
+  const query = "/section-sliders" + (section ? "?section=" + encodeURIComponent(section) : "");
+  const data = await request(query);
+  return Array.isArray(data) ? data : [];
+}
+
+// ریل‌های شگفت‌انگیز/محبوب از عضویت اسلایدر می‌آیند، نه از پرچم‌های محصول.
+export const SLIDER_BACKED_SECTIONS = ["amazing", "popular"];
+
+export async function fetchSectionSliderProducts(section, limit) {
+  if (!SLIDER_BACKED_SECTIONS.includes(section)) {
+    const data = await fetchProducts({ section, limit });
+    return Array.isArray(data) ? data : [];
+  }
+  const rows = await fetchSectionSliders(section);
+  const products = rows.map((row) => row.product).filter(Boolean).map(mapProduct);
+  return limit ? products.slice(0, limit) : products;
 }
 
 export async function getAddresses() {

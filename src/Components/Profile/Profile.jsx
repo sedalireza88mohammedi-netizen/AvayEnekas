@@ -131,6 +131,7 @@ function Profile() {
   const [addresses, setAddresses] = useState([])
   const [profile, setProfile] = useState({
     NameAndFamily: "", BirthDate: "", IdCard: "", Email: "", Number: "", gender: "",
+    IsAdmin: false, IsBlocked: false,
   })
   const [newAddress, setNewAddress] = useState({ title: "", address: "", postal_code: "" })
   const [showAddAddress, setShowAddAddress] = useState(false)
@@ -150,7 +151,8 @@ function Profile() {
   const [fieldErrors, setFieldErrors] = useState({});
 
   const editName = profile.NameAndFamily || formData.NameAndFamily;
-  const isAdmin = editName === ADMIN_USERNAME;
+  // مدیریت با پرچم بک‌اند تعیین می‌شود، نه با نام نمایشی کاربر
+  const isAdmin = Boolean(profile.IsAdmin) || editName === ADMIN_USERNAME;
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedGender, setSelectedGender] = useState({ label: "لطفاً انتخاب کنید", value: "" });

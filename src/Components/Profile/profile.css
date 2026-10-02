@@ -177,7 +177,7 @@ body {
 .AddAddresContaner {
     width: 250px;
     height: 60px;
-    background-color: #efefef;
+    background-color: #212121;
     text-align: center;
     margin: 0 auto;
     line-height: 60px;
@@ -190,7 +190,7 @@ body {
 }
 
 .AddAddresContaner:hover {
-    background-color: #e4e4e4;
+    background-color: #111111;
     color: #212121;
     transform: translateY(-8px);
 }
@@ -314,16 +314,12 @@ body {
     width: 100%;
     display: flex;
     justify-content: flex-end;
-    /* دکمه در سمت چپ قرار گیرد یا حذف کنید تا سمت راست باشد */
     margin-top: 15px;
 }
 
 .SubmitProfileBtn {
     width: 100%;
-    /* اگر می‌خواهید دکمه تمام‌عرض باشد */
     height: 48px;
-    background-color: #212121;
-    /* رنگ هماهنگ با تم سایت */
     color: #ffffff;
     border: none;
     border-radius: 8px;
@@ -331,12 +327,12 @@ body {
     font-family: inherit;
     font-weight: bold;
     cursor: pointer;
+    background-color: #141414;
     transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .SubmitProfileBtn:hover {
     background-color: #000000;
-    /* رنگ کمی تیره‌تر هنگام هاور */
     transform: translateY(-2px);
 }
 
