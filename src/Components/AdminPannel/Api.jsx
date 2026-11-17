@@ -378,3 +378,119 @@ export async function fetchAllReviews() {
 export async function deleteReview(id) {
   return request("/admin/reviews/" + id, { method: "DELETE" });
 }
+
+/* ============================== BANNERS & SLIDESHOW ============================== */
+
+export async function fetchBanners(type = null, all = true) {
+  const params = new URLSearchParams();
+  if (type) params.append("type", type);
+  if (all) params.append("all", "true");
+  const qs = params.toString();
+  return request("/banners" + (qs ? "?" + qs : ""));
+}
+
+export async function createBanner(payload) {
+  const formData = new FormData();
+  formData.append("title", payload.title);
+  formData.append("subtitle", payload.subtitle || "");
+  formData.append("link_url", payload.link_url || "");
+  formData.append("banner_type", payload.banner_type || "hero");
+  formData.append("display_order", payload.display_order || 0);
+  formData.append("is_active", payload.is_active !== undefined ? payload.is_active : true);
+  if (payload.imageFile) formData.append("image", payload.imageFile);
+  return request("/banners", { method: "POST", body: formData });
+}
+
+export async function updateBanner(id, payload) {
+  let body;
+  if (payload instanceof FormData) {
+    body = payload;
+  } else {
+    const formData = new FormData();
+    if (payload.title !== undefined) formData.append("title", payload.title);
+    if (payload.subtitle !== undefined) formData.append("subtitle", payload.subtitle);
+    if (payload.link_url !== undefined) formData.append("link_url", payload.link_url);
+    if (payload.banner_type !== undefined) formData.append("banner_type", payload.banner_type);
+    if (payload.display_order !== undefined) formData.append("display_order", payload.display_order);
+    if (payload.is_active !== undefined) formData.append("is_active", payload.is_active);
+    if (payload.imageFile) formData.append("image", payload.imageFile);
+    body = formData;
+  }
+  return request("/banners/" + id, { method: "PATCH", body });
+}
+
+export async function deleteBanner(id) {
+  return request("/banners/" + id, { method: "DELETE" });
+}
+
+export async function reorderBanners(order) {
+  return request("/banners/reorder", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ order }),
+  });
+}
+
+/* ============================== SITE SETTINGS ============================== */
+
+export async function fetchSiteSettings() {
+  return request("/site-settings");
+}
+
+export async function updateSiteSettings(payload) {
+  return request("/site-settings", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+}
+
+/* ============================== FEATURED & SPECIAL PRODUCTS ============================== */
+
+export async function fetchFeaturedProducts(limit = 12) {
+  return request("/products/featured?limit=" + limit);
+}
+
+export async function fetchSpecialOffers(limit = 12) {
+  return request("/products/special-offers?limit=" + limit);
+}
+
+export async function toggleProductFeatured(id, is_featured = null) {
+  return request("/products/" + id + "/toggle-featured", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(is_featured !== null ? { is_featured } : {}),
+  });
+}
+
+export async function batchActionProducts(ids, action, extra = {}) {
+  return request("/products/batch-action", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ids, action, ...extra }),
+  });
+}
+
+/* ============================== DASHBOARD METRICS ============================== */
+
+export async function fetchDashboardMetrics() {
+  return request("/admin/dashboard/metrics");
+}
+
+/* ============================== COUPONS ============================== */
+
+export async function fetchCoupons() {
+  return request("/admin/coupons");
+}
+
+export async function createCoupon(payload) {
+  return request("/admin/coupons", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function deleteCoupon(id) {
+  return request("/admin/coupons/" + id, { method: "DELETE" });
+}
