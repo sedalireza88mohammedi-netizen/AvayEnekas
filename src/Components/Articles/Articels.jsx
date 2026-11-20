@@ -107,7 +107,7 @@ export default function Articelse() {
          {/* StartCatagorySwiper */}
             {/* بخش اصلی اسلایدر با استانداردهای Accessibility و سئو */}
             <section
-                className="slider-container"
+                className="slider-container articles-cat-rail"
                 aria-label="اسلایدر  مقالات"
                 onKeyDown={handleKeyDown}
                 tabIndex={0}

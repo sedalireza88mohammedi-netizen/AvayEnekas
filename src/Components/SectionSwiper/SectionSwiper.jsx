@@ -148,7 +148,7 @@ export default function SectionSwiper({ section, title }) {
         </button>
       </div>
 
-      <section className="swiper-container" aria-label={meta.label}>
+      <section className={`swiper-container swiper-section--${section}`} aria-label={meta.label}>
         <div className="swiper-wrapper-box">
           <div
             className="custom-swiper"

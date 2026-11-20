@@ -1979,10 +1979,10 @@ function SettingsView() {
 
 /** چهار بخش ویژه سایت؛ هر کدام پرچم مستقل خود را روی محصول دارد. */
 const SPECIAL_SECTIONS = [
-  { key: "is_featured", label: "شگفت‌انگیزها", hint: "نمایش در پیشنهاد شگفت‌انگیز صفحه اصلی" },
-  { key: "is_popular", label: "محبوب‌ترین‌ها", hint: "نمایش در اسلایدر محبوب‌ترین‌ها" },
-  { key: "is_trending", label: "ترندترین‌ها", hint: "نمایش در اسلایدر ترندترین‌ها" },
-  { key: "is_best_seller", label: "پرفروش‌ترین‌ها", hint: "نمایش در اسلایدر پرفروش‌ترین‌ها" },
+  { key: "is_featured", sliderSection: "amazing", label: "شگفت‌انگیزها", hint: "نمایش در صفحهٔ اختصاصی شگفت‌انگیزها (جدا از اسلایدر صفحهٔ اصلی)" },
+  { key: "is_popular", sliderSection: "popular", label: "محبوب‌ترین‌ها", hint: "نمایش در صفحهٔ اختصاصی محبوب‌ترین‌ها (جدا از اسلایدر صفحهٔ اصلی)" },
+  { key: "is_trending", sliderSection: null, label: "ترندترین‌ها", hint: "نمایش در صفحهٔ اختصاصی ترندترین‌ها" },
+  { key: "is_best_seller", sliderSection: null, label: "پرفروش‌ترین‌ها", hint: "نمایش در صفحهٔ اختصاصی پرفروش‌ترین‌ها" },
 ];
 
 const matchesProduct = (p, term) => {
@@ -1996,27 +1996,51 @@ const matchesProduct = (p, term) => {
   );
 };
 
-function SpecialProducts({ products, onToggleFlag }) {
+function SpecialProducts({ products, onToggleFlag, sliders }) {
   const [activeKey, setActiveKey] = useState(SPECIAL_SECTIONS[0].key);
   const [search, setSearch] = useState("");
   const [pending, setPending] = useState(null);
+  const [error, setError] = useState("");
 
   const active = SPECIAL_SECTIONS.find((s) => s.key === activeKey) || SPECIAL_SECTIONS[0];
+  // محصولاتی که در اسلایدر صفحهٔ اصلی هستند، نباید به‌عنوان رویداد ویژه پیشنهاد شوند
+  const sliderIds = useMemo(() => {
+    if (!active.sliderSection) return null;
+    return new Set(
+      (sliders || [])
+        .filter((s) => s.section === active.sliderSection)
+        .map((s) => s.product && s.product.id)
+        .filter((id) => id !== undefined && id !== null),
+    );
+  }, [sliders, active.sliderSection]);
   const inSection = useMemo(
     () => products.filter((p) => !!p[active.key]),
     [products, active.key],
   );
   const candidates = useMemo(
-    () => products.filter((p) => !p[active.key] && matchesProduct(p, search)),
-    [products, active.key, search],
+    () =>
+      products.filter(
+        (p) =>
+          !p[active.key] &&
+          !(sliderIds && sliderIds.has(p.id)) &&
+          matchesProduct(p, search),
+      ),
+    [products, active.key, search, sliderIds],
   );
 
   const toggle = async (p, next) => {
     setPending(p.id);
+    setError("");
     try {
       await onToggleFlag(p, active.key, next);
     } catch (err) {
-      /* مدیر می‌تواند دوباره تلاش کند؛ وضعیت سرور تغییری نکرده است */
+      // پیام خطا باید دیده شود، وگرنه ادمین فکر می‌کند کلیک بی‌اثر بوده است
+      console.error("[special-sections] toggle failed", err);
+      setError(
+        next
+          ? "افزودن محصول انجام نشد. اتصال یا دسترسی مدیر را بررسی کنید."
+          : "حذف محصول از این بخش انجام نشد.",
+      );
     } finally {
       setPending(null);
     }
@@ -2027,9 +2051,13 @@ function SpecialProducts({ products, onToggleFlag }) {
       <div className="info-note">
         <Star size={15} aria-hidden="true" />
         <span>
-          هر بخش جداگانه مدیریت می‌شود؛ محصولی که در این بخش اضافه کنید فقط در اسلایدر همان بخش از صفحه اصلی نمایش داده می‌شود. یک محصول می‌تواند هم‌زمان در چند بخش باشد.
+          این بخش‌ها کاملاً از «اسلایدرها» جدا هستند: محصولی که اینجا اضافه کنید فقط در صفحهٔ اختصاصی همان بخش دیده می‌شود و روی اسلایدر صفحهٔ اصلی اثری ندارد. برعکس هم اعضای اسلایدر صفحهٔ اصلی جداگانه در تب «اسلایدرها» مدیریت می‌شوند.
         </span>
       </div>
+
+      {error ? (
+        <p className="special-error" role="alert">{error}</p>
+      ) : null}
 
       <div className="special-tabs" role="tablist" aria-label="بخش‌های ویژه">
         {SPECIAL_SECTIONS.map((s) => {
@@ -2091,6 +2119,11 @@ function SpecialProducts({ products, onToggleFlag }) {
 
       <div className="card table-card">
         <div className="table-card-header"><h2>افزودن محصول به «{active.label}»</h2></div>
+        {sliderIds && sliderIds.size > 0 ? (
+          <p className="special-excluded">
+            {num(sliderIds.size)} محصول به‌دلیل حضور در اسلایدر صفحهٔ اصلی، اینجا تکراری نمایش داده نشده است.
+          </p>
+        ) : null}
         <div className="toolbar">
           <div className="toolbar-filters">
             <div className="search-box">
@@ -2938,6 +2971,7 @@ export default function AdminPanel() {
             {activeTab === "events" && (
               <SpecialProducts
                 products={products}
+                sliders={sectionSliders}
                 onToggleFlag={handleToggleProductFlag}
               />
             )}

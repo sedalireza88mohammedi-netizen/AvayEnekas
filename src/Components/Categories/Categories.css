@@ -22,7 +22,7 @@
     margin: 0;
 }
 
-.cat-grid {
+.cat-categories-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 18px;
@@ -119,7 +119,7 @@
     color: #e23744;
 }
 
-.cat-empty {
+.cat-categories-empty {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -130,13 +130,13 @@
 }
 
 @media (max-width: 900px) {
-    .cat-grid {
+    .cat-categories-grid {
         grid-template-columns: repeat(2, 1fr);
     }
 }
 
 @media (max-width: 560px) {
-    .cat-grid {
+    .cat-categories-grid {
         grid-template-columns: 1fr;
         gap: 12px;
     }

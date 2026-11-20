@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { ChevronLeft, Package, Heart } from "lucide-react";
-import { fetchProducts } from "../../../api";
+import { fetchProducts, fetchSectionSliderProducts } from "../../../api";
 import { usePageMeta } from "../../../useSeo";
 import RatingStars from "../../../RatingStars";
 import SafeImg from "../../../SafeImg";
@@ -33,10 +33,22 @@ export default function SectionPopular() {
 
   useEffect(() => {
     let active = true;
-    fetchProducts({ section: SECTION_KEY, limit: 100 })
-      .then((data) => {
+    // اعضای اسلایدر صفحهٔ اصلی + محصولات رویداد ویژه، بدون تکرار
+    Promise.all([
+      fetchSectionSliderProducts(SECTION_KEY, 100).catch(() => []),
+      fetchProducts({ section: SECTION_KEY, limit: 100 }),
+    ])
+      .then(([sliderItems, eventItems]) => {
         if (!active) return;
-        setProducts(Array.isArray(data) ? data : []);
+        const merged = [];
+        const seen = new Set();
+        for (const item of [...sliderItems, ...eventItems]) {
+          const id = item && item.id;
+          if (id === undefined || id === null || seen.has(id)) continue;
+          seen.add(id);
+          merged.push(item);
+        }
+        setProducts(merged);
         setError("");
       })
       .catch(() => {

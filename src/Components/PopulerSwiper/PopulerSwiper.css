@@ -27,12 +27,18 @@
 .swiper-container {
     direction: rtl;
     background-color: #ffffff;
-    margin-bottom: 40px;
     width: 100%;
     display: flex;
     justify-content: center;
     position: relative;
     user-select: none;
+}
+
+/* ارتفاع کارت و فاصلهٔ پایین، مخصوص ریل محبوب است.
+   قبلاً بدون محدوده بود و چون هر دو ریل از کلاس‌های یکسان استفاده می‌کنند،
+   هر فایل CSS که دیرتر لود می‌شد روی ریل دیگر اثر می‌گذاشت. */
+.swiper-container.swiper-section--popular {
+    margin-bottom: 40px;
 }
 
 .swiper-wrapper-box {
@@ -176,7 +182,6 @@
     background-color: white;
     min-width: 200px;
     width: 250px;
-    height: 320px;
     padding: 16px;
     display: flex;
     flex-direction: column;
@@ -192,6 +197,11 @@
     transform: translateY(-5px);
     box-shadow: 0 5px 10px #cdcdcd;
 
+}
+
+/* ارتفاع ثابت کارت، مخصوص ریل محبوب (تا کارت‌ها هم‌ارتفاع بمانند) */
+.swiper-section--popular .product-card {
+    height: 320px;
 }
 
 .product-card:first-of-type {

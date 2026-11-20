@@ -74,12 +74,12 @@ export default function Categories() {
       </header>
 
       {list.length === 0 ? (
-        <div className="cat-empty">
+        <div className="cat-categories-empty">
           <PackageX size={48} />
           <span>دسته‌ای برای نمایش وجود ندارد</span>
         </div>
       ) : (
-        <div className="cat-grid">
+        <div className="cat-categories-grid">
           {list.map((cat) => (
             <article key={cat.name} className="cat-card">
               <Link

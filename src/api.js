@@ -176,6 +176,7 @@ function mapProduct(p) {
     discount: Number(p.discount) || 0,
     rating: Number(p.rating) || 0,
     Empressive: featured,
+    is_featured: featured,
     is_popular: flag("is_popular"),
     is_trending: flag("is_trending"),
     is_best_seller: flag("is_best_seller"),
