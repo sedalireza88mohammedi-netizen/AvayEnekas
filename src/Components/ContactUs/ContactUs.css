@@ -1,129 +1,131 @@
-* {
-    margin: 0;
-    padding: 0;
-}
-
 .TopPartContact {
     direction: rtl;
     width: 100%;
+    max-width: 100%;
     background-color: #D3DAD9;
-    padding: 50px;
+    padding: clamp(16px, 4vw, 50px);
+    overflow: hidden;
 }
 
 .HedContact {
-    width: 180px;
-    height: 70px;
-    padding: 10px;
+    width: auto;
+    min-width: min(180px, 100%);
+    height: auto;
+    min-height: 64px;
+    padding: 10px 16px;
     text-align: center;
-    margin: 30px auto;
-    margin-top: 30px;
+    margin: 0 auto clamp(20px, 4vw, 30px);
     background-color: #c4c4c4;
     border-radius: 60px;
     color: #2c2c2c;
+    font-size: clamp(1.15rem, 3vw, 1.7rem);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .ContactContainer {
-    margin: 50px auto;
-    width: 65%;
+    margin: 0 auto clamp(20px, 4vw, 50px);
+    width: min(100%, 760px);
     display: flex;
     flex-direction: column;
+    gap: 12px;
     background-color: #EEEEEE;
-    padding: 20px;
+    padding: clamp(12px, 3vw, 20px);
     border-radius: 20px;
 }
 
 .ChildConatct {
-    width: 70%;
-    height: 75px;
-    margin: 10px auto;
+    width: 100%;
+    min-height: 75px;
+    height: auto;
+    margin: 0;
     background-color: #D8D8D8;
-    padding: 8px;
+    padding: 8px clamp(8px, 2vw, 14px);
     border-radius: 60px;
     display: flex;
-    line-height: 65px;
+    align-items: center;
+    gap: 10px;
     color: #3d3d3d;
 }
 
-.IconContact {
-    color: #959d9c !important;
-    font-size: 30px !important;
-    width: 60px;
-    height: 60px;
+.IconContact,
+.IconContactItta img,
+.IconContactAddress {
+    flex: 0 0 56px;
+    width: 56px;
+    height: 56px;
+    font-size: 26px !important;
     background-color: #EEEEEE;
     border-radius: 50%;
-    line-height: 60px;
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #959d9c !important;
+    margin: 0;
 }
 
 .IconContactItta img {
-    color: #959d9c !important;
-    font-size: 30px !important;
-    width: 60px;
-    height: 60px;
-    padding: 10px;
-    background-color: #EEEEEE;
-    border-radius: 50%;
-    line-height: 60px;
-    text-align: center;
+    padding: 8px;
+    object-fit: cover;
 }
 
 .ChildConatct h2 {
-    font-size: 25px;
-    padding-right: 75px;
+    font-size: clamp(0.85rem, 2.6vw, 1.35rem);
+    line-height: 1.7;
+    padding-right: 0;
+    min-width: 0;
+    overflow-wrap: anywhere;
 }
 
 .ChildConatct h2 a {
-    padding-right: 100px;
+    padding-right: 0;
     color: #3d3d3d;
+    overflow-wrap: anywhere;
 }
 
 .Time {
-    font-size: 22px !important;
-    padding-right: 20px !important;
+    font-size: clamp(0.8rem, 2.3vw, 1.2rem) !important;
+    padding-right: 0 !important;
 }
 
 .ChildConatct h2 a:hover {
-    padding-right: 100px;
     color: #000000;
     text-decoration: underline #000000;
 }
 
 .AddressContact {
     direction: rtl;
-    width: 70%;
-    height: 220px;
-    margin: 10px auto;
+    width: 100%;
+    height: auto;
+    min-height: 150px;
+    margin: 0;
     background-color: #D8D8D8;
-    padding: 15px;
+    padding: clamp(12px, 3vw, 18px);
     border-radius: 20px;
     text-align: center;
+    display: flex;
+    flex-direction: column;
     align-items: center;
-    line-height: 65px;
-    color: #2c2c2c;
     justify-content: center;
+    gap: 10px;
+    color: #2c2c2c;
 }
 
-.IconContactAddress {
-    margin: 0 auto;
-    color: #959d9c !important;
-    font-size: 30px !important;
-    width: 60px;
-    height: 60px;
-    background-color: #EEEEEE;
-    border-radius: 50%;
-    line-height: 60px;
-    text-align: center;
+.AddressContact h2 {
+    font-size: clamp(0.85rem, 2.6vw, 1.25rem);
+    line-height: 1.9;
+    overflow-wrap: anywhere;
 }
 
 .footer-mapContact {
-    flex: 1 1 240px;
     display: flex;
-    width: 59%;
-    height: 380px;
-    border-radius: 8px;
+    width: min(100%, 760px);
+    height: clamp(200px, 48vw, 380px);
+    border-radius: 12px;
     overflow: hidden;
     cursor: pointer;
-    margin: 10px auto;
+    margin: 0 auto;
 }
 
 .map-image {
@@ -136,4 +138,28 @@
 
 .footer-mapContact:hover .map-image {
     transform: scale(1.05);
+}
+
+@media (max-width: 480px) {
+    .TopPartContact {
+        padding: 14px 10px 22px;
+    }
+
+    .ChildConatct {
+        border-radius: 18px;
+        align-items: flex-start;
+    }
+
+    .IconContact,
+    .IconContactItta img,
+    .IconContactAddress {
+        flex-basis: 44px;
+        width: 44px;
+        height: 44px;
+        font-size: 20px !important;
+    }
+
+    .AddressContact {
+        border-radius: 18px;
+    }
 }
