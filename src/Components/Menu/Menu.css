@@ -26,9 +26,11 @@ a {
 .HeaderWrapper.scrolled {
     box-shadow: var(--shadow-md);
 }
-.AvayHeader{
-    color:#F5F5F5 ;
+
+.AvayHeader {
+    color: #F5F5F5;
 }
+
 .Header>p {
     position: fixed;
     top: 0;
@@ -323,6 +325,7 @@ a {
 .cart-btn:hover {
     color: #000000;
 }
+
 .massege-btn {
     background: none;
     border: none;
@@ -423,7 +426,7 @@ a {
 
 .category-trigger {
     font-size: 18px;
-    background-color: none ;
+    background-color: none;
     color: #222831;
     position: relative;
     font-family: YekanBold !important;
@@ -436,7 +439,7 @@ a {
     font-weight: bolder;
     color: #62666d;
     cursor: pointer;
-    background-color:#ffffff;
+    background-color: #ffffff;
     border: none;
     font-size: 15px;
 }
@@ -582,7 +585,7 @@ a {
     font-size: 16px;
     padding: 5px 15px;
     display: flex;
-    
+
 }
 
 .AdminPannel :hover {
@@ -625,9 +628,9 @@ a {
     }
 
     .logo {
-    
-       margin: 40px;
-       margin-bottom: 0;
+
+        margin: 40px;
+        margin-bottom: 0;
         font-size: 22px;
         align-self: center;
 
@@ -687,6 +690,7 @@ a {
         font-weight: bold;
     }
 }
+
 .cart-btn {
     position: relative;
 }
@@ -735,3 +739,4 @@ a {
     text-align: center;
     z-index: 2;
 }
+

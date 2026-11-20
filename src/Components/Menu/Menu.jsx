@@ -557,11 +557,7 @@ function Menu({ isCart }) {
             <span>سبد خرید</span>
             {cartCount > 0 && <span className="mob-badge">{toPersianDigits(cartCount)}</span>}
           </NavLink>
-          <NavLink className={({ isActive }) => (isActive ? "active-link" : "")} to="/Profile?tab=messages">
-            <FontAwesomeIcon icon={faBell} />
-            <span>پیام‌ها</span>
-            {unreadCount > 0 && <span className="mob-badge mob-badge--bell">{toPersianDigits(unreadCount)}</span>}
-          </NavLink>
+
           {loggedIn ? (
             <NavLink className={({ isActive }) => (isActive ? "active-link" : "mobUser")} to="/Profile">
               <FontAwesomeIcon icon={faUser} />
