@@ -95,4 +95,7 @@
   .slider-wrapper {
     height: 300px;
   }
+  .slider-main-container {
+margin-top: 0px;
+  }
 }
