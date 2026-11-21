@@ -2207,11 +2207,6 @@ function SpecialProducts({ products, onToggleFlag, sliders }) {
 
       <div className="card table-card">
         <div className="table-card-header"><h2>افزودن محصول به «{active.label}»</h2></div>
-        {sliderIds && sliderIds.size > 0 ? (
-          <p className="special-excluded">
-            {num(sliderIds.size)} محصول به‌دلیل حضور در اسلایدر صفحهٔ اصلی، اینجا تکراری نمایش داده نشده است.
-          </p>
-        ) : null}
         <div className="toolbar">
           <div className="toolbar-filters">
             <div className="search-box">
