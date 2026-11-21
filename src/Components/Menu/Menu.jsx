@@ -466,8 +466,11 @@ function Menu({ isCart }) {
 
           </div>
 
-
-
+          {/* آیکن پیامها در موبایل (در نوار پایین نیست، داخل سربرگ نمایش داده میشود) */}
+          <button type="button" className="mobile-bell-btn" onClick={() => navigate("/Profile?tab=messages")} aria-label="پیام ها">
+            <FontAwesomeIcon icon={faBell} />
+            {unreadCount > 0 && <span className="bell-unread-badge">{toPersianDigits(unreadCount)}</span>}
+          </button>
         </div>
 
         <div className="Border"></div>

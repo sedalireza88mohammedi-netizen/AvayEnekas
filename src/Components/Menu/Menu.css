@@ -114,11 +114,13 @@ a {
     color: var(--brand, #000);
     font-weight: 700;
 }
-.brandSearch{
+
+.brandSearch {
     color: #000 !important;
     font-weight: bolder;
     font-size: 18px;
 }
+
 .search-placeholder.is-hidden {
     opacity: 0;
 }
@@ -130,7 +132,8 @@ a {
 }
 
 /* سربرگ موبایل فقط؛ در دسکتاپ مخفی است */
-.mobile-brand {
+.mobile-brand,
+.mobile-bell-btn {
     display: none;
 }
 
@@ -635,10 +638,12 @@ a {
 
     /* سربرگ موبایل: زمینه خاکستری روشن + قرص سفید جستجو (مطابق عکس مرجع) */
     .HeaderWrapper {
-        top: 0;
+        /* نوار مشکی ثابت بالا ۵۰px است؛ سربرگ نباید موقع اسکرول زیر آن برود */
+        top: 50px;
         background: #f2f3f5;
         box-shadow: none;
         padding: 8px 10px 6px;
+        height: 80px;
     }
 
     .HeaderWrapper.scrolled {
@@ -649,7 +654,7 @@ a {
     .Header,
     .Header>p,
     .Border {
-       margin-bottom: 50px;
+        margin-bottom: 50px;
     }
 
     .Menu {
@@ -696,6 +701,30 @@ a {
     .search-placeholder {
         right: 38px;
         font-size: 13px;
+    }
+
+    .mobile-bell-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 34px;
+        width: 34px;
+        height: 34px;
+        border: none;
+        border-radius: 50%;
+        background: #f2f3f5;
+        color: #333333;
+        font-size: 15px;
+        cursor: pointer;
+        position: relative;
+    }
+
+    .mobile-bell-btn .bell-unread-badge {
+        top: -4px;
+        left: -4px;
+        font-size: 10px;
+        min-width: 16px;
+        height: 16px;
     }
 
     .search-pop {
@@ -775,7 +804,7 @@ a {
     }
 
     .IconMenuContainer a.active-link {
-        color: var(--brand, #ef4056);
+        color: #000;
         font-weight: bold;
     }
 }
@@ -843,4 +872,3 @@ a {
     text-align: center;
     z-index: 2;
 }
-

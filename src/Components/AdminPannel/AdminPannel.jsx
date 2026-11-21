@@ -54,7 +54,9 @@ const ORDER_STATUSES = ["در انتظار پردازش", "در حال ارسا�
 /* ============================== HELPERS ============================== */
 
 const toman = (n) => n.toLocaleString("fa-IR") + " تومان";
-const num = (n) => n.toLocaleString("fa-IR");
+/* برخی اندپوینت‌های قدیمی بکاند فیلد count را برنمیگردانند؛
+   بدون این محافظ، صفحه «جستجوهای پرطرفدار» با خطای toLocaleString سفید میشد. */
+const num = (n) => (Number(n) || 0).toLocaleString("fa-IR");
 const sortPopularSearches = (list) =>
   [...list].sort((a, b) => (a.order ?? 0) - (b.order ?? 0) || a.id - b.id);
 
@@ -1350,7 +1352,7 @@ function PopularSearches({ items, onCreate, onUpdate, onDelete }) {
   const startEdit = (item) => {
     setEditId(item.id);
     setError("");
-    setForm({ term: item.term, order: item.order, active: item.active });
+    setForm({ term: item.term || "", order: item.order ?? 0, active: !!item.active });
   };
 
   const cancelEdit = () => {
@@ -1762,6 +1764,7 @@ function SectionSliders({ sliders, products, onAdd, onUpdate, onDelete }) {
   const [activeKey, setActiveKey] = useState(SLIDER_TABS[0].key);
   const [search, setSearch] = useState("");
   const [pending, setPending] = useState(null);
+  const [actionError, setActionError] = useState("");
 
   const active = SLIDER_TABS.find((s) => s.key === activeKey) || SLIDER_TABS[0];
 
@@ -1781,10 +1784,12 @@ function SectionSliders({ sliders, products, onAdd, onUpdate, onDelete }) {
 
   const run = async (key, action) => {
     setPending(key);
+    setActionError("");
     try {
       await action();
     } catch (err) {
-      /* وضعیت سرور تغییری نکرده است؛ مدیر می‌تواند دوباره تلاش کند */
+      /* خطا حتماً به ادمین نشان داده شود تا کلیک بیاثر به نظر نرسد */
+      setActionError(faError(err, "عملیات انجام نشد؛ اتصال یا دسترسی مدیر را بررسی کنید"));
     } finally {
       setPending(null);
     }
@@ -1798,6 +1803,8 @@ function SectionSliders({ sliders, products, onAdd, onUpdate, onDelete }) {
           محصولاتی که اینجا اضافه می‌کنید فقط در ریل مربوطه در صفحه اصلی نمایش داده می‌شوند. این لیست کاملاً از بخش‌های ویژه جداست؛ حذف محصول از اینجا آن را از بخش ویژه‌اش حذف نمی‌کند و یک محصول می‌تواند در هر دو ریل باشد.
         </span>
       </div>
+
+      {actionError && <p className="form-error">{actionError}</p>}
 
       <div className="special-tabs" role="tablist" aria-label="ریل‌های صفحه اصلی">
         {SLIDER_TABS.map((s) => {
@@ -2096,16 +2103,7 @@ function SpecialProducts({ products, onToggleFlag, sliders }) {
   const [error, setError] = useState("");
 
   const active = SPECIAL_SECTIONS.find((s) => s.key === activeKey) || SPECIAL_SECTIONS[0];
-  // محصولاتی که در اسلایدر صفحهٔ اصلی هستند، نباید به‌عنوان رویداد ویژه پیشنهاد شوند
-  const sliderIds = useMemo(() => {
-    if (!active.sliderSection) return null;
-    return new Set(
-      (sliders || [])
-        .filter((s) => s.section === active.sliderSection)
-        .map((s) => s.product && s.product.id)
-        .filter((id) => id !== undefined && id !== null),
-    );
-  }, [sliders, active.sliderSection]);
+  // عضویت در اسلایدر و پرچم رویداد ویژه مستقلاند؛ هر محصول قابل افزودن است.
   const inSection = useMemo(
     () => products.filter((p) => !!p[active.key]),
     [products, active.key],
@@ -2113,12 +2111,9 @@ function SpecialProducts({ products, onToggleFlag, sliders }) {
   const candidates = useMemo(
     () =>
       products.filter(
-        (p) =>
-          !p[active.key] &&
-          !(sliderIds && sliderIds.has(p.id)) &&
-          matchesProduct(p, search),
+        (p) => !p[active.key] && matchesProduct(p, search),
       ),
-    [products, active.key, search, sliderIds],
+    [products, active.key, search],
   );
 
   const toggle = async (p, next) => {
