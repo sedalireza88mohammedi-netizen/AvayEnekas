@@ -111,10 +111,14 @@ a {
 }
 
 .search-placeholder b {
-    color: var(--brand, #ef4056);
+    color: var(--brand, #000);
     font-weight: 700;
 }
-
+.brandSearch{
+    color: #000 !important;
+    font-weight: bolder;
+    font-size: 18px;
+}
 .search-placeholder.is-hidden {
     opacity: 0;
 }
@@ -645,7 +649,7 @@ a {
     .Header,
     .Header>p,
     .Border {
-        display: none !important;
+       margin-bottom: 50px;
     }
 
     .Menu {
