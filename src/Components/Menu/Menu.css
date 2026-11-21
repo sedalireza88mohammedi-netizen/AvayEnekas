@@ -96,6 +96,40 @@ a {
     font-size: 18px;
 }
 
+/* متن جستجوی لایهلایقی: «جستجو در» خاکستری + نام برند قرمز (سبک عکس مرجع) */
+.search-placeholder {
+    position: absolute;
+    right: 45px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9aa0a8;
+    font-size: 15px;
+    white-space: nowrap;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+    z-index: 1;
+}
+
+.search-placeholder b {
+    color: var(--brand, #ef4056);
+    font-weight: 700;
+}
+
+.search-placeholder.is-hidden {
+    opacity: 0;
+}
+
+.search::-webkit-search-cancel-button,
+.search::-webkit-search-decoration {
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+/* سربرگ موبایل فقط؛ در دسکتاپ مخفی است */
+.mobile-brand {
+    display: none;
+}
+
 /* دراپ‌داون پیشنهادهای جستجو (سبک دیجی‌کالا) */
 .search-pop {
     position: absolute;
@@ -595,57 +629,108 @@ a {
 
 @media (max-width: 768px) {
 
-
+    /* سربرگ موبایل: زمینه خاکستری روشن + قرص سفید جستجو (مطابق عکس مرجع) */
     .HeaderWrapper {
         top: 0;
-
+        background: #f2f3f5;
+        box-shadow: none;
+        padding: 8px 10px 6px;
     }
 
-    .Header {
-        margin-bottom: 10px;
+    .HeaderWrapper.scrolled {
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
     }
 
-    .Header>p {
-        font-size: 14px;
-
+    /* نوار تبلیغاتی مشکی در موبایل نمایش داده نمیشود */
+    .Header,
+    .Header>p,
+    .Border {
+        display: none !important;
     }
 
     .Menu {
         display: none !important;
-
     }
 
     .MenuTop {
-        padding: 10px 15px;
-        flex-direction: column;
-
-        gap: 15px;
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
+        min-height: 54px;
+        padding: 5px 12px;
+        background: #ffffff;
+        border-radius: 28px;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.07);
+        overflow: visible;
     }
 
+    .logo,
     .LeftHed {
-        display: none;
-
-    }
-
-    .logo {
-
-        margin: 40px;
-        margin-bottom: 0;
-        font-size: 22px;
-        align-self: center;
-
+        display: none !important;
     }
 
     .search-container {
-        width: 100%;
-        max-width: 100%;
+        flex: 1 1 auto;
+        width: auto;
+        min-width: 0;
+        max-width: none;
     }
 
     .search {
-        border-radius: 12px;
-        height: 40px;
+        height: 42px;
+        border-radius: 21px;
+        background: transparent;
+        padding: 0 38px 0 6px;
+        font-size: 14px;
     }
 
+    .searchIcon {
+        right: 2px;
+        font-size: 17px;
+    }
+
+    .search-placeholder {
+        right: 38px;
+        font-size: 13px;
+    }
+
+    .search-pop {
+        border-radius: 16px;
+        margin-top: 4px;
+    }
+
+    .mobile-brand {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex: 0 0 auto;
+    }
+
+    .mobile-brand-menu {
+        width: 34px;
+        height: 34px;
+        flex: 0 0 34px;
+        border: none;
+        border-radius: 50%;
+        background: #f2f3f5;
+        color: #333333;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 15px;
+        cursor: pointer;
+    }
+
+    .mobile-brand-logo {
+        font-size: 13px;
+        font-weight: 700;
+        white-space: nowrap;
+        color: #6d6c6c;
+    }
+
+    .mobile-brand-logo b {
+        color: #111111;
+    }
 
     .MobileMenu {
         display: block;
@@ -686,8 +771,23 @@ a {
     }
 
     .IconMenuContainer a.active-link {
-        color: #222831;
+        color: var(--brand, #ef4056);
         font-weight: bold;
+    }
+}
+
+/* صفحههای خیلی باریک: لوگوی داخل قرص حذف میشود تا جستجو جای کافی داشتهباشد */
+@media (max-width: 380px) {
+    .MenuTop {
+        padding: 5px 10px;
+    }
+
+    .mobile-brand-logo {
+        display: none;
+    }
+
+    .search-placeholder {
+        font-size: 12px;
     }
 }
 

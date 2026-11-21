@@ -348,6 +348,9 @@ function Menu({ isCart }) {
 
           <form className="search-container" onSubmit={handleSearch} role="search" ref={searchWrapRef}>
             <FontAwesomeIcon icon={faSearch} className="searchIcon" />
+            <span className={`search-placeholder ${query ? "is-hidden" : ""}`} aria-hidden="true">
+              جستجو در <b>آوای انعکاس</b>
+            </span>
             <input
               className="search"
               type="search"
@@ -355,7 +358,7 @@ function Menu({ isCart }) {
               onChange={(e) => { setQuery(e.target.value); setSearchOpen(true); }}
               onFocus={() => setSearchOpen(true)}
               onKeyDown={handleKeyDown}
-              placeholder='  جستجو در آوای انعکاس'
+              placeholder=""
               aria-label="جستجو در سایت"
               autoComplete="off"
             />
@@ -461,6 +464,14 @@ function Menu({ isCart }) {
             </button>
 
 
+          </div>
+
+          {/* سربرگ موبایل： جستجو در سمت راست و لوگو/دستهبندی در سمت چپ (سبک عکس مرجع) */}
+          <div className="mobile-brand">
+            <button type="button" className="mobile-brand-menu" onClick={() => navigate("/Catagoryes")} aria-label="دسته بندی کالاها">
+              <FontAwesomeIcon icon={faBars} />
+            </button>
+            <Link to="/" className="mobile-brand-logo">آوای <b>انعکاس</b></Link>
           </div>
         </div>
 
