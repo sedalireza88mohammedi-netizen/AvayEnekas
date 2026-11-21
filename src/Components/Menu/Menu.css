@@ -119,6 +119,7 @@ a {
     color: #000 !important;
     font-weight: bolder;
     font-size: 18px;
+    padding-right: 5px;
 }
 
 .search-placeholder.is-hidden {
