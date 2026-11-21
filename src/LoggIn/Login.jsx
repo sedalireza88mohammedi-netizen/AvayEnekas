@@ -11,7 +11,6 @@ import { sendOtpCode, verifyOtpCode } from "../api";
 
 function LogIn() {
   const [number, setNumber] = useState("");
-  const [otpCode, setOtpCode] = useState("");
   const [userCode, setUserCode] = useState("");
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
@@ -46,9 +45,7 @@ function LogIn() {
     }
     setIsLoading(true);
     try {
-      const res = await sendOtpCode(phone);
-      // در محیط توسعه بک‌اند کد را برمی‌گرداند (devCode)
-      setOtpCode((res && res.devCode) || "");
+      await sendOtpCode(phone);
       setStep(2);
     } catch (err) {
       showError(
@@ -126,12 +123,6 @@ function LogIn() {
         <div className="FirstStebContainer">
           <div className="logoLogin">آوای <span className="logoLogin2">انعکاس</span></div>
           <h2 className="titlecode">کد تایید را وارد کنید</h2>
-
-          {otpCode && (
-            <div className="otpCode">
-              کد تایید شما (محیط تست): <strong>{otpCode}</strong>
-            </div>
-          )}
 
           <input className="numberInp" type="tel" placeholder="کد ۵ رقمی" value={userCode} onChange={(e) => setUserCode(e.target.value)} dir="ltr" />
           <button onClick={handleVerifyOtp} className="btnSendNumber" disabled={isLoading}>
