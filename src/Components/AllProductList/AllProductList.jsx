@@ -71,7 +71,7 @@ function ProductCard({ product }) {
           <SafeImg
             src={product.image}
             alt={product.title}
-            loading="lazy"
+            loading="eager"
             decoding="async"
             width={200}
             height={200}

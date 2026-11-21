@@ -114,7 +114,7 @@ export default function SectionBestSeller() {
                   <SafeImg
                     src={product.image}
                     alt={product.title}
-                    loading="lazy"
+                    loading="eager"
                     width="320"
                     height="320"
                   />

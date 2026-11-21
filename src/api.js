@@ -211,7 +211,8 @@ export async function fetchProducts(params = {}) {
   if (params.limit) query.set("limit", String(params.limit));
   const qs = query.toString();
   const data = await request("/products" + (qs ? "?" + qs : ""));
-  return Array.isArray(data) ? data.map(mapProduct) : [];
+  const list = Array.isArray(data) ? data : (data && Array.isArray(data.results) ? data.results : []);
+  return list.map(mapProduct);
 }
 
 export async function fetchProduct(id) {

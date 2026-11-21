@@ -194,7 +194,7 @@ export default function CatagorySwiper() {
                                                 <SafeImg
                                                     src={category.image}
                                                     className="category-image"
-                                                    loading="lazy"
+                                                    loading="eager"
                                                 />
                                             ) : (
                                                 <div className="category-image category-image-fallback">{category.name}</div>

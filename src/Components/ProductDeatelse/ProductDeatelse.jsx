@@ -365,7 +365,7 @@ export default function ProductDeatelse() {
           <div className="pd-related-grid">
             {related.map((p) => (
               <Link key={p.id} to={`/Product/${p.id}`} className="pd-related-card">
-                <SafeImg src={p.image} alt={p.title} loading="lazy"  />
+                <SafeImg src={p.image} alt={p.title} loading="eager"  />
                 <h4 title={p.title}>{p.title}</h4>
                 <RatingStars rating={p.rating} size={11} />
                 <span className="pd-related-price">{toPersianDigits(formatPrice(p.price))} تومان</span>

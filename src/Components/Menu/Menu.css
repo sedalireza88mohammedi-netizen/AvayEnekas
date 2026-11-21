@@ -663,6 +663,7 @@ a {
     }
 
     .MenuTop {
+        width: 80%;
         flex-direction: row;
         align-items: center;
         gap: 8px;
@@ -687,6 +688,7 @@ a {
     }
 
     .search {
+       
         height: 42px;
         border-radius: 21px;
         background: transparent;

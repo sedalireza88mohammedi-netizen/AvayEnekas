@@ -47,7 +47,7 @@ const ProductCard = ({ product, onDrag }) => {
             src={product.image}
             alt={product.title}
             draggable="false"
-            loading="lazy"
+            loading="eager"
             width="200"
             height="200"
           />
