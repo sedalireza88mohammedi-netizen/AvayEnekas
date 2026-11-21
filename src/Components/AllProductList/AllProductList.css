@@ -732,3 +732,115 @@
         height: 30px;
     }
 }
+
+/* ==================== PAGINATION ==================== */
+.cat-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 40px auto 20px;
+    padding: 16px 20px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+    max-width: 600px;
+    direction: rtl;
+}
+
+.cat-pagination-nav {
+    font-family: inherit;
+    font-size: 0.88rem;
+    font-weight: 600;
+    padding: 8px 16px;
+    background: #f3f4f6;
+    color: #1f2937;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.cat-pagination-nav:hover:not(:disabled) {
+    background: #111827;
+    color: #ffffff;
+    border-color: #111827;
+}
+
+.cat-pagination-nav:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.cat-pagination-pages {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.cat-pagination-num {
+    font-family: inherit;
+    font-size: 0.92rem;
+    font-weight: 600;
+    min-width: 38px;
+    height: 38px;
+    padding: 0 8px;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    color: #374151;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.cat-pagination-num:hover:not(.active) {
+    background: #f3f4f6;
+    border-color: #d1d5db;
+}
+
+.cat-pagination-num.active {
+    background: #111827;
+    color: #ffffff;
+    border-color: #111827;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.cat-pagination-dots {
+    color: #9ca3af;
+    font-weight: 700;
+    padding: 0 4px;
+}
+
+.cat-pagination-info {
+    font-size: 0.8rem;
+    color: #6b7280;
+    margin-right: 12px;
+}
+
+@media (max-width: 640px) {
+    .cat-pagination {
+        gap: 6px;
+        padding: 12px 14px;
+        margin: 24px 8px 16px;
+    }
+    .cat-pagination-num {
+        min-width: 32px;
+        height: 32px;
+        font-size: 0.82rem;
+    }
+    .cat-pagination-nav {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+    }
+    .cat-pagination-info {
+        width: 100%;
+        text-align: center;
+        margin-right: 0;
+        margin-top: 4px;
+    }
+}

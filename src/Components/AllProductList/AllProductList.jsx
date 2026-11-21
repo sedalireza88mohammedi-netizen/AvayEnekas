@@ -122,6 +122,8 @@ export default function AllProductList() {
   const [maxPrice, setMaxPrice] = useState('');
   const [minRating, setMinRating] = useState(0);
   const [sort, setSort] = useState('default');
+  const [page, setPage] = useState(1);
+  const pageSize = 12;
 
   usePageMeta({
     title: category
@@ -177,6 +179,20 @@ export default function AllProductList() {
     else if (sort === 'newest') list = [...list].sort((a, b) => b.id - a.id);
     return list;
   })();
+
+  useEffect(() => {
+    setPage(1);
+  }, [category, search, brand, minPrice, maxPrice, minRating, sort]);
+
+  const totalPages = Math.max(1, Math.ceil(products.length / pageSize));
+  const pagedProducts = products.slice((page - 1) * pageSize, page * pageSize);
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setPage(newPage);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   const hasFilters = brand || minPrice !== '' || maxPrice !== '' || minRating > 0 || sort !== 'default';
 
@@ -289,11 +305,64 @@ export default function AllProductList() {
               <p>محصولی یافت نشد.</p>
             </div>
           ) : (
-            <div className="cat-grid">
-              {products.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
+            <>
+              <div className="cat-grid">
+                {pagedProducts.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+
+              {totalPages > 1 && (
+                <div className="cat-pagination">
+                  <button
+                    type="button"
+                    className="cat-pagination-nav"
+                    onClick={() => handlePageChange(page - 1)}
+                    disabled={page === 1}
+                  >
+                    قبلی
+                  </button>
+
+                  <div className="cat-pagination-pages">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => {
+                      if (
+                        p === 1 ||
+                        p === totalPages ||
+                        (p >= page - 2 && p <= page + 2)
+                      ) {
+                        return (
+                          <button
+                            key={p}
+                            type="button"
+                            className={`cat-pagination-num ${p === page ? 'active' : ''}`}
+                            onClick={() => handlePageChange(p)}
+                          >
+                            {toPersianDigits(p)}
+                          </button>
+                        );
+                      }
+                      if (p === page - 3 || p === page + 3) {
+                        return <span key={p} className="cat-pagination-dots">...</span>;
+                      }
+                      return null;
+                    })}
+                  </div>
+
+                  <button
+                    type="button"
+                    className="cat-pagination-nav"
+                    onClick={() => handlePageChange(page + 1)}
+                    disabled={page === totalPages}
+                  >
+                    بعدی
+                  </button>
+
+                  <span className="cat-pagination-info">
+                    صفحه {toPersianDigits(page)} از {toPersianDigits(totalPages)}
+                  </span>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

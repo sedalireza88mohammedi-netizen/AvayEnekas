@@ -73,13 +73,16 @@ function LogIn() {
     }
     setIsLoading(true);
     try {
-      await verifyOtpCode(phone, userCode.trim(), getSessionKey());
+      const authRes = await verifyOtpCode(phone, userCode.trim(), getSessionKey());
       showError(
         <FontAwesomeIcon style={{ color: "green" }} icon={faCircleCheck} />,
         "خوش آمدید!",
         <h3 style={{ color: "green" }}>ورود شما موفقیت‌آمیز بود</h3>
       );
-      setTimeout(() => navigate("/"), 1800);
+      const targetRoute = (authRes && (authRes.IsAdmin || authRes.is_staff || authRes.is_superuser))
+        ? "/AdminPannel"
+        : "/";
+      setTimeout(() => navigate(targetRoute), 1500);
     } catch (err) {
       const message =
         err && err.message && !String(err.message).includes("خطا در ارتباط")

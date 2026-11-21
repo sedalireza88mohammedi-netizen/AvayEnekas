@@ -2247,3 +2247,23 @@
   color: var(--muted);
   font-size: 0.8rem;
 }
+
+.admin-login-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--bg);
+}
+
+.admin-login-card {
+  max-width: 420px;
+  width: 100%;
+  padding: 36px 30px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+}
+}

@@ -135,7 +135,8 @@ function buildArticleFormData(payload) {
 /* ============================== PRODUCTS ============================== */
 
 export async function fetchProducts() {
-  return request("/products");
+  const res = await request("/products?all=true");
+  return Array.isArray(res) ? res : (res && res.results ? res.results : []);
 }
 
 export async function createProduct(payload) {
@@ -162,7 +163,8 @@ export async function updateProductSelection(id, patch) {
 /* ============================== ORDERS ============================== */
 
 export async function fetchOrders() {
-  return request("/orders");
+  const res = await request("/orders");
+  return Array.isArray(res) ? res : (res && res.results ? res.results : []);
 }
 
 export async function updateOrderStatus(id, status) {
@@ -176,7 +178,8 @@ export async function updateOrderStatus(id, status) {
 /* ============================== CUSTOMERS ============================== */
 
 export async function fetchCustomers() {
-  return request("/customers");
+  const res = await request("/customers");
+  return Array.isArray(res) ? res : (res && res.results ? res.results : []);
 }
 
 /** مسدود/رفع مسدود کردن مشتری (ورود او با OTP هم مسدود می‌شود) */
@@ -196,7 +199,8 @@ export async function deleteCustomer(id) {
 /* ================== POPULAR SEARCHES (جستجوهای پرطرفدار) ================== */
 
 export async function fetchPopularSearchesAdmin() {
-  return request("/admin/popular-searches");
+  const res = await request("/admin/popular-searches");
+  return Array.isArray(res) ? res : (res && res.results ? res.results : []);
 }
 
 export async function createPopularSearch(payload) {
@@ -222,7 +226,8 @@ export async function deletePopularSearch(id) {
 /* ============================== ARTICLES ============================== */
 
 export async function fetchArticles() {
-  return request("/articles");
+  const res = await request("/articles");
+  return Array.isArray(res) ? res : (res && res.results ? res.results : []);
 }
 
 export async function createArticle(payload) {
@@ -249,7 +254,8 @@ function buildHomeSliderFormData(payload) {
 }
 
 export async function fetchHomeSliders() {
-  return request("/home/sliders");
+  const res = await request("/home/sliders");
+  return Array.isArray(res) ? res : (res && res.results ? res.results : []);
 }
 
 export async function createHomeSlider(payload) {
@@ -278,7 +284,8 @@ function buildCategorySlideFormData(payload) {
 }
 
 export async function fetchCategorySlides() {
-  return request("/admin/category-slides");
+  const res = await request("/admin/category-slides");
+  return Array.isArray(res) ? res : (res && res.results ? res.results : []);
 }
 
 export async function createCategorySlide(payload) {
@@ -302,7 +309,8 @@ export const SLIDER_SECTIONS = [
 
 export async function fetchSectionSliders(section) {
   const query = section ? "?section=" + encodeURIComponent(section) : "";
-  return request("/admin/section-sliders" + query);
+  const res = await request("/admin/section-sliders" + query);
+  return Array.isArray(res) ? res : (res && res.results ? res.results : []);
 }
 
 export async function createSectionSliderItem(section, productId) {
@@ -328,7 +336,8 @@ export async function deleteSectionSlider(id) {
 /* ============================== MESSAGES (پیامک) ============================== */
 
 export async function fetchAdminMessages() {
-  return request("/admin/messages/list");
+  const res = await request("/admin/messages/list");
+  return Array.isArray(res) ? res : (res && res.results ? res.results : []);
 }
 
 export async function sendAdminMessage(payload) {
@@ -346,7 +355,8 @@ export async function deleteAdminMessage(id) {
 /* ============================== CATEGORIES (دسته‌بندی) ============================== */
 
 export async function fetchAdminCategories() {
-  return request("/admin/categories");
+  const res = await request("/admin/categories");
+  return Array.isArray(res) ? res : (res && res.results ? res.results : []);
 }
 
 export async function createAdminCategory(payload) {
@@ -372,7 +382,8 @@ export async function deleteAdminCategory(id) {
 /* ============================== REVIEWS (دیدگاه‌ها) ============================== */
 
 export async function fetchAllReviews() {
-  return request("/admin/reviews");
+  const res = await request("/admin/reviews");
+  return Array.isArray(res) ? res : (res && res.results ? res.results : []);
 }
 
 export async function deleteReview(id) {

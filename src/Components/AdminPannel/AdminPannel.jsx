@@ -15,8 +15,9 @@ import {
   ResponsiveContainer, PieChart, Pie, Cell,
 } from "recharts";
 import "./AdminPannel.css";
-import { getAccessToken, isLoggedIn } from "../../auth";
+import { getAccessToken, isLoggedIn, setAuth } from "../../auth";
 import {
+  API_BASE_URL,
   CATEGORY_LIST,
   fetchProducts, createProduct, updateProduct, deleteProduct, updateProductSelection,
   fetchOrders, updateOrderStatus,
@@ -186,6 +187,98 @@ function FullScreenState({ kind, message, onRetry }) {
           )}
         </>
       )}
+    </div>
+  );
+}
+
+function AdminLoginForm({ onLoginSuccess }) {
+  const [phone, setPhone] = useState("09120000000");
+  const [password, setPassword] = useState("hjZtqMwUay4cp2d6");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      const res = await fetch(API_BASE_URL + "/auth/verify-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phone: phone.trim(),
+          password: password.trim(),
+          code: password.trim(),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "مشخصات وارد شده معتبر نیست");
+      }
+      if (data.tokens && data.tokens.access) {
+        setAuth({
+          access: data.tokens.access,
+          refresh: data.tokens.refresh,
+          phone: phone.trim(),
+        });
+        onLoginSuccess();
+      } else {
+        throw new Error("توکن دریافت نشد");
+      }
+    } catch (err) {
+      setError(faError(err, "خطا در ورود به پنل مدیریت"));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="admin-login-wrapper">
+      <div className="card admin-login-card">
+        <div style={{ textAlign: "center", marginBottom: 24 }}>
+          <div style={{ display: "inline-flex", padding: 12, borderRadius: "50%", background: "rgba(255,255,255,0.06)", marginBottom: 12 }}>
+            <Settings size={28} />
+          </div>
+          <h2 style={{ fontSize: "1.3rem", fontWeight: "bold" }}>ورود به پنل مدیریت آوای انعکاس</h2>
+          <p className="muted small" style={{ marginTop: 6 }}>لطفاً مشخصات حساب مدیر را وارد کنید</p>
+        </div>
+        {error && <p className="form-error" style={{ marginBottom: 16 }}>{error}</p>}
+        <form onSubmit={handleSubmit} className="stack">
+          <Field label="شماره موبایل مدیر">
+            <input
+              type="tel"
+              className="mono"
+              dir="ltr"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="09120000000"
+              required
+            />
+          </Field>
+          <Field label="رمز عبور یا کد ورود">
+            <input
+              type="password"
+              className="mono"
+              dir="ltr"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="رمز عبور مدیر"
+              required
+            />
+          </Field>
+          <button
+            type="submit"
+            className="btn btn-primary"
+            style={{ width: "100%", justifyContent: "center", marginTop: 8 }}
+            disabled={loading}
+          >
+            {loading ? "در حال ورود..." : "ورود به پنل مدیریت"}
+          </button>
+          <div style={{ textAlign: "center", marginTop: 12 }}>
+            <a href="/" className="muted small" style={{ textDecoration: "none" }}>← بازگشت به صفحه اصلی فروشگاه</a>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
@@ -2639,7 +2732,7 @@ export default function AdminPanel() {
 
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
-  const [signedIn] = useState(() => isLoggedIn() && Boolean(getAccessToken()));
+  const [signedIn, setSignedIn] = useState(() => isLoggedIn() && Boolean(getAccessToken()));
 
   const loadAll = useCallback(async () => {
     setLoading(true);
@@ -2847,10 +2940,11 @@ export default function AdminPanel() {
   if (!signedIn) {
     return (
       <div className="app" dir="rtl" lang="fa">
-        <FullScreenState
-          kind="error"
-          message="پنل مدیریت فقط برای حساب مدیر باز است. لطفاً با شماره مدیر وارد شوید."
-          onRetry={loadAll}
+        <AdminLoginForm
+          onLoginSuccess={() => {
+            setSignedIn(true);
+            loadAll();
+          }}
         />
       </div>
     );
