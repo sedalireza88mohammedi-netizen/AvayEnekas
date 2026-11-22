@@ -39,12 +39,25 @@ export default function Cart() {
       .finally(() => active && setLoading(false));
     refreshCart();
     if (logged) {
-      getProfile()
-        .catch(() => ({}))
-        .then((p) => active && setProfile(p || {}));
-      getAddresses()
-        .catch(() => [])
-        .then((a) => active && setAddresses(a || []));
+      Promise.all([
+        getProfile().catch(() => ({})),
+        getAddresses().catch(() => []),
+      ]).then(([p, a]) => {
+        if (!active) return;
+        const prof = p || {};
+        const list = a || [];
+        setProfile(prof);
+        setAddresses(list);
+        const def = list.find((x) => x.is_default) || list[0];
+        if (def) setSelectedAddressId(def.id);
+        setForm((prev) => ({
+          ...prev,
+          customer: prof.NameAndFamily || prev.customer,
+          phone: prof.Number || prev.phone,
+          email: prof.Email || prev.email,
+          address: def ? def.address : prev.address,
+        }));
+      });
     }
     return () => { active = false; };
   }, [refreshCart, logged]);
@@ -307,7 +320,7 @@ export default function Cart() {
                   <option value="">انتخاب از آدرس‌های ذخیره‌شده...</option>
                   {addresses.map((a) => (
                     <option key={a.id} value={a.id}>
-                      {a.title ? a.title + ' — ' : ''}{a.address}
+                      {a.is_default ? 'پیشفرض — ' : ''}{a.title ? a.title + ' — ' : ''}{a.address}
                     </option>
                   ))}
                 </select>
