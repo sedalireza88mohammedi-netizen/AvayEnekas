@@ -658,6 +658,10 @@ a {
         margin-bottom: 50px;
     }
 
+    .Header>p {
+        font-size: 18px;
+    }
+
     .Menu {
         display: none !important;
     }
@@ -687,7 +691,7 @@ a {
     }
 
     .search {
-       
+
         height: 42px;
         border-radius: 21px;
         background: transparent;
