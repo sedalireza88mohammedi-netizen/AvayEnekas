@@ -148,8 +148,11 @@
     .ChildConatct {
         border-radius: 18px;
         align-items: flex-start;
+        
     }
-
+ .ChildConatct h2 {
+font-size: 18px;
+ }
     .IconContact,
     .IconContactItta img,
     .IconContactAddress {
