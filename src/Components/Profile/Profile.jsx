@@ -327,24 +327,37 @@ function Profile() {
       setErrorMessage("عنوان و متن آدرس الزامی است.");
       return;
     }
-    await addAddress(newAddress).catch(() => {});
-    setNewAddress({ title: "", address: "", postal_code: "" });
-    setShowAddAddress(false);
     setErrorMessage("");
-    const addrs = await getAddresses().catch(() => []);
-    setAddresses(addrs);
+    try {
+      const saved = await addAddress(newAddress);
+      const addrs = await getAddresses().catch(() => []);
+      setAddresses(addrs);
+      setNewAddress({ title: "", address: "", postal_code: "" });
+      setShowAddAddress(false);
+      setSuccessMessage(saved && saved.id ? "آدرس جدید ذخیره شد." : "آدرس ذخیره شد.");
+      setTimeout(() => setSuccessMessage(""), 3500);
+    } catch (err) {
+      const msg = err && err.message ? err.message : "";
+      setErrorMessage(msg || "ذخیره آدرس انجام نشد؛ دوباره تلاش کنید.");
+    }
   };
 
   const handleDeleteAddress = async (id) => {
-    await deleteAddress(id).catch(() => {});
-    const addrs = await getAddresses().catch(() => []);
-    setAddresses(addrs);
+    try {
+      await deleteAddress(id);
+      setAddresses(await getAddresses().catch(() => []));
+    } catch {
+      setErrorMessage("حذف آدرس انجام نشد؛ دوباره تلاش کنید.");
+    }
   };
 
   const handleDefaultAddress = async (id) => {
-    await setDefaultAddress(id).catch(() => {});
-    const addrs = await getAddresses().catch(() => []);
-    setAddresses(addrs);
+    try {
+      await setDefaultAddress(id);
+      setAddresses(await getAddresses().catch(() => []));
+    } catch {
+      setErrorMessage("انتخاب آدرس پیشفرض انجام نشد؛ دوباره تلاش کنید.");
+    }
   };
 
   if (loading) {
@@ -373,7 +386,7 @@ function Profile() {
   return (
     <div className="ContaimerAllPro">
       <div className="SideBar">
-        <img className="AccountImage" src="public/Images/AccountImage.png" alt="تصویر حساب کاربری" />
+        <SafeImg className="AccountImage" src="/Images/AccountImage.png" alt="تصویر حساب کاربری" />
         <div className="subjects">
           <h3>{profile.NameAndFamily || "کاربر آوای انعکاس"}</h3>
           <h4>{profile.Number || getPhone() || ""}</h4>
@@ -530,6 +543,8 @@ function Profile() {
           <>
             <h2 className="TitleOptions"><FontAwesomeIcon icon={faLocationDot} /> آدرس‌ها</h2>
             <h6 className="LineOrder"></h6>
+            {successMessage && <div className="form-success-msg">{successMessage}</div>}
+            {errorMessage && !showAddAddress && <div className="form-error-msg">{errorMessage}</div>}
             {addresses.length > 0 ? (
               <div className="AddressList">
                 {addresses.map(addr => (

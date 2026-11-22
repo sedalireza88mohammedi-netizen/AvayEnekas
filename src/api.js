@@ -375,21 +375,32 @@ export async function fetchSectionSliderProducts(section, limit) {
   return limit ? products.slice(0, limit) : products;
 }
 
+function addressPhoneQuery() {
+  if (getAccessToken()) return "";
+  const phone = getPhone();
+  return phone ? "?phone=" + encodeURIComponent(phone) : "";
+}
+
 export async function getAddresses() {
-  const data = await request("/addresses");
+  const data = await request("/addresses" + addressPhoneQuery(), { guest: true });
   return Array.isArray(data) ? data : [];
 }
 
 export async function addAddress(payload) {
-  return request("/addresses", { method: "POST", body: payload, guest: true });
+  const body = getAccessToken() ? payload : { ...payload, phone: getPhone() };
+  return request("/addresses" + addressPhoneQuery(), {
+    method: "POST",
+    body,
+    guest: true,
+  });
 }
 
 export async function setDefaultAddress(id) {
-  return request("/addresses/" + id, { method: "PATCH" });
+  return request("/addresses/" + id + addressPhoneQuery(), { method: "PATCH", guest: true });
 }
 
 export async function deleteAddress(id) {
-  return request("/addresses/" + id, { method: "DELETE" });
+  return request("/addresses/" + id + addressPhoneQuery(), { method: "DELETE", guest: true });
 }
 
 /* ------------------------------ cart ------------------------------ */

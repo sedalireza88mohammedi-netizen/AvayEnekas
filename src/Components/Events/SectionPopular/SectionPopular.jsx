@@ -135,7 +135,7 @@ export default function SectionPopular() {
                       {toPersianDigits(product.discount)}٪
                     </span>
                   )}
-                  <FavButton id={product.id} size={18} />
+                  {/* <FavButton id={product.id} size={18} /> */}
                 </Link>
 
                 <div className="SectionPopular__body">
