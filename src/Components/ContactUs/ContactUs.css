@@ -90,8 +90,8 @@
 }
 
 .ChildConatct h2 a:hover {
-    color: #000000;
-    text-decoration: underline #000000;
+    color: #2d2d2d;
+    text-decoration: underline #2d2d2d;
 }
 
 .AddressContact {
@@ -148,11 +148,13 @@
     .ChildConatct {
         border-radius: 18px;
         align-items: flex-start;
-        
+
     }
- .ChildConatct h2 {
-font-size: 18px;
- }
+
+    .ChildConatct h2 {
+        font-size: 17px;
+    }
+
     .IconContact,
     .IconContactItta img,
     .IconContactAddress {
@@ -162,10 +164,17 @@ font-size: 18px;
         font-size: 22px !important;
     }
 
+    .AddressContact h2 {
+        font-size: 17px;
+    }
+.Time{
+    font-size: 17px;
+}
     .AddressContact {
         border-radius: 18px;
     }
-    .ChildConatct h2{
-       margin-top: 10px;
+
+    .ChildConatct h2 {
+        margin-top: 10px;
     }
 }
