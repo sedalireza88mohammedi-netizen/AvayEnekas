@@ -2,7 +2,7 @@
     direction: rtl;
     width: 100%;
     max-width: 100%;
-    background-color: #D3DAD9;
+    background-color: #dddddd;
     padding: clamp(16px, 4vw, 50px);
     overflow: hidden;
 }
@@ -14,10 +14,10 @@
     min-height: 64px;
     padding: 10px 16px;
     text-align: center;
-    margin: 0 auto clamp(20px, 4vw, 30px);
-    background-color: #c4c4c4;
+    margin: 10px auto clamp(20px, 4vw, 30px);
+    background-color: #000;
     border-radius: 60px;
-    color: #2c2c2c;
+    color: #fefefe;
     font-size: clamp(1.15rem, 3vw, 1.7rem);
     display: flex;
     align-items: center;
@@ -40,13 +40,13 @@
     min-height: 75px;
     height: auto;
     margin: 0;
-    background-color: #D8D8D8;
+    background-color: #000000;
     padding: 8px clamp(8px, 2vw, 14px);
     border-radius: 60px;
     display: flex;
     align-items: center;
     gap: 10px;
-    color: #3d3d3d;
+    color: #fefefe;
 }
 
 .IconContact,
@@ -61,7 +61,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #959d9c !important;
+    color: #000000 !important;
     margin: 0;
 }
 
@@ -80,7 +80,7 @@
 
 .ChildConatct h2 a {
     padding-right: 0;
-    color: #3d3d3d;
+    color: #fefefe;
     overflow-wrap: anywhere;
 }
 
@@ -100,7 +100,7 @@
     height: auto;
     min-height: 150px;
     margin: 0;
-    background-color: #D8D8D8;
+    background-color: #000;
     padding: clamp(12px, 3vw, 18px);
     border-radius: 20px;
     text-align: center;
@@ -109,7 +109,7 @@
     align-items: center;
     justify-content: center;
     gap: 10px;
-    color: #2c2c2c;
+    color: #fefefe;
 }
 
 .AddressContact h2 {
