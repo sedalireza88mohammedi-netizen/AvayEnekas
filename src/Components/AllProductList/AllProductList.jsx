@@ -3,7 +3,7 @@ import { faSearch, faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import { useState, useEffect, useRef } from 'react';
 import { PackageX } from 'lucide-react';
 import "./AllProductList.css";
-import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation, Link } from 'react-router-dom';
 import { fetchProducts, fetchCategories } from '../../api';
 import { usePageMeta } from '../../useSeo';
 import { saveSearch } from '../../searchHistory';
@@ -109,6 +109,8 @@ function ProductCard({ product }) {
 export default function AllProductList() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const currentPath = location.pathname;
   const search = searchParams.get('search') || '';
   const category = searchParams.get('category') || '';
 
@@ -197,14 +199,18 @@ export default function AllProductList() {
   const hasFilters = brand || minPrice !== '' || maxPrice !== '' || minRating > 0 || sort !== 'default';
 
   const selectCategory = (name) => {
-    navigate(name ? `/Catagoryes?category=${encodeURIComponent(name)}` : '/Catagoryes');
+    navigate(name ? `${currentPath}?category=${encodeURIComponent(name)}` : currentPath);
   };
 
   const submitSearch = (e) => {
     e.preventDefault();
     const value = localSearch.trim();
     if (value) saveSearch(value);
-    navigate(`/Catagoryes?search=${encodeURIComponent(value)}`);
+    const params = new URLSearchParams();
+    if (category) params.set('category', category);
+    if (value) params.set('search', value);
+    const qs = params.toString();
+    navigate(qs ? `${currentPath}?${qs}` : currentPath);
   };
 
   const title = category || search || 'همه محصولات';

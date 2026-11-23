@@ -148,9 +148,11 @@ async function tryRefreshToken() {
         localStorage.setItem(ACCESS_TOKEN_KEY, data.access);
         return true;
       }
+    } else {
+      clearAuth();
     }
   } catch {
-    // خطا در رفرش توکن
+    clearAuth();
   }
   return false;
 }

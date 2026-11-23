@@ -35,7 +35,7 @@ function App() {
   const path = location.pathname.toLowerCase();
 
   // صفحاتی که نه منو و نه فوتر می‌خواهند
-  const barePaths = ['/login/sinup', '/adminpannel'];
+  const barePaths = ['/login', '/admin'];
   const hideChrome = barePaths.some((p) => path.startsWith(p));
 
   const isCart = path === '/cart';
@@ -68,7 +68,39 @@ function App() {
           }
         />
         <Route
+          path="/login"
+          element={
+            <Suspense fallback={<div className="page-loader" />}>
+              <LogIn />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/LogIn"
+          element={
+            <Suspense fallback={<div className="page-loader" />}>
+              <LogIn />
+            </Suspense>
+          }
+        />
+        <Route
           path="/AllProductList"
+          element={
+            <Suspense fallback={<div className="page-loader" />}>
+              <AllProductList />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/products"
+          element={
+            <Suspense fallback={<div className="page-loader" />}>
+              <AllProductList />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/Products"
           element={
             <Suspense fallback={<div className="page-loader" />}>
               <AllProductList />
@@ -148,6 +180,22 @@ function App() {
           }
         />
         <Route
+          path="/admin"
+          element={
+            <Suspense fallback={<div className="page-loader" />}>
+              <AdminPanel />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/Admin"
+          element={
+            <Suspense fallback={<div className="page-loader" />}>
+              <AdminPanel />
+            </Suspense>
+          }
+        />
+        <Route
           path="/Product/:id"
           element={
             <Suspense fallback={<div className="page-loader" />}>
@@ -163,8 +211,24 @@ function App() {
             </Suspense>
           }
         />
-         <Route
+        <Route
           path="/ContactUs"
+          element={
+            <Suspense fallback={<div className="page-loader" />}>
+              <ContactUs />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/contact"
+          element={
+            <Suspense fallback={<div className="page-loader" />}>
+              <ContactUs />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/Contact"
           element={
             <Suspense fallback={<div className="page-loader" />}>
               <ContactUs />
