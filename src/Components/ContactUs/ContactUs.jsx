@@ -23,14 +23,14 @@ export default function ContactUs() {
           </div>
           <div className="ChildConatct">
             <h1 className="IconContactItta"><img src="Images/Itta-Icon.jpg" alt="ایتای ما" /></h1>
-            <h2><a title='نشانی ایتا ما' href="https://eitaa.com/enekas_ava" target='_blank'>enekas-ava</a></h2>
+            <h2><a title='نشانی ایتا ما' href="https://eitaa.com/enekas_ava" target='_blank' rel='noopener noreferrer'>enekas-ava</a></h2>
           </div>
           <div className="AddressContact">
                    <h1 className="IconContactAddress"> <FontAwesomeIcon icon={faLocationDot} /></h1>
               <h2>قم خیابان جهوری بلوار سعادتی نرسیده به پمپ بنزین کوچه محممد نزاد پلاک 100 فروشگاه آوای انعکاس</h2>
           </div>
         </div>
-           <div className="footer-mapContact" onClick={() => window.open(neshanUrl, "_blank")}>
+           <div className="footer-mapContact" onClick={() => window.open(neshanUrl, "_blank", "noopener,noreferrer")}>
                         <img title="موقعیت مکانی فروشگاه آوای" src="Images/Map-Image.jpg" alt="لوکیشن فروشگاه آوای انعکاس" className="map-image" />
                     </div>
       </div>

@@ -116,8 +116,6 @@ const ORDER_STATUS_LIST = [
   { key: "Canceled", label: "لغو شده", emptyMessage: "هنوز هیچ سفارشی لغو نشده" },
 ]
 
-const ADMIN_USERNAME = "sedMad77AdminPanellAllowed";
-
 function Profile() {
   const [page, setPage] = useState("Profile")
   const [activeOrderOption, setActiveOrderOption] = useState("InProgress")
@@ -150,9 +148,8 @@ function Profile() {
   const [successMessage, setSuccessMessage] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
 
-  const editName = profile.NameAndFamily || formData.NameAndFamily;
   // مدیریت با پرچم بک‌اند تعیین می‌شود، نه با نام نمایشی کاربر
-  const isAdmin = Boolean(profile.IsAdmin) || editName === ADMIN_USERNAME;
+  const isAdmin = Boolean(profile.IsAdmin);
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedGender, setSelectedGender] = useState({ label: "لطفاً انتخاب کنید", value: "" });

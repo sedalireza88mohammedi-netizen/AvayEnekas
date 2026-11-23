@@ -194,8 +194,8 @@ function FullScreenState({ kind, message, onRetry }) {
 }
 
 function AdminLoginForm({ onLoginSuccess }) {
-  const [phone, setPhone] = useState("09120000000");
-  const [password, setPassword] = useState("hjZtqMwUay4cp2d6");
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 

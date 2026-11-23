@@ -5,6 +5,7 @@ import { fetchCategories, fetchProducts } from '../../api';
 import { usePageMeta } from '../../useSeo';
 import { saveSearch } from '../../searchHistory';
 import { PackageX } from 'lucide-react';
+import { normalizeSubgroups } from '../../categoryUtils';
 
 const FALLBACK_CATEGORIES = ["اسپیکر", "هدفون", "آمپلی‌فایر", "میکروفون", "میکسر", "کابل و اتصالات"];
 
@@ -49,8 +50,8 @@ export default function Categories() {
 
   const list = categories
     ? categories.map((c) => ({
-        name: c.name,
-        subgroups: c.subgroups || [],
+        name: String(c.name || ''),
+        subgroups: normalizeSubgroups(c.subgroups),
         count: byCategory[c.name]?.count || 0,
         image: byCategory[c.name]?.image || '',
       }))
@@ -100,7 +101,7 @@ export default function Categories() {
                   </span>
                 </div>
               </Link>
-              {cat.subgroups && cat.subgroups.length > 0 && (
+              {cat.subgroups.length > 0 && (
                 <ul className="cat-card-subs">
                   {cat.subgroups.slice(0, 6).map((sub) => (
                     <li key={sub}>

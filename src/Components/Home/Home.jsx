@@ -4,6 +4,7 @@ import CatagorySwiper from "../CatagorySwiper/CatagorySwiper";
 import PopularSlider from "../PopulerSwiper/PopulerSwiper";
 import Articelse from "../Articles/Articels";
 import { usePageMeta } from "../../useSeo";
+import { buildOrganizationJsonLd } from "../../seoSchemas";
 import "./Home.css";
 
 function Home() {
@@ -11,6 +12,7 @@ function Home() {
     title: "فروشگاه صوتی تصویری آوای انعکاس | خرید تجهیزات صوت و تصویر",
     description:
       "فروشگاه آوای انعکاس؛ عرضه تخصصی تجهیزات صوتی و تصویری، باند، میکروفون، میکسر و آمپلی فایر با ضمانت اصالت و ارسال سریع.",
+    jsonLd: buildOrganizationJsonLd(),
   });
 
   return (

@@ -1,6 +1,6 @@
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faInstagram, faTelegram } from '@fortawesome/free-brands-svg-icons';
+import { faInstagram } from '@fortawesome/free-brands-svg-icons';
 import { Link } from "react-router-dom"
 import "./Footer.css"
 import { faCircleCheck, faThumbsUp, faTruck } from '@fortawesome/free-regular-svg-icons';
@@ -22,9 +22,8 @@ function Footer() {
                     <section className='WithUs' >همراه ما باشید</section>
 
                     <div className="iconContainerFooter">
-                        <a title='پیج اینستگرام ما' href="https://www.instagram.com/enekas_ava?igsh=MWVob2ppamdlcWtqMg==" target='_blank'><FontAwesomeIcon icon={faInstagram} /></a>
-                        <a title='نشانی ایتا ما' href="https://eitaa.com/enekas_ava" target='_blank'><img src="Images/Itta-Icon.jpg" alt="ایتای ما" /></a>
-                        <a href="#" target='_blank'><FontAwesomeIcon icon={faTelegram} /></a>
+                        <a title='پیج اینستگرام ما' href="https://www.instagram.com/enekas_ava?igsh=MWVob2ppamdlcWtqMg==" target='_blank' rel='noopener noreferrer'><FontAwesomeIcon icon={faInstagram} /></a>
+                        <a title='نشانی ایتا ما' href="https://eitaa.com/enekas_ava" target='_blank' rel='noopener noreferrer'><img src="Images/Itta-Icon.jpg" alt="ایتای ما" /></a>
                     </div>
 
                 </div>
@@ -40,7 +39,7 @@ function Footer() {
                                  <Link to="/ContactUs">ارتباط با ما</Link>
                             </li>
                               <li>
-                                 <Link to="">درباره ما</Link>
+                                 <Link to="/ContactUs">درباره ما</Link>
                             </li>
                               <li>
                                 <Link to="/Cart">سبد خرید</Link>
@@ -49,7 +48,7 @@ function Footer() {
                                 <Link to="/Categories"> دسته بندی ها</Link>
                             </li>
                             <li>
-                                 <Link to="">مشاوره رایگان</Link>
+                                 <Link to="/ContactUs">مشاوره رایگان</Link>
                             </li>
                             
                         </ul>
@@ -80,7 +79,7 @@ function Footer() {
 
                   
 
-                    <div className="footer-map" onClick={() => window.open(neshanUrl, "_blank")}>
+                    <div className="footer-map" onClick={() => window.open(neshanUrl, "_blank", "noopener,noreferrer")}>
                         <img title="موقعیت مکانی فروشگاه آوای" src="Images/Map-Image.jpg" alt="لوکیشن فروشگاه آوای انعکاس" className="map-image" />
                     </div>
 

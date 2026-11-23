@@ -20,7 +20,9 @@ import {
   clearAuth,
   getPhone,
   getSessionKey,
+  safeStorage,
 } from "./auth";
+import { refreshAccessToken } from "./authRefresh";
 
 export const API_BASE_URL =
   (typeof window !== "undefined" && window.__API_BASE_URL__) || "/api";
@@ -58,6 +60,9 @@ function getHeaders({ auth = true, guest = false, json = true, form = false }) {
 /* ------------------------------ request ------------------------------ */
 
 /** پیام‌هایی که یعنی حساب کاربری توسط ادمین مسدود شده است. */
+const REQUEST_TIMEOUT_MS = 20000;
+const TIMEOUT_MESSAGE = "پاسخ‌گویی سرور طولانی شد؛ دوباره تلاش کنید";
+
 const BLOCKED_MARKERS = ["مسدود شده", "مسدودسازی", "user_inactive"];
 
 function isBlockedError(status, message) {
@@ -68,8 +73,16 @@ function isBlockedError(status, message) {
 
 async function request(path, options = {}) {
   const { method = "GET", body, auth = true, guest = false, form = false } = options;
-  const controller = new AbortController();
   const retryable = typeof AbortController === "function";
+  const controller = retryable ? new AbortController() : null;
+  let timedOut = false;
+  // بدون timeout، روی اینترنت ضعیف موبایل لودر تا ابد می‌چرخد
+  const timer = controller
+    ? setTimeout(() => {
+        timedOut = true;
+        controller.abort();
+      }, REQUEST_TIMEOUT_MS)
+    : null;
 
   const doFetch = (signal) =>
     fetch(API_BASE_URL + path, {
@@ -84,7 +97,10 @@ async function request(path, options = {}) {
   try {
     res = await doFetchOnce();
   } catch (networkErr) {
-    if (networkErr && networkErr.name === "AbortError") throw networkErr;
+    if (networkErr && networkErr.name === "AbortError") {
+      clearTimeout(timer);
+      throw timedOut ? new Error(TIMEOUT_MESSAGE) : networkErr;
+    }
     if (method === "GET" || method === "HEAD") {
       // کانکشن keep-alive کهنه ممکن است بسته شود؛ یک بار با سوکت تازه دوباره تلاش می‌کنیم
       await new Promise((r) => setTimeout(r, 400));
@@ -99,24 +115,15 @@ async function request(path, options = {}) {
   }
 
   // در صورت منقضی شدن توکن، یک بار ریفرش و تلاش دوباره
-  if (res.status === 401 && getRefreshToken() && !options._retried) {
-    try {
-      const refreshRes = await fetch(API_BASE_URL + "/auth/token/refresh", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ refresh: getRefreshToken() }),
-      });
-      const data = await refreshRes.json().catch(() => null);
-      if (!refreshRes.ok && isBlockedError(refreshRes.status, data && (data.error || data.detail))) {
-        clearAuth();
-      } else if (refreshRes.ok && data && data.access) {
-        setAuth({ access: data.access });
-        res = await doFetch(retryable ? controller.signal : undefined);
-      }
-    } catch {
-      /* سکوت — درخواست اولیه برگردانده می‌شود */
+  // (فقط برای درخواست‌های احراز‌شده‌ی کاربری که توکن دارد)
+  if (res.status === 401 && auth && getAccessToken() && getRefreshToken()) {
+    const refreshed = await refreshAccessToken(API_BASE_URL);
+    if (refreshed) {
+      res = await doFetch(retryable ? controller.signal : undefined);
     }
   }
+
+  clearTimeout(timer);
 
   if (!res.ok && res.status >= 400) {
     const raw = await res.text().catch(() => "");
@@ -475,14 +482,15 @@ const LOCAL_CART_KEY = "avay_local_cart";
 
 function readLocalCartRaw() {
   try {
-    return JSON.parse(localStorage.getItem(LOCAL_CART_KEY) || "[]");
+    const parsed = JSON.parse(safeStorage.get(LOCAL_CART_KEY) || "[]");
+    return Array.isArray(parsed) ? parsed : [];
   } catch {
     return [];
   }
 }
 
 function writeLocalCart(items) {
-  localStorage.setItem(LOCAL_CART_KEY, JSON.stringify(items));
+  safeStorage.set(LOCAL_CART_KEY, JSON.stringify(items));
 }
 
 function readLocalCart() {

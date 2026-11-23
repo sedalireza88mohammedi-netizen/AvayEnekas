@@ -4,6 +4,7 @@ import { Minus, Plus, ShoppingCart, ChevronLeft, PackageX, Loader2, CheckCircle2
 import "./ProductDeatelse.css";
 import { fetchProduct, fetchProducts, fetchProductReviews, addProductReview } from '../../api';
 import { usePageMeta } from '../../useSeo';
+import { buildProductJsonLd } from '../../seoSchemas';
 import RatingStars from '../../RatingStars';
 import SafeImg from '../../SafeImg';
 import { FavButton } from '../../ProductActions';
@@ -43,6 +44,9 @@ export default function ProductDeatelse() {
       ? {
           title: `${product.title} | آوای انعکاس`,
           description: `خرید ${product.title} با قیمت ${toPersianDigits(formatPrice(product.price))} تومان از فروشگاه آوای انعکاس.`,
+          type: 'product',
+          image: product.image,
+          jsonLd: buildProductJsonLd(product, { reviewsCount }),
         }
       : { title: 'محصول | آوای انعکاس' }
   );

@@ -1,22 +1,25 @@
-import { Suspense, lazy, useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Menu from './Components/Menu/Menu';
 import Footer from './Components/Footer/Footer';
 import ContactUs from './Components/ContactUs/ContactUs';
+import ErrorBoundary from './ErrorBoundary';
+import { useNoIndex } from './useSeo';
+import { lazyWithRetry } from './lazyWithRetry';
 
-const Home = lazy(() => import('./Components/Home/Home'));
-const LogIn = lazy(() => import('./LoggIn/Login'));
-const AllProductList = lazy(() => import('./Components/AllProductList/AllProductList'));
-const Cart = lazy(() => import('./Components/Cart/Cart'));
-const Profile = lazy(() => import('./Components/Profile/Profile'));
-const AdminPanel = lazy(() => import('./Components/AdminPannel/AdminPannel'));
-const ProductDeatelse = lazy(() => import('./Components/ProductDeatelse/ProductDeatelse'));
-const ArticleDeatelse = lazy(() => import('./Components/Articles/ArticleDeatelse'));
-const CategoriesPage = lazy(() => import('./Components/Categories/Categories'));
-const SectionAmazing = lazy(() => import('./Components/Events/SectionAmazing/SectionAmazing'));
-const SectionPopular = lazy(() => import('./Components/Events/SectionPopular/SectionPopular'));
-const SectionTrending = lazy(() => import('./Components/Events/SectionTrending/SectionTrending'));
-const SectionBestSeller = lazy(() => import('./Components/Events/SectionBestSeller/SectionBestSeller'));
+const Home = lazyWithRetry(() => import('./Components/Home/Home'));
+const LogIn = lazyWithRetry(() => import('./LoggIn/Login'));
+const AllProductList = lazyWithRetry(() => import('./Components/AllProductList/AllProductList'));
+const Cart = lazyWithRetry(() => import('./Components/Cart/Cart'));
+const Profile = lazyWithRetry(() => import('./Components/Profile/Profile'));
+const AdminPanel = lazyWithRetry(() => import('./Components/AdminPannel/AdminPannel'));
+const ProductDeatelse = lazyWithRetry(() => import('./Components/ProductDeatelse/ProductDeatelse'));
+const ArticleDeatelse = lazyWithRetry(() => import('./Components/Articles/ArticleDeatelse'));
+const CategoriesPage = lazyWithRetry(() => import('./Components/Categories/Categories'));
+const SectionAmazing = lazyWithRetry(() => import('./Components/Events/SectionAmazing/SectionAmazing'));
+const SectionPopular = lazyWithRetry(() => import('./Components/Events/SectionPopular/SectionPopular'));
+const SectionTrending = lazyWithRetry(() => import('./Components/Events/SectionTrending/SectionTrending'));
+const SectionBestSeller = lazyWithRetry(() => import('./Components/Events/SectionBestSeller/SectionBestSeller'));
 
 
 function ScrollToTop() {
@@ -37,11 +40,16 @@ function App() {
 
   const isCart = path === '/cart';
 
+  // سبد، پروفایل، ورود و پنل مدیریت نباید در گوگل ایندکس شوند
+  const isPrivate = ['/cart', '/profile', '/login', '/adminpannel'].some((p) => path.startsWith(p));
+  useNoIndex(isPrivate);
+
   return (
     <>
       <ScrollToTop />
       {!hideChrome && <Menu isCart={isCart} />}
 
+      <ErrorBoundary resetKey={location.pathname}>
       <Routes>
         <Route
           path="/"
@@ -165,6 +173,7 @@ function App() {
         />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      </ErrorBoundary>
 
       {!hideChrome && <Footer isCart={isCart} />}
     </>

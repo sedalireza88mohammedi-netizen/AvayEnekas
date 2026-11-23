@@ -7,6 +7,7 @@ import { useCartStore } from '../../cartStore';
 import { usePageMeta } from '../../useSeo';
 import SafeImg from '../../SafeImg';
 import { isLoggedIn } from '../../auth';
+import { toEnglishDigits } from '../../utils/digits';
 
 const toPersianDigits = (num) =>
   (num || 0).toString().replace(/\d/g, (x) => '۰۱۲۳۴۵۶۷۸۹'[x]);
@@ -134,7 +135,7 @@ export default function Cart() {
     try {
       const result = await checkoutCart({
         customer: form.customer.trim(),
-        phone: form.phone.trim(),
+        phone: toEnglishDigits(form.phone.trim()),
         address: form.address.trim(),
         email: form.email.trim(),
         location: form.location.trim(),

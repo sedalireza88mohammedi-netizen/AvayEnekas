@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useRef, useState, useCallback } from 'react';
 import { getCart, addCartItem, getFavorites, addFavorite, removeFavorite, getMyMessages, markMessageRead } from './api';
+import { isLoggedIn } from './auth';
 
 const StoreContext = createContext(null);
 
@@ -41,6 +42,10 @@ export function StoreProvider({ children }) {
   }, []);
 
   const refreshFavorites = useCallback(async () => {
+    if (!isLoggedIn()) {
+      setFavorites(new Set());
+      return;
+    }
     try {
       const favs = await getFavorites();
       setFavorites(new Set((favs || []).map((f) => Number(f.id))));
@@ -50,6 +55,10 @@ export function StoreProvider({ children }) {
   }, []);
 
   const refreshMessages = useCallback(async () => {
+    if (!isLoggedIn()) {
+      setUnreadCount(0);
+      return;
+    }
     try {
       const msgs = await getMyMessages();
       setUnreadCount((msgs || []).filter((m) => !m.is_read).length);
@@ -64,6 +73,17 @@ export function StoreProvider({ children }) {
     refreshCart();
     refreshFavorites();
     refreshMessages();
+  }, [refreshCart, refreshFavorites, refreshMessages]);
+
+  // با ورود یا خروج کاربر، سبد، علاقه‌مندی‌ها و پیام‌ها دوباره همگام می‌شوند
+  useEffect(() => {
+    const sync = () => {
+      refreshCart();
+      refreshFavorites();
+      refreshMessages();
+    };
+    window.addEventListener('avay:auth', sync);
+    return () => window.removeEventListener('avay:auth', sync);
   }, [refreshCart, refreshFavorites, refreshMessages]);
 
   const addToCart = useCallback(async (product, qty = 1) => {

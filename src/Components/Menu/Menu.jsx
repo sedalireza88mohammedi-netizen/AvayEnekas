@@ -99,8 +99,6 @@ const CURATED_SUBGROUPS_INDEX = new Map(
   Object.keys(CURATED_SUBGROUPS).map((name) => [normalizeCategoryName(name), CURATED_SUBGROUPS[name]])
 );
 
-const ADMIN_USERNAME = "sedMad77AdminPanellAllowed"; // نقش پشتیبان؛ منبع اصلی پرچم بک‌اند است
-
 const toPersianDigits = (num) =>
   num.toString().replace(/\d/g, (x) => '۰۱۲۳۴۵۶۷۸۹'[x]);
 
@@ -125,6 +123,7 @@ function Menu({ isCart }) {
   const [results, setResults] = useState([]);
   const [activeIndex, setActiveIndex] = useState(-1);
   const searchWrapRef = useRef(null);
+  const megaRef = useRef(null);
   const [popular, setPopular] = useState([]);
   const [history, setHistory] = useState(getSearchHistory());
 
@@ -158,8 +157,8 @@ function Menu({ isCart }) {
     getProfile()
       .then((p) => {
         if (!active) return;
-        // پرچم مدیریت از خود بک‌اند می‌آید؛ نام تاریخی فقط نقش پشتیبان دارد
-        setIsAdmin(Boolean(p && (p.IsAdmin || p.NameAndFamily === ADMIN_USERNAME)));
+        // پرچم مدیریت فقط از بک‌اند می‌آید
+        setIsAdmin(Boolean(p && p.IsAdmin));
       })
       .catch(() => { if (active) setIsAdmin(false); });
     return () => { active = false; };
@@ -241,9 +240,12 @@ function Menu({ isCart }) {
       if (searchWrapRef.current && !searchWrapRef.current.contains(e.target)) {
         setSearchOpen(false);
       }
+      if (megaRef.current && !megaRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
     };
-    document.addEventListener('mousedown', onDocClick);
-    return () => document.removeEventListener('mousedown', onDocClick);
+    document.addEventListener('pointerdown', onDocClick);
+    return () => document.removeEventListener('pointerdown', onDocClick);
   }, []);
 
   useEffect(() => {
@@ -269,15 +271,20 @@ function Menu({ isCart }) {
       setActiveIndex(-1);
       return;
     }
+    let active = true; // جلوگیری از نمایش نتیجه‌ی قدیمی روی تایپ جدید
     const timer = setTimeout(() => {
       fetchProducts({ search: value })
         .then((data) => {
+          if (!active) return;
           setResults((data || []).slice(0, 6));
           setActiveIndex(-1);
         })
-        .catch(() => setResults([]));
+        .catch(() => active && setResults([]));
     }, 250);
-    return () => clearTimeout(timer);
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
   }, [query]);
 
   const closeSearch = () => {
@@ -478,9 +485,10 @@ function Menu({ isCart }) {
         <nav className="Menu" aria-label="منوی اصلی">
           <ul>
             <li
+              ref={megaRef}
               className="category-trigger"
-              onMouseEnter={() => setIsOpen(true)}
-              onMouseLeave={() => setIsOpen(false)}
+              onPointerEnter={(e) => e.pointerType === "mouse" && setIsOpen(true)}
+              onPointerLeave={(e) => e.pointerType === "mouse" && setIsOpen(false)}
             >
               <button type="button" className="trigger-btn" onClick={() => setIsOpen((v) => !v)}>
                 <span className="hamburger"><FontAwesomeIcon icon={faBars} /></span>
@@ -495,6 +503,7 @@ function Menu({ isCart }) {
                         key={cat.key}
                         className={`sidebar-item ${activeCategory === cat.key ? "active" : ""}`}
                         onMouseEnter={() => setActiveCategory(cat.key)}
+                        onClick={() => setActiveCategory(cat.key)}
                       >
                         {cat.title}
                       </div>

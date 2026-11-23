@@ -1,9 +1,12 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Heart, ShoppingCart, Check } from 'lucide-react';
 import { useCartStore } from './cartStore';
+import { isLoggedIn } from './auth';
 
 export function FavButton({ id, size = 22 }) {
   const { isFavorite, toggleFavorite } = useCartStore();
+  const navigate = useNavigate();
   const fav = isFavorite(id);
   return (
     <button
@@ -12,6 +15,10 @@ export function FavButton({ id, size = 22 }) {
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
+        if (!isLoggedIn()) {
+          navigate('/LogIn/SinUp');
+          return;
+        }
         toggleFavorite(id);
       }}
       aria-label={fav ? 'حذف از علاقه‌مندی‌ها' : 'افزودن به علاقه‌مندی‌ها'}
