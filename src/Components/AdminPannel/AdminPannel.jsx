@@ -15,7 +15,9 @@ import {
   ResponsiveContainer, PieChart, Pie, Cell,
 } from "recharts";
 import "./AdminPannel.css";
-import { getAccessToken, isLoggedIn, setAuth } from "../../auth";
+import { getAccessToken, setAuth } from "../../auth";
+import { getProfile, sendOtpCode, verifyOtpCode } from "../../api";
+import { toEnglishDigits } from "../../utils/digits";
 import {
   API_BASE_URL,
   CATEGORY_LIST,
@@ -193,42 +195,61 @@ function FullScreenState({ kind, message, onRetry }) {
   );
 }
 
-function AdminLoginForm({ onLoginSuccess }) {
+function AdminLoginForm({ onLoginSuccess, notice = "" }) {
   const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("");
+  const [code, setCode] = useState("");
+  const [step, setStep] = useState("phone");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [info, setInfo] = useState("");
 
-  const handleSubmit = async (e) => {
+  const handleSendCode = async (e) => {
     e.preventDefault();
     setError("");
+    setInfo("");
+    const value = toEnglishDigits(phone).replace(/\s/g, "");
+    if (!/^09\d{9}$/.test(value)) {
+      setError("شماره موبایل مدیر را درست وارد کنید");
+      return;
+    }
     setLoading(true);
     try {
-      const res = await fetch(API_BASE_URL + "/auth/verify-code", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          phone: phone.trim(),
-          password: password.trim(),
-          code: password.trim(),
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || "مشخصات وارد شده معتبر نیست");
-      }
-      if (data.tokens && data.tokens.access) {
-        setAuth({
-          access: data.tokens.access,
-          refresh: data.tokens.refresh,
-          phone: phone.trim(),
-        });
-        onLoginSuccess();
-      } else {
-        throw new Error("توکن دریافت نشد");
-      }
+      await sendOtpCode(value);
+      setPhone(value);
+      setStep("code");
+      setInfo("کد تایید به شماره مدیر ارسال شد");
     } catch (err) {
-      setError(faError(err, "خطا در ورود به پنل مدیریت"));
+      setError(faError(err, "ارسال کد انجام نشد؛ کمی بعد دوباره تلاش کنید"));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerify = async (e) => {
+    e.preventDefault();
+    setError("");
+    setInfo("");
+    const cleanCode = toEnglishDigits(code).trim();
+    if (!/^\d{5,6}$/.test(cleanCode)) {
+      setError("کد تایید را به درستی وارد کنید");
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await verifyOtpCode(phone, cleanCode);
+      if (!res || !res.tokens || !res.tokens.access) {
+        throw new Error("توکن ورود دریافت نشد");
+      }
+      const profile = await getProfile();
+      const isAdmin = Boolean(
+        profile && (profile.IsAdmin || profile.is_staff || profile.is_superuser),
+      );
+      if (!isAdmin) {
+        throw new Error("این حساب دسترسی مدیریت ندارد؛ با شماره مدیر وارد شوید");
+      }
+      onLoginSuccess();
+    } catch (err) {
+      setError(faError(err, "ورود به پنل مدیریت انجام نشد"));
     } finally {
       setLoading(false);
     }
@@ -242,44 +263,59 @@ function AdminLoginForm({ onLoginSuccess }) {
             <Settings size={28} />
           </div>
           <h2 style={{ fontSize: "1.3rem", fontWeight: "bold" }}>ورود به پنل مدیریت آوای انعکاس</h2>
-          <p className="muted small" style={{ marginTop: 6 }}>لطفاً مشخصات حساب مدیر را وارد کنید</p>
+          <p className="muted small" style={{ marginTop: 6 }}>
+            فقط حساب مدیر می‌تواند تغییرات فروشگاه را ذخیره کند.
+          </p>
         </div>
-        {error && <p className="form-error" style={{ marginBottom: 16 }}>{error}</p>}
-        <form onSubmit={handleSubmit} className="stack">
-          <Field label="شماره موبایل مدیر">
-            <input
-              type="tel"
-              className="mono"
-              dir="ltr"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="09120000000"
-              required
-            />
-          </Field>
-          <Field label="رمز عبور یا کد ورود">
-            <input
-              type="password"
-              className="mono"
-              dir="ltr"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="رمز عبور مدیر"
-              required
-            />
-          </Field>
-          <button
-            type="submit"
-            className="btn btn-primary"
-            style={{ width: "100%", justifyContent: "center", marginTop: 8 }}
-            disabled={loading}
-          >
-            {loading ? "در حال ورود..." : "ورود به پنل مدیریت"}
-          </button>
-          <div style={{ textAlign: "center", marginTop: 12 }}>
-            <a href="/" className="muted small" style={{ textDecoration: "none" }}>← بازگشت به صفحه اصلی فروشگاه</a>
-          </div>
-        </form>
+        {notice && <p className="form-error" style={{ marginBottom: 12 }}>{notice}</p>}
+        {error && <p className="form-error" style={{ marginBottom: 12 }}>{error}</p>}
+        {info && <p className="muted small" style={{ marginBottom: 12 }}>{info}</p>}
+        {step === "phone" ? (
+          <form onSubmit={handleSendCode} className="stack">
+            <Field label="شماره موبایل مدیر">
+              <input
+                type="tel"
+                className="mono"
+                dir="ltr"
+                value={phone}
+                onChange={(e) => setPhone(toEnglishDigits(e.target.value))}
+                placeholder="09120000000"
+                required
+              />
+            </Field>
+            <button type="submit" className="btn btn-primary" style={{ width: "100%", justifyContent: "center", marginTop: 8 }} disabled={loading}>
+              {loading ? "در حال ارسال کد..." : "ارسال کد تایید"}
+            </button>
+          </form>
+        ) : (
+          <form onSubmit={handleVerify} className="stack">
+            <Field label="کد تایید">
+              <input
+                type="tel"
+                className="mono"
+                dir="ltr"
+                value={code}
+                onChange={(e) => setCode(toEnglishDigits(e.target.value))}
+                placeholder="کد ۵ رقمی"
+                required
+              />
+            </Field>
+            <button type="submit" className="btn btn-primary" style={{ width: "100%", justifyContent: "center", marginTop: 8 }} disabled={loading}>
+              {loading ? "در حال بررسی..." : "ورود به پنل مدیریت"}
+            </button>
+            <button
+              type="button"
+              className="link-btn"
+              style={{ textAlign: "center" }}
+              onClick={() => { setStep("phone"); setCode(""); setError(""); setInfo(""); }}
+            >
+              ویرایش شماره
+            </button>
+          </form>
+        )}
+        <div style={{ textAlign: "center", marginTop: 12 }}>
+          <a href="/" className="muted small" style={{ textDecoration: "none" }}>← بازگشت به صفحه اصلی فروشگاه</a>
+        </div>
       </div>
     </div>
   );
@@ -2722,7 +2758,8 @@ export default function AdminPanel() {
 
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
-  const [signedIn, setSignedIn] = useState(() => isLoggedIn() && Boolean(getAccessToken()));
+  const [adminStatus, setAdminStatus] = useState("checking");
+  const [adminNotice, setAdminNotice] = useState("");
 
   const loadAll = useCallback(async () => {
     setLoading(true);
@@ -2751,7 +2788,35 @@ export default function AdminPanel() {
     }
   }, []);
 
-  useEffect(() => { loadAll(); }, [loadAll]);
+  const checkAdmin = useCallback(async () => {
+    setAdminStatus("checking");
+    setAdminNotice("");
+    if (!getAccessToken()) {
+      setAdminStatus("denied");
+      setLoading(false);
+      return;
+    }
+    try {
+      const profile = await getProfile();
+      const ok = Boolean(
+        profile && (profile.IsAdmin || profile.is_staff || profile.is_superuser),
+      );
+      if (!ok) {
+        setAdminNotice("این حساب دسترسی مدیریت ندارد؛ با حساب مدیر وارد شوید.");
+        setAdminStatus("denied");
+        setLoading(false);
+        return;
+      }
+      setAdminStatus("ok");
+      await loadAll();
+    } catch (err) {
+      setAdminNotice(faError(err, "برای بررسی دسترسی مدیر اتصال به سرور لازم است"));
+      setAdminStatus("denied");
+      setLoading(false);
+    }
+  }, [loadAll]);
+
+  useEffect(() => { checkAdmin(); }, [checkAdmin]);
 
   const selectTab = (key) => {
     setActiveTab(key);
@@ -2919,7 +2984,7 @@ export default function AdminPanel() {
     setReviews((prev) => prev.filter((r) => r.id !== id));
   };
 
-  if (loading) {
+  if (adminStatus === "checking" || (adminStatus === "ok" && loading)) {
     return (
       <div className="app" dir="rtl" lang="fa">
         <FullScreenState kind="loading" />
@@ -2927,15 +2992,10 @@ export default function AdminPanel() {
     );
   }
 
-  if (!signedIn) {
+  if (adminStatus === "denied") {
     return (
       <div className="app" dir="rtl" lang="fa">
-        <AdminLoginForm
-          onLoginSuccess={() => {
-            setSignedIn(true);
-            loadAll();
-          }}
-        />
+        <AdminLoginForm notice={adminNotice} onLoginSuccess={checkAdmin} />
       </div>
     );
   }

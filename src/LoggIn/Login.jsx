@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import ErrorEmpty from "../Components/Errores/ErrorEmpty";
 import { usePageMeta } from "../useSeo";
 import { getSessionKey } from "../auth";
-import { sendOtpCode, verifyOtpCode } from "../api";
+import { getProfile, sendOtpCode, verifyOtpCode } from "../api";
 import { toEnglishDigits } from "../utils/digits";
 
 const PHONE_PATTERN = /^09\d{9}$/;
@@ -90,9 +90,13 @@ function LogIn() {
         "خوش آمدید!",
         <h3 style={{ color: "green" }}>ورود شما موفقیت‌آمیز بود</h3>
       );
-      const targetRoute = (authRes && (authRes.IsAdmin || authRes.is_staff || authRes.is_superuser))
-        ? "/AdminPannel"
-        : "/";
+      // بکاند قدیمی پرچم ادمین را در پاسخ ورود نمیدهد؛ از پروفایل خوانده میشود
+      const profile = await getProfile().catch(() => null);
+      const isAdmin = Boolean(
+        (authRes && (authRes.IsAdmin || authRes.is_staff || authRes.is_superuser)) ||
+          (profile && (profile.IsAdmin || profile.is_staff || profile.is_superuser)),
+      );
+      const targetRoute = isAdmin ? "/AdminPannel" : "/";
       redirectTimer.current = setTimeout(() => navigate(targetRoute), REDIRECT_DELAY_MS);
     } catch (err) {
       showError(errorIcon, "مشکلی پیش آمد!", describeError(err, "کد وارد شده صحیح نیست یا منقضی شده است"));
